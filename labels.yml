@@ -1,0 +1,125 @@
+# GitHub Labels Configuration
+# Compatible with github-label-sync (https://github.com/Financial-Times/github-label-sync)
+#
+# Usage:
+#   npx github-label-sync --access-token $GITHUB_TOKEN --labels labels.yml owner/repo
+#
+# This file defines a standardized set of labels for consistent issue and PR
+# management across all repositories in the organization.
+
+# =============================================================================
+# PRIORITY LABELS
+# Used to indicate urgency and scheduling priority
+# =============================================================================
+
+- name: "priority: critical"
+  color: "FF0000"
+  description: "Immediate attention required - production impact or security issue"
+
+- name: "priority: high"
+  color: "FF6B6B"
+  description: "Should be addressed in current sprint or iteration"
+
+- name: "priority: medium"
+  color: "FFE66D"
+  description: "Important but can be scheduled for upcoming work"
+
+- name: "priority: low"
+  color: "4ECDC4"
+  description: "Nice to have - address when time permits"
+
+# =============================================================================
+# TYPE LABELS
+# Categorize the nature of the issue or pull request
+# =============================================================================
+
+- name: "type: bug"
+  color: "D73A49"
+  description: "Something is not working as expected"
+
+- name: "type: feature"
+  color: "0075CA"
+  description: "New functionality or capability"
+
+- name: "type: enhancement"
+  color: "A2EEEF"
+  description: "Improvement to existing functionality"
+
+- name: "type: documentation"
+  color: "0075CA"
+  description: "Documentation updates or additions"
+
+- name: "type: security"
+  color: "B60205"
+  description: "Security vulnerability or hardening"
+
+- name: "type: maintenance"
+  color: "FBCA04"
+  description: "Chores, refactoring, tech debt, or dependency updates"
+
+- name: "type: performance"
+  color: "5319E7"
+  description: "Performance improvements or optimizations"
+
+# =============================================================================
+# STATUS LABELS
+# Track the current state of work
+# =============================================================================
+
+- name: "status: needs-triage"
+  color: "EDEDED"
+  description: "Awaiting initial review and prioritization"
+
+- name: "status: in-progress"
+  color: "0E8A16"
+  description: "Actively being worked on"
+
+- name: "status: blocked"
+  color: "B60205"
+  description: "Cannot proceed - waiting on external dependency or decision"
+
+- name: "status: ready-for-review"
+  color: "6F42C1"
+  description: "Work complete, awaiting code review"
+
+- name: "status: approved"
+  color: "0E8A16"
+  description: "Approved and ready to merge or deploy"
+
+# =============================================================================
+# AREA LABELS
+# Identify the component or system area affected
+# =============================================================================
+
+- name: "area: ci-cd"
+  color: "1D76DB"
+  description: "CI/CD pipelines, GitHub Actions, or deployment automation"
+
+- name: "area: dependencies"
+  color: "0366D6"
+  description: "Dependency updates, version bumps, or package management"
+
+- name: "area: testing"
+  color: "BFDADC"
+  description: "Test suite, coverage, or testing infrastructure"
+
+- name: "area: infrastructure"
+  color: "C5DEF5"
+  description: "Infrastructure, cloud resources, or platform configuration"
+
+# =============================================================================
+# EFFORT LABELS
+# Estimate relative size of work for planning
+# =============================================================================
+
+- name: "effort: small"
+  color: "C2E0C6"
+  description: "Quick fix or minor change (< 2 hours)"
+
+- name: "effort: medium"
+  color: "FEF2C0"
+  description: "Moderate work (2-8 hours or 1-2 days)"
+
+- name: "effort: large"
+  color: "F9D0C4"
+  description: "Significant effort (> 2 days or requires breakdown)"

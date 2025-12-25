@@ -1,0 +1,86 @@
+# Composite Action: Setup Python with uv
+# Provides consistent Python environment setup across all workflows
+#
+# Usage:
+#   - uses: ./actions/setup-python-uv
+#     with:
+#       python-version: '3.12'
+
+name: 'Setup Python with uv'
+description: 'Install Python and uv package manager with caching'
+author: 'zircote'
+
+branding:
+  icon: 'package'
+  color: 'blue'
+
+inputs:
+  python-version:
+    description: 'Python version to install'
+    required: false
+    default: '3.12'
+  install-dependencies:
+    description: 'Install dependencies after setup'
+    required: false
+    default: 'true'
+  extras:
+    description: 'Extra dependencies to install (comma-separated)'
+    required: false
+    default: ''
+  working-directory:
+    description: 'Working directory for commands'
+    required: false
+    default: '.'
+
+outputs:
+  python-version:
+    description: 'Installed Python version'
+    value: ${{ steps.python.outputs.version }}
+  uv-version:
+    description: 'Installed uv version'
+    value: ${{ steps.uv.outputs.version }}
+  cache-hit:
+    description: 'Whether the cache was hit'
+    value: ${{ steps.uv.outputs.cache-hit }}
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Install uv
+      id: uv
+      uses: astral-sh/setup-uv@6b9c6063abd6010835644d4c2e1bef4cf5cd0fca # v6.0.1
+      with:
+        enable-cache: true
+        cache-dependency-glob: "${{ inputs.working-directory }}/uv.lock"
+
+    - name: Set up Python
+      id: python
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      env:
+        PYTHON_VERSION: ${{ inputs.python-version }}
+      run: |
+        uv python install "$PYTHON_VERSION"
+        INSTALLED_VERSION=$(uv python find "$PYTHON_VERSION" | xargs -I{} {} --version | cut -d' ' -f2)
+        echo "version=$INSTALLED_VERSION" >> "$GITHUB_OUTPUT"
+        echo "Installed Python $INSTALLED_VERSION"
+
+    - name: Get uv version
+      shell: bash
+      run: |
+        UV_VERSION=$(uv --version | cut -d' ' -f2)
+        echo "version=$UV_VERSION" >> "$GITHUB_OUTPUT"
+        echo "Using uv $UV_VERSION"
+
+    - name: Install dependencies
+      if: inputs.install-dependencies == 'true'
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      env:
+        EXTRAS: ${{ inputs.extras }}
+      run: |
+        if [[ -n "$EXTRAS" ]]; then
+          uv sync --all-extras
+        else
+          uv sync
+        fi

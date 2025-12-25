@@ -1,0 +1,250 @@
+# Reusable Release Workflow
+# Provides centralized semantic release management for all repositories
+#
+# Security Note: This workflow only uses workflow_call inputs (controlled by caller)
+# and internal job status values. No untrusted user input is used in run commands.
+#
+# Usage in consuming workflows:
+#   jobs:
+#     release:
+#       uses: org-github/.github/workflows/reusable-release.yml@main
+#       with:
+#         release-type: 'auto'
+#       secrets: inherit
+
+name: Release
+
+on:
+  workflow_call:
+    inputs:
+      release-type:
+        description: 'Release type: auto (from conventional commits), patch, minor, major'
+        required: false
+        type: string
+        default: 'auto'
+      prerelease:
+        description: 'Create a prerelease (e.g., alpha, beta, rc)'
+        required: false
+        type: string
+        default: ''
+      draft:
+        description: 'Create release as draft'
+        required: false
+        type: boolean
+        default: false
+      generate-notes:
+        description: 'Auto-generate release notes from commits'
+        required: false
+        type: boolean
+        default: true
+      upload-artifacts:
+        description: 'Upload build artifacts to release'
+        required: false
+        type: boolean
+        default: false
+      artifacts-path:
+        description: 'Path to artifacts to upload (glob pattern)'
+        required: false
+        type: string
+        default: 'dist/*'
+      runs-on:
+        description: 'Runner to use'
+        required: false
+        type: string
+        default: 'ubuntu-latest'
+    outputs:
+      version:
+        description: 'Released version number'
+        value: ${{ jobs.release.outputs.version }}
+      tag:
+        description: 'Git tag created'
+        value: ${{ jobs.release.outputs.tag }}
+      release-url:
+        description: 'URL to the GitHub release'
+        value: ${{ jobs.release.outputs.release-url }}
+
+permissions:
+  contents: write
+  pull-requests: read
+
+jobs:
+  release:
+    name: Create Release
+    runs-on: ${{ inputs.runs-on }}
+    outputs:
+      version: ${{ steps.version.outputs.new_version }}
+      tag: ${{ steps.version.outputs.tag }}
+      release-url: ${{ steps.create-release.outputs.url }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+
+      - name: Get latest tag
+        id: latest-tag
+        run: |
+          # Get the latest semver tag
+          LATEST=$(git tag -l 'v*' --sort=-v:refname | head -n1)
+          if [[ -z "$LATEST" ]]; then
+            LATEST="v0.0.0"
+          fi
+          echo "tag=$LATEST" >> "$GITHUB_OUTPUT"
+          echo "Latest tag: $LATEST"
+
+      - name: Determine version bump
+        id: version
+        env:
+          RELEASE_TYPE: ${{ inputs.release-type }}
+          PRERELEASE: ${{ inputs.prerelease }}
+          LATEST_TAG: ${{ steps.latest-tag.outputs.tag }}
+        run: |
+          # Parse current version
+          VERSION="${LATEST_TAG#v}"
+          IFS='.' read -r MAJOR MINOR PATCH <<< "${VERSION%%-*}"
+          MAJOR=${MAJOR:-0}
+          MINOR=${MINOR:-0}
+          PATCH=${PATCH:-0}
+
+          # Determine bump type
+          if [[ "$RELEASE_TYPE" == "auto" ]]; then
+            # Analyze commits since last tag
+            COMMITS=$(git log "$LATEST_TAG"..HEAD --pretty=format:"%s" 2>/dev/null || git log --pretty=format:"%s")
+
+            if echo "$COMMITS" | grep -qE "^(feat|feature)(\(.+\))?!:|BREAKING CHANGE:"; then
+              BUMP="major"
+            elif echo "$COMMITS" | grep -qE "^(feat|feature)(\(.+\))?:"; then
+              BUMP="minor"
+            else
+              BUMP="patch"
+            fi
+          else
+            BUMP="$RELEASE_TYPE"
+          fi
+
+          # Calculate new version
+          case "$BUMP" in
+            major)
+              MAJOR=$((MAJOR + 1))
+              MINOR=0
+              PATCH=0
+              ;;
+            minor)
+              MINOR=$((MINOR + 1))
+              PATCH=0
+              ;;
+            patch)
+              PATCH=$((PATCH + 1))
+              ;;
+          esac
+
+          NEW_VERSION="${MAJOR}.${MINOR}.${PATCH}"
+
+          # Add prerelease suffix if specified
+          if [[ -n "$PRERELEASE" ]]; then
+            NEW_VERSION="${NEW_VERSION}-${PRERELEASE}"
+          fi
+
+          TAG="v${NEW_VERSION}"
+
+          echo "new_version=$NEW_VERSION" >> "$GITHUB_OUTPUT"
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          echo "bump=$BUMP" >> "$GITHUB_OUTPUT"
+          echo "New version: $NEW_VERSION (bump: $BUMP)"
+
+      - name: Generate changelog
+        id: changelog
+        if: inputs.generate-notes
+        env:
+          LATEST_TAG: ${{ steps.latest-tag.outputs.tag }}
+          NEW_TAG: ${{ steps.version.outputs.tag }}
+          REPO: ${{ github.repository }}
+        run: |
+          {
+            echo 'notes<<EOF'
+
+            # Group commits by type
+            echo "## What's Changed"
+            echo ""
+
+            # Features
+            FEATURES=$(git log "$LATEST_TAG"..HEAD --pretty=format:"- %s (%h)" --grep="^feat" 2>/dev/null || true)
+            if [[ -n "$FEATURES" ]]; then
+              echo "### Features"
+              echo "$FEATURES"
+              echo ""
+            fi
+
+            # Bug fixes
+            FIXES=$(git log "$LATEST_TAG"..HEAD --pretty=format:"- %s (%h)" --grep="^fix" 2>/dev/null || true)
+            if [[ -n "$FIXES" ]]; then
+              echo "### Bug Fixes"
+              echo "$FIXES"
+              echo ""
+            fi
+
+            # Other changes
+            OTHERS=$(git log "$LATEST_TAG"..HEAD --pretty=format:"- %s (%h)" --grep="^chore\|^docs\|^refactor\|^test\|^ci" 2>/dev/null || true)
+            if [[ -n "$OTHERS" ]]; then
+              echo "### Other Changes"
+              echo "$OTHERS"
+              echo ""
+            fi
+
+            # Contributors
+            echo "### Contributors"
+            git log "$LATEST_TAG"..HEAD --pretty=format:"@%an" 2>/dev/null | sort -u | tr '\n' ', ' | sed 's/,$//'
+            echo ""
+            echo ""
+
+            echo "**Full Changelog**: https://github.com/$REPO/compare/$LATEST_TAG...$NEW_TAG"
+
+            echo 'EOF'
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Create Git tag
+        env:
+          TAG: ${{ steps.version.outputs.tag }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git tag -a "$TAG" -m "Release $TAG"
+          git push origin "$TAG"
+
+      - name: Download artifacts
+        if: inputs.upload-artifacts
+        uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4.1.8
+        with:
+          path: release-artifacts
+        continue-on-error: true
+
+      - name: Create GitHub Release
+        id: create-release
+        uses: softprops/action-gh-release@c95fe1489396fe8a9eb87c0abf8aa5b2ef267fda # v2.2.1
+        with:
+          tag_name: ${{ steps.version.outputs.tag }}
+          name: Release ${{ steps.version.outputs.tag }}
+          body: ${{ steps.changelog.outputs.notes }}
+          draft: ${{ inputs.draft }}
+          prerelease: ${{ inputs.prerelease != '' }}
+          files: ${{ inputs.upload-artifacts && 'release-artifacts/**/*' || '' }}
+          generate_release_notes: ${{ !inputs.generate-notes }}
+
+      - name: Output summary
+        env:
+          VERSION: ${{ steps.version.outputs.new_version }}
+          TAG: ${{ steps.version.outputs.tag }}
+          BUMP: ${{ steps.version.outputs.bump }}
+          RELEASE_URL: ${{ steps.create-release.outputs.url }}
+        run: |
+          {
+            echo "## Release Summary"
+            echo ""
+            echo "| Property | Value |"
+            echo "|----------|-------|"
+            echo "| Version | $VERSION |"
+            echo "| Tag | $TAG |"
+            echo "| Bump Type | $BUMP |"
+            echo "| Release URL | $RELEASE_URL |"
+          } >> "$GITHUB_STEP_SUMMARY"

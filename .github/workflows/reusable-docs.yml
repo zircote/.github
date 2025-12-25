@@ -1,0 +1,239 @@
+# Reusable Documentation Workflow
+# Provides centralized documentation building and deployment
+#
+# Security Note: This workflow only uses workflow_call inputs (controlled by caller)
+# and internal job status values. No untrusted user input is used in run commands.
+#
+# Usage in consuming workflows:
+#   jobs:
+#     docs:
+#       uses: org-github/.github/workflows/reusable-docs.yml@main
+#       with:
+#         framework: 'astro'
+#       secrets: inherit
+
+name: Documentation
+
+on:
+  workflow_call:
+    inputs:
+      framework:
+        description: 'Documentation framework: astro, mkdocs, sphinx, docusaurus'
+        required: false
+        type: string
+        default: 'astro'
+      node-version:
+        description: 'Node.js version (for JS-based frameworks)'
+        required: false
+        type: string
+        default: '22'
+      python-version:
+        description: 'Python version (for Python-based frameworks)'
+        required: false
+        type: string
+        default: '3.12'
+      working-directory:
+        description: 'Working directory for docs'
+        required: false
+        type: string
+        default: '.'
+      build-command:
+        description: 'Custom build command (overrides framework default)'
+        required: false
+        type: string
+        default: ''
+      output-directory:
+        description: 'Build output directory'
+        required: false
+        type: string
+        default: 'dist'
+      deploy-to-pages:
+        description: 'Deploy to GitHub Pages'
+        required: false
+        type: boolean
+        default: false
+      lint-markdown:
+        description: 'Run markdown linting'
+        required: false
+        type: boolean
+        default: true
+      check-links:
+        description: 'Check for broken links'
+        required: false
+        type: boolean
+        default: true
+      runs-on:
+        description: 'Runner to use'
+        required: false
+        type: string
+        default: 'ubuntu-latest'
+    outputs:
+      artifact-name:
+        description: 'Name of the uploaded artifact'
+        value: ${{ jobs.build.outputs.artifact-name }}
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  # ===========================================================================
+  # Lint - Check markdown and links
+  # ===========================================================================
+  lint:
+    name: Lint
+    runs-on: ${{ inputs.runs-on }}
+    if: ${{ inputs.lint-markdown }}
+    defaults:
+      run:
+        working-directory: ${{ inputs.working-directory }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Setup Node.js
+        uses: actions/setup-node@39370e3970a6d050c480ffad4ff0ed4d3fdee5af # v4.1.0
+        with:
+          node-version: ${{ inputs.node-version }}
+
+      - name: Install markdownlint
+        run: npm install -g markdownlint-cli
+
+      - name: Run markdownlint
+        run: |
+          if [[ -f ".markdownlint.json" ]] || [[ -f ".markdownlint.yaml" ]]; then
+            markdownlint '**/*.md' --ignore node_modules --ignore .git
+          else
+            markdownlint '**/*.md' --ignore node_modules --ignore .git --disable MD013 MD033
+          fi
+        continue-on-error: true
+
+  # ===========================================================================
+  # Link Check - Verify all links work
+  # ===========================================================================
+  link-check:
+    name: Check Links
+    runs-on: ${{ inputs.runs-on }}
+    if: ${{ inputs.check-links }}
+    defaults:
+      run:
+        working-directory: ${{ inputs.working-directory }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Install lychee
+        uses: lycheeverse/lychee-action@f613c4a64e50d792e0b31ec34bbcbba12263c6a6 # v2.3.0
+        with:
+          args: >-
+            --verbose
+            --no-progress
+            --exclude-mail
+            --exclude 'localhost'
+            --exclude '127.0.0.1'
+            '**/*.md'
+          fail: false
+
+  # ===========================================================================
+  # Build - Build documentation
+  # ===========================================================================
+  build:
+    name: Build
+    runs-on: ${{ inputs.runs-on }}
+    needs: [lint, link-check]
+    if: always() && !cancelled()
+    defaults:
+      run:
+        working-directory: ${{ inputs.working-directory }}
+    outputs:
+      artifact-name: docs-site
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      # Node.js setup for Astro/Docusaurus
+      - name: Setup pnpm
+        if: inputs.framework == 'astro' || inputs.framework == 'docusaurus'
+        uses: pnpm/action-setup@fe02b34f77f8bc703788d5817da081398fad5dd2 # v4.0.0
+
+      - name: Setup Node.js
+        if: inputs.framework == 'astro' || inputs.framework == 'docusaurus'
+        uses: actions/setup-node@39370e3970a6d050c480ffad4ff0ed4d3fdee5af # v4.1.0
+        with:
+          node-version: ${{ inputs.node-version }}
+          cache: 'pnpm'
+          cache-dependency-path: ${{ inputs.working-directory }}/pnpm-lock.yaml
+
+      # Python setup for MkDocs/Sphinx
+      - name: Install uv
+        if: inputs.framework == 'mkdocs' || inputs.framework == 'sphinx'
+        uses: astral-sh/setup-uv@6b9c6063abd6010835644d4c2e1bef4cf5cd0fca # v6.0.1
+
+      - name: Setup Python
+        if: inputs.framework == 'mkdocs' || inputs.framework == 'sphinx'
+        env:
+          PYTHON_VERSION: ${{ inputs.python-version }}
+        run: uv python install "$PYTHON_VERSION"
+
+      # Install dependencies
+      - name: Install dependencies (Node.js)
+        if: inputs.framework == 'astro' || inputs.framework == 'docusaurus'
+        run: pnpm install --frozen-lockfile
+
+      - name: Install dependencies (Python)
+        if: inputs.framework == 'mkdocs' || inputs.framework == 'sphinx'
+        run: uv sync --all-extras
+
+      # Build documentation
+      - name: Build (Astro)
+        if: inputs.framework == 'astro' && inputs.build-command == ''
+        run: pnpm run build
+
+      - name: Build (Docusaurus)
+        if: inputs.framework == 'docusaurus' && inputs.build-command == ''
+        run: pnpm run build
+
+      - name: Build (MkDocs)
+        if: inputs.framework == 'mkdocs' && inputs.build-command == ''
+        run: uv run mkdocs build
+
+      - name: Build (Sphinx)
+        if: inputs.framework == 'sphinx' && inputs.build-command == ''
+        run: uv run sphinx-build -b html docs _build/html
+
+      - name: Build (Custom)
+        if: inputs.build-command != ''
+        env:
+          BUILD_CMD: ${{ inputs.build-command }}
+        run: eval "$BUILD_CMD"
+
+      # Upload artifact
+      - name: Upload artifact
+        uses: actions/upload-artifact@b4b15b8c7c6ac21ea08fcf65892d2ee8f75cf882 # v4.4.3
+        with:
+          name: docs-site
+          path: ${{ inputs.working-directory }}/${{ inputs.output-directory }}
+          retention-days: 7
+
+      - name: Upload Pages artifact
+        if: inputs.deploy-to-pages
+        uses: actions/upload-pages-artifact@56afc609e74202658d3ffba0e8f6dda462b719fa # v3.0.1
+        with:
+          path: ${{ inputs.working-directory }}/${{ inputs.output-directory }}
+
+  # ===========================================================================
+  # Deploy - Deploy to GitHub Pages
+  # ===========================================================================
+  deploy:
+    name: Deploy to Pages
+    runs-on: ${{ inputs.runs-on }}
+    needs: build
+    if: ${{ inputs.deploy-to-pages }}
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@d6db90164ac5ed86f2b6aed7e0febac5b3c0c03e # v4.0.5

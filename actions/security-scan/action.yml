@@ -1,0 +1,191 @@
+# Composite Action: Security Scan
+# Runs security scanning for secrets and dependencies
+#
+# Usage:
+#   - uses: ./actions/security-scan
+#     with:
+#       scan-secrets: 'true'
+#       scan-dependencies: 'true'
+
+name: 'Security Scan'
+description: 'Run security scanning for secrets and vulnerable dependencies'
+author: 'zircote'
+
+branding:
+  icon: 'shield'
+  color: 'red'
+
+inputs:
+  scan-secrets:
+    description: 'Scan for secrets with gitleaks'
+    required: false
+    default: 'true'
+  scan-dependencies:
+    description: 'Scan dependencies for vulnerabilities'
+    required: false
+    default: 'true'
+  language:
+    description: 'Language for dependency scanning (python, node, go, auto)'
+    required: false
+    default: 'auto'
+  fail-on-finding:
+    description: 'Fail the action if issues are found'
+    required: false
+    default: 'true'
+  gitleaks-config:
+    description: 'Path to custom gitleaks config'
+    required: false
+    default: ''
+
+outputs:
+  secrets-found:
+    description: 'Whether secrets were found'
+    value: ${{ steps.secrets.outputs.found }}
+  vulnerabilities-found:
+    description: 'Whether vulnerabilities were found'
+    value: ${{ steps.deps.outputs.found }}
+  summary:
+    description: 'Security scan summary'
+    value: ${{ steps.summary.outputs.text }}
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Detect language
+      id: detect
+      if: inputs.language == 'auto'
+      shell: bash
+      run: |
+        if [[ -f "pyproject.toml" ]] || [[ -f "requirements.txt" ]]; then
+          echo "language=python" >> "$GITHUB_OUTPUT"
+        elif [[ -f "package.json" ]]; then
+          echo "language=node" >> "$GITHUB_OUTPUT"
+        elif [[ -f "go.mod" ]]; then
+          echo "language=go" >> "$GITHUB_OUTPUT"
+        else
+          echo "language=unknown" >> "$GITHUB_OUTPUT"
+        fi
+
+    - name: Run gitleaks
+      id: secrets
+      if: inputs.scan-secrets == 'true'
+      shell: bash
+      env:
+        CONFIG: ${{ inputs.gitleaks-config }}
+        FAIL_ON_FINDING: ${{ inputs.fail-on-finding }}
+      run: |
+        # Install gitleaks
+        curl -sSL https://github.com/gitleaks/gitleaks/releases/download/v8.18.4/gitleaks_8.18.4_linux_x64.tar.gz | tar xz
+        chmod +x gitleaks
+
+        # Run scan
+        CONFIG_FLAG=""
+        if [[ -n "$CONFIG" ]]; then
+          CONFIG_FLAG="--config=$CONFIG"
+        fi
+
+        if ./gitleaks detect --no-git $CONFIG_FLAG --report-format json --report-path gitleaks-report.json; then
+          echo "found=false" >> "$GITHUB_OUTPUT"
+          echo "✅ No secrets found"
+        else
+          echo "found=true" >> "$GITHUB_OUTPUT"
+          echo "⚠️ Secrets detected!"
+          cat gitleaks-report.json
+          if [[ "$FAIL_ON_FINDING" == "true" ]]; then
+            exit 1
+          fi
+        fi
+
+    - name: Scan Python dependencies
+      id: deps-python
+      if: inputs.scan-dependencies == 'true' && (inputs.language == 'python' || steps.detect.outputs.language == 'python')
+      shell: bash
+      env:
+        FAIL_ON_FINDING: ${{ inputs.fail-on-finding }}
+      run: |
+        pip install pip-audit
+        if pip-audit --strict --format json --output pip-audit-report.json 2>/dev/null; then
+          echo "No vulnerabilities found in Python dependencies"
+        else
+          echo "⚠️ Vulnerabilities found in Python dependencies"
+          cat pip-audit-report.json
+          if [[ "$FAIL_ON_FINDING" == "true" ]]; then
+            exit 1
+          fi
+        fi
+      continue-on-error: true
+
+    - name: Scan Node dependencies
+      id: deps-node
+      if: inputs.scan-dependencies == 'true' && (inputs.language == 'node' || steps.detect.outputs.language == 'node')
+      shell: bash
+      env:
+        FAIL_ON_FINDING: ${{ inputs.fail-on-finding }}
+      run: |
+        npm audit --json > npm-audit-report.json 2>&1 || true
+        VULNS=$(jq '.metadata.vulnerabilities.total // 0' npm-audit-report.json)
+        if [[ "$VULNS" -gt 0 ]]; then
+          echo "⚠️ Found $VULNS vulnerabilities in Node dependencies"
+          if [[ "$FAIL_ON_FINDING" == "true" ]]; then
+            npm audit
+            exit 1
+          fi
+        else
+          echo "No vulnerabilities found in Node dependencies"
+        fi
+      continue-on-error: true
+
+    - name: Scan Go dependencies
+      id: deps-go
+      if: inputs.scan-dependencies == 'true' && (inputs.language == 'go' || steps.detect.outputs.language == 'go')
+      shell: bash
+      env:
+        FAIL_ON_FINDING: ${{ inputs.fail-on-finding }}
+      run: |
+        go install golang.org/x/vuln/cmd/govulncheck@latest
+        if govulncheck ./...; then
+          echo "No vulnerabilities found in Go dependencies"
+        else
+          echo "⚠️ Vulnerabilities found in Go dependencies"
+          if [[ "$FAIL_ON_FINDING" == "true" ]]; then
+            exit 1
+          fi
+        fi
+      continue-on-error: true
+
+    - name: Aggregate results
+      id: deps
+      shell: bash
+      run: |
+        FOUND=false
+        if [[ -f "pip-audit-report.json" ]] && jq -e '.[] | select(.vulns | length > 0)' pip-audit-report.json >/dev/null 2>&1; then
+          FOUND=true
+        fi
+        if [[ -f "npm-audit-report.json" ]] && [[ $(jq '.metadata.vulnerabilities.total // 0' npm-audit-report.json) -gt 0 ]]; then
+          FOUND=true
+        fi
+        echo "found=$FOUND" >> "$GITHUB_OUTPUT"
+
+    - name: Generate summary
+      id: summary
+      shell: bash
+      env:
+        SECRETS_FOUND: ${{ steps.secrets.outputs.found }}
+        DEPS_FOUND: ${{ steps.deps.outputs.found }}
+      run: |
+        {
+          echo 'text<<EOF'
+          echo "## Security Scan Results"
+          echo ""
+          if [[ "$SECRETS_FOUND" == "true" ]]; then
+            echo "- 🔴 **Secrets**: Found"
+          else
+            echo "- 🟢 **Secrets**: None found"
+          fi
+          if [[ "$DEPS_FOUND" == "true" ]]; then
+            echo "- 🔴 **Dependencies**: Vulnerabilities found"
+          else
+            echo "- 🟢 **Dependencies**: No vulnerabilities"
+          fi
+          echo 'EOF'
+        } >> "$GITHUB_OUTPUT"

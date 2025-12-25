@@ -1,0 +1,319 @@
+# Reusable Python CI Workflow
+# Provides centralized Python CI for all repositories using uv
+#
+# Security Note: This workflow only uses workflow_call inputs (controlled by caller)
+# and internal job status values. No untrusted user input is used in run commands.
+#
+# Usage in consuming workflows:
+#   jobs:
+#     ci:
+#       uses: org-github/.github/workflows/reusable-ci-python.yml@main
+#       with:
+#         python-version: '3.12'
+#         coverage-threshold: 90
+#       secrets: inherit
+
+name: Python CI
+
+on:
+  workflow_call:
+    inputs:
+      python-version:
+        description: 'Python version to use'
+        required: false
+        type: string
+        default: '3.12'
+      python-versions-matrix:
+        description: 'JSON array of Python versions for matrix testing (e.g., ''["3.12", "3.13"]'')'
+        required: false
+        type: string
+        default: '["3.12"]'
+      coverage-threshold:
+        description: 'Minimum coverage percentage to pass'
+        required: false
+        type: number
+        default: 90
+      enable-matrix:
+        description: 'Enable matrix testing with multiple Python versions'
+        required: false
+        type: boolean
+        default: false
+      package-name:
+        description: 'Package name for coverage reporting (defaults to src directory detection)'
+        required: false
+        type: string
+        default: ''
+      working-directory:
+        description: 'Working directory for commands'
+        required: false
+        type: string
+        default: '.'
+      upload-coverage:
+        description: 'Upload coverage to Codecov'
+        required: false
+        type: boolean
+        default: true
+      runs-on:
+        description: 'Runner to use'
+        required: false
+        type: string
+        default: 'ubuntu-latest'
+    outputs:
+      coverage-percentage:
+        description: 'Test coverage percentage'
+        value: ${{ jobs.test.outputs.coverage }}
+
+permissions:
+  contents: read
+
+jobs:
+  # ===========================================================================
+  # Lint - Check code style and formatting
+  # ===========================================================================
+  lint:
+    name: Lint
+    runs-on: ${{ inputs.runs-on }}
+    defaults:
+      run:
+        working-directory: ${{ inputs.working-directory }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@6b9c6063abd6010835644d4c2e1bef4cf5cd0fca # v6.0.1
+        with:
+          enable-cache: true
+          cache-dependency-glob: "uv.lock"
+
+      - name: Set up Python
+        env:
+          PYTHON_VERSION: ${{ inputs.python-version }}
+        run: uv python install "$PYTHON_VERSION"
+
+      - name: Install dependencies
+        run: uv sync --all-extras
+
+      - name: Run ruff check
+        run: uv run ruff check --output-format=github .
+
+      - name: Run ruff format check
+        run: uv run ruff format --check .
+
+  # ===========================================================================
+  # Type Check - Static type analysis
+  # ===========================================================================
+  type-check:
+    name: Type Check
+    runs-on: ${{ inputs.runs-on }}
+    defaults:
+      run:
+        working-directory: ${{ inputs.working-directory }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@6b9c6063abd6010835644d4c2e1bef4cf5cd0fca # v6.0.1
+        with:
+          enable-cache: true
+          cache-dependency-glob: "uv.lock"
+
+      - name: Set up Python
+        env:
+          PYTHON_VERSION: ${{ inputs.python-version }}
+        run: uv python install "$PYTHON_VERSION"
+
+      - name: Install dependencies
+        run: uv sync --all-extras
+
+      - name: Run pyright
+        run: uv run pyright
+
+  # ===========================================================================
+  # Test - Run tests with coverage (single version)
+  # ===========================================================================
+  test:
+    name: Test
+    runs-on: ${{ inputs.runs-on }}
+    if: ${{ !inputs.enable-matrix }}
+    defaults:
+      run:
+        working-directory: ${{ inputs.working-directory }}
+    outputs:
+      coverage: ${{ steps.coverage.outputs.percentage }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@6b9c6063abd6010835644d4c2e1bef4cf5cd0fca # v6.0.1
+        with:
+          enable-cache: true
+          cache-dependency-glob: "uv.lock"
+
+      - name: Set up Python
+        env:
+          PYTHON_VERSION: ${{ inputs.python-version }}
+        run: uv python install "$PYTHON_VERSION"
+
+      - name: Install dependencies
+        run: uv sync --all-extras
+
+      - name: Detect package name
+        id: detect-package
+        env:
+          INPUT_PACKAGE_NAME: ${{ inputs.package-name }}
+        run: |
+          if [[ -n "$INPUT_PACKAGE_NAME" ]]; then
+            echo "package=$INPUT_PACKAGE_NAME" >> "$GITHUB_OUTPUT"
+          elif [[ -d "src" ]]; then
+            # Find first directory in src that isn't __pycache__
+            PKG=$(find src -mindepth 1 -maxdepth 1 -type d ! -name '__pycache__' -printf '%f\n' | head -1)
+            echo "package=$PKG" >> "$GITHUB_OUTPUT"
+          else
+            echo "package=." >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Run tests with coverage
+        id: coverage
+        env:
+          PACKAGE_NAME: ${{ steps.detect-package.outputs.package }}
+          COVERAGE_THRESHOLD: ${{ inputs.coverage-threshold }}
+        run: |
+          uv run pytest \
+            --cov="$PACKAGE_NAME" \
+            --cov-report=term-missing \
+            --cov-report=xml:coverage.xml \
+            --cov-fail-under="$COVERAGE_THRESHOLD" \
+            -v
+
+          # Extract coverage percentage from XML
+          if [[ -f "coverage.xml" ]]; then
+            COVERAGE=$(grep -oP 'line-rate="\K[0-9.]+' coverage.xml | head -1)
+            PERCENTAGE=$(echo "$COVERAGE * 100" | bc | cut -d. -f1)
+            echo "percentage=$PERCENTAGE" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Upload coverage report
+        if: inputs.upload-coverage
+        uses: codecov/codecov-action@ad3126e916f78f00edff4ed0317cf185271ccc2d # v5.4.2
+        with:
+          files: coverage.xml
+          fail_ci_if_error: false
+          verbose: true
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+
+      - name: Upload coverage artifact
+        uses: actions/upload-artifact@b4b15b8c7c6ac21ea08fcf65892d2ee8f75cf882 # v4.4.3
+        with:
+          name: coverage-report
+          path: coverage.xml
+          retention-days: 30
+
+  # ===========================================================================
+  # Test Matrix - Run tests across multiple Python versions
+  # ===========================================================================
+  test-matrix:
+    name: Test (Python ${{ matrix.python-version }})
+    runs-on: ${{ inputs.runs-on }}
+    if: ${{ inputs.enable-matrix }}
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ${{ fromJson(inputs.python-versions-matrix) }}
+    defaults:
+      run:
+        working-directory: ${{ inputs.working-directory }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@6b9c6063abd6010835644d4c2e1bef4cf5cd0fca # v6.0.1
+        with:
+          enable-cache: true
+          cache-dependency-glob: "uv.lock"
+
+      - name: Set up Python
+        env:
+          PYTHON_VERSION: ${{ matrix.python-version }}
+        run: uv python install "$PYTHON_VERSION"
+
+      - name: Install dependencies
+        run: uv sync --all-extras
+
+      - name: Detect package name
+        id: detect-package
+        env:
+          INPUT_PACKAGE_NAME: ${{ inputs.package-name }}
+        run: |
+          if [[ -n "$INPUT_PACKAGE_NAME" ]]; then
+            echo "package=$INPUT_PACKAGE_NAME" >> "$GITHUB_OUTPUT"
+          elif [[ -d "src" ]]; then
+            PKG=$(find src -mindepth 1 -maxdepth 1 -type d ! -name '__pycache__' -printf '%f\n' | head -1)
+            echo "package=$PKG" >> "$GITHUB_OUTPUT"
+          else
+            echo "package=." >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Run tests with coverage
+        env:
+          PACKAGE_NAME: ${{ steps.detect-package.outputs.package }}
+          COVERAGE_THRESHOLD: ${{ inputs.coverage-threshold }}
+        run: |
+          uv run pytest \
+            --cov="$PACKAGE_NAME" \
+            --cov-report=term-missing \
+            --cov-report=xml:coverage.xml \
+            --cov-fail-under="$COVERAGE_THRESHOLD" \
+            -v
+
+      - name: Upload coverage report
+        if: inputs.upload-coverage && matrix.python-version == fromJson(inputs.python-versions-matrix)[0]
+        uses: codecov/codecov-action@ad3126e916f78f00edff4ed0317cf185271ccc2d # v5.4.2
+        with:
+          files: coverage.xml
+          fail_ci_if_error: false
+          verbose: true
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+
+  # ===========================================================================
+  # Summary - Aggregate results
+  # ===========================================================================
+  all-checks-pass:
+    name: All Checks Pass
+    if: always()
+    needs: [lint, type-check, test, test-matrix]
+    runs-on: ubuntu-latest
+    env:
+      LINT_RESULT: ${{ needs.lint.result }}
+      TYPE_CHECK_RESULT: ${{ needs.type-check.result }}
+      TEST_RESULT: ${{ needs.test.result }}
+      TEST_MATRIX_RESULT: ${{ needs.test-matrix.result }}
+      ENABLE_MATRIX: ${{ inputs.enable-matrix }}
+    steps:
+      - name: Check all jobs passed
+        run: |
+          # Lint and type-check must pass
+          if [[ "$LINT_RESULT" != "success" ]] || [[ "$TYPE_CHECK_RESULT" != "success" ]]; then
+            echo "Lint or type-check failed"
+            exit 1
+          fi
+
+          # Either test or test-matrix must pass (depending on config)
+          if [[ "$ENABLE_MATRIX" == "true" ]]; then
+            if [[ "$TEST_MATRIX_RESULT" != "success" ]]; then
+              echo "Matrix tests failed"
+              exit 1
+            fi
+          else
+            if [[ "$TEST_RESULT" != "success" ]]; then
+              echo "Tests failed"
+              exit 1
+            fi
+          fi
+
+          echo "All checks passed!"

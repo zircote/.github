@@ -1,0 +1,284 @@
+# Reusable Content Pipeline Workflow
+# Provides centralized content validation and publishing
+#
+# Security Note: This workflow only uses workflow_call inputs (controlled by caller)
+# and internal job status values. No untrusted user input is used in run commands.
+#
+# Usage in consuming workflows:
+#   jobs:
+#     content:
+#       uses: org-github/.github/workflows/reusable-content.yml@main
+#       with:
+#         content-path: 'content/'
+#       secrets: inherit
+
+name: Content Pipeline
+
+on:
+  workflow_call:
+    inputs:
+      content-path:
+        description: 'Path to content directory'
+        required: false
+        type: string
+        default: 'content'
+      validate-frontmatter:
+        description: 'Validate frontmatter in markdown files'
+        required: false
+        type: boolean
+        default: true
+      lint-markdown:
+        description: 'Run markdown linting'
+        required: false
+        type: boolean
+        default: true
+      check-links:
+        description: 'Check for broken links'
+        required: false
+        type: boolean
+        default: true
+      check-spelling:
+        description: 'Check spelling in content'
+        required: false
+        type: boolean
+        default: false
+      node-version:
+        description: 'Node.js version'
+        required: false
+        type: string
+        default: '22'
+      runs-on:
+        description: 'Runner to use'
+        required: false
+        type: string
+        default: 'ubuntu-latest'
+    outputs:
+      validation-passed:
+        description: 'Whether all validation checks passed'
+        value: ${{ jobs.summary.outputs.passed }}
+
+permissions:
+  contents: read
+
+jobs:
+  # ===========================================================================
+  # Frontmatter Validation
+  # ===========================================================================
+  frontmatter:
+    name: Validate Frontmatter
+    runs-on: ${{ inputs.runs-on }}
+    if: ${{ inputs.validate-frontmatter }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Setup Node.js
+        uses: actions/setup-node@39370e3970a6d050c480ffad4ff0ed4d3fdee5af # v4.1.0
+        with:
+          node-version: ${{ inputs.node-version }}
+
+      - name: Install dependencies
+        run: npm install -g gray-matter
+
+      - name: Validate frontmatter
+        env:
+          CONTENT_PATH: ${{ inputs.content-path }}
+        run: |
+          #!/bin/bash
+          set -euo pipefail
+
+          ERRORS=0
+
+          # Find all markdown files
+          while IFS= read -r -d '' file; do
+            # Check if file has frontmatter
+            if head -1 "$file" | grep -q "^---$"; then
+              # Extract frontmatter and validate
+              FRONTMATTER=$(sed -n '1,/^---$/p' "$file" | tail -n +2 | head -n -1)
+
+              # Check for required fields (basic check)
+              if ! echo "$FRONTMATTER" | grep -q "^title:"; then
+                echo "::error file=$file::Missing required field: title"
+                ERRORS=$((ERRORS + 1))
+              fi
+            else
+              echo "::warning file=$file::No frontmatter found"
+            fi
+          done < <(find "$CONTENT_PATH" -name "*.md" -print0 2>/dev/null || true)
+
+          if [[ $ERRORS -gt 0 ]]; then
+            echo "::error::Found $ERRORS frontmatter errors"
+            exit 1
+          fi
+
+          echo "All frontmatter validated successfully"
+
+  # ===========================================================================
+  # Markdown Linting
+  # ===========================================================================
+  lint:
+    name: Lint Markdown
+    runs-on: ${{ inputs.runs-on }}
+    if: ${{ inputs.lint-markdown }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Setup Node.js
+        uses: actions/setup-node@39370e3970a6d050c480ffad4ff0ed4d3fdee5af # v4.1.0
+        with:
+          node-version: ${{ inputs.node-version }}
+
+      - name: Install markdownlint
+        run: npm install -g markdownlint-cli
+
+      - name: Run markdownlint
+        env:
+          CONTENT_PATH: ${{ inputs.content-path }}
+        run: |
+          if [[ -f ".markdownlint.json" ]] || [[ -f ".markdownlint.yaml" ]]; then
+            markdownlint "$CONTENT_PATH/**/*.md" --ignore node_modules
+          else
+            # Default rules for content - relaxed for prose
+            markdownlint "$CONTENT_PATH/**/*.md" \
+              --ignore node_modules \
+              --disable MD013 MD033 MD041
+          fi
+
+  # ===========================================================================
+  # Link Checking
+  # ===========================================================================
+  links:
+    name: Check Links
+    runs-on: ${{ inputs.runs-on }}
+    if: ${{ inputs.check-links }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Run lychee
+        uses: lycheeverse/lychee-action@f613c4a64e50d792e0b31ec34bbcbba12263c6a6 # v2.3.0
+        with:
+          args: >-
+            --verbose
+            --no-progress
+            --exclude-mail
+            --exclude 'localhost'
+            --exclude '127.0.0.1'
+            --max-retries 3
+            '${{ inputs.content-path }}/**/*.md'
+          fail: true
+
+  # ===========================================================================
+  # Spell Check
+  # ===========================================================================
+  spelling:
+    name: Check Spelling
+    runs-on: ${{ inputs.runs-on }}
+    if: ${{ inputs.check-spelling }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Run cspell
+        uses: streetsidesoftware/cspell-action@934c74da3775ac844ec89503f666f67efb427fed # v6.10.1
+        with:
+          files: '${{ inputs.content-path }}/**/*.md'
+          config: .cspell.json
+          strict: false
+
+  # ===========================================================================
+  # Summary
+  # ===========================================================================
+  summary:
+    name: Validation Summary
+    runs-on: ${{ inputs.runs-on }}
+    needs: [frontmatter, lint, links, spelling]
+    if: always()
+    outputs:
+      passed: ${{ steps.check.outputs.passed }}
+    env:
+      FRONTMATTER_RESULT: ${{ needs.frontmatter.result }}
+      LINT_RESULT: ${{ needs.lint.result }}
+      LINKS_RESULT: ${{ needs.links.result }}
+      SPELLING_RESULT: ${{ needs.spelling.result }}
+      VALIDATE_FM: ${{ inputs.validate-frontmatter }}
+      LINT_MD: ${{ inputs.lint-markdown }}
+      CHECK_LINKS: ${{ inputs.check-links }}
+      CHECK_SPELL: ${{ inputs.check-spelling }}
+    steps:
+      - name: Check results
+        id: check
+        run: |
+          PASSED=true
+
+          # Check each enabled job
+          if [[ "$VALIDATE_FM" == "true" ]] && [[ "$FRONTMATTER_RESULT" != "success" ]]; then
+            echo "Frontmatter validation failed"
+            PASSED=false
+          fi
+
+          if [[ "$LINT_MD" == "true" ]] && [[ "$LINT_RESULT" != "success" ]]; then
+            echo "Markdown linting failed"
+            PASSED=false
+          fi
+
+          if [[ "$CHECK_LINKS" == "true" ]] && [[ "$LINKS_RESULT" != "success" ]]; then
+            echo "Link checking failed"
+            PASSED=false
+          fi
+
+          if [[ "$CHECK_SPELL" == "true" ]] && [[ "$SPELLING_RESULT" != "success" ]]; then
+            echo "Spell checking failed"
+            PASSED=false
+          fi
+
+          echo "passed=$PASSED" >> "$GITHUB_OUTPUT"
+
+          if [[ "$PASSED" == "false" ]]; then
+            exit 1
+          fi
+
+          echo "All content validation checks passed!"
+
+      - name: Generate summary
+        if: always()
+        run: |
+          {
+            echo "## Content Validation Summary"
+            echo ""
+            echo "| Check | Status |"
+            echo "|-------|--------|"
+
+            if [[ "$VALIDATE_FM" == "true" ]]; then
+              if [[ "$FRONTMATTER_RESULT" == "success" ]]; then
+                echo "| Frontmatter | :white_check_mark: Passed |"
+              else
+                echo "| Frontmatter | :x: Failed |"
+              fi
+            fi
+
+            if [[ "$LINT_MD" == "true" ]]; then
+              if [[ "$LINT_RESULT" == "success" ]]; then
+                echo "| Markdown Lint | :white_check_mark: Passed |"
+              else
+                echo "| Markdown Lint | :x: Failed |"
+              fi
+            fi
+
+            if [[ "$CHECK_LINKS" == "true" ]]; then
+              if [[ "$LINKS_RESULT" == "success" ]]; then
+                echo "| Link Check | :white_check_mark: Passed |"
+              else
+                echo "| Link Check | :x: Failed |"
+              fi
+            fi
+
+            if [[ "$CHECK_SPELL" == "true" ]]; then
+              if [[ "$SPELLING_RESULT" == "success" ]]; then
+                echo "| Spell Check | :white_check_mark: Passed |"
+              else
+                echo "| Spell Check | :x: Failed |"
+              fi
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"

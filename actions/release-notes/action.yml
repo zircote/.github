@@ -1,0 +1,161 @@
+# Composite Action: Generate Release Notes
+# Generates changelog from conventional commits
+#
+# Usage:
+#   - uses: ./actions/release-notes
+#     with:
+#       from-tag: 'v1.0.0'
+#       to-ref: 'HEAD'
+
+name: 'Generate Release Notes'
+description: 'Generate changelog from conventional commits between two refs'
+author: 'zircote'
+
+branding:
+  icon: 'file-text'
+  color: 'purple'
+
+inputs:
+  from-tag:
+    description: 'Starting tag or ref (exclusive)'
+    required: false
+    default: ''
+  to-ref:
+    description: 'Ending ref (inclusive)'
+    required: false
+    default: 'HEAD'
+  include-breaking:
+    description: 'Include breaking changes section'
+    required: false
+    default: 'true'
+  include-contributors:
+    description: 'Include contributors section'
+    required: false
+    default: 'true'
+  repository:
+    description: 'Repository name (owner/repo)'
+    required: false
+    default: ${{ github.repository }}
+
+outputs:
+  notes:
+    description: 'Generated release notes'
+    value: ${{ steps.generate.outputs.notes }}
+  has-breaking:
+    description: 'Whether there are breaking changes'
+    value: ${{ steps.generate.outputs.has_breaking }}
+  bump-type:
+    description: 'Suggested version bump (major, minor, patch)'
+    value: ${{ steps.generate.outputs.bump_type }}
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Get latest tag
+      id: latest-tag
+      shell: bash
+      env:
+        FROM_TAG: ${{ inputs.from-tag }}
+      run: |
+        if [[ -n "$FROM_TAG" ]]; then
+          echo "tag=$FROM_TAG" >> "$GITHUB_OUTPUT"
+        else
+          LATEST=$(git tag -l 'v*' --sort=-v:refname | head -n1)
+          if [[ -z "$LATEST" ]]; then
+            LATEST=$(git rev-list --max-parents=0 HEAD | head -1)
+          fi
+          echo "tag=$LATEST" >> "$GITHUB_OUTPUT"
+        fi
+
+    - name: Generate release notes
+      id: generate
+      shell: bash
+      env:
+        FROM_TAG: ${{ steps.latest-tag.outputs.tag }}
+        TO_REF: ${{ inputs.to-ref }}
+        INCLUDE_BREAKING: ${{ inputs.include-breaking }}
+        INCLUDE_CONTRIBUTORS: ${{ inputs.include-contributors }}
+        REPO: ${{ inputs.repository }}
+      run: |
+        {
+          echo 'notes<<EOF'
+
+          # Analyze commits for bump type
+          COMMITS=$(git log "$FROM_TAG".."$TO_REF" --pretty=format:"%s" 2>/dev/null || git log --pretty=format:"%s")
+          HAS_BREAKING=false
+          BUMP_TYPE="patch"
+
+          if echo "$COMMITS" | grep -qE "^(feat|feature)(\(.+\))?!:|BREAKING CHANGE:"; then
+            HAS_BREAKING=true
+            BUMP_TYPE="major"
+          elif echo "$COMMITS" | grep -qE "^(feat|feature)(\(.+\))?:"; then
+            BUMP_TYPE="minor"
+          fi
+
+          echo "has_breaking=$HAS_BREAKING" >> "$GITHUB_OUTPUT"
+          echo "bump_type=$BUMP_TYPE" >> "$GITHUB_OUTPUT"
+
+          # Breaking changes
+          if [[ "$INCLUDE_BREAKING" == "true" ]] && [[ "$HAS_BREAKING" == "true" ]]; then
+            BREAKING=$(git log "$FROM_TAG".."$TO_REF" --pretty=format:"- %s (%h)" --grep="BREAKING CHANGE:\|!" 2>/dev/null || true)
+            if [[ -n "$BREAKING" ]]; then
+              echo "## ⚠️ Breaking Changes"
+              echo ""
+              echo "$BREAKING"
+              echo ""
+            fi
+          fi
+
+          # Features
+          FEATURES=$(git log "$FROM_TAG".."$TO_REF" --pretty=format:"- %s (%h)" --grep="^feat" 2>/dev/null || true)
+          if [[ -n "$FEATURES" ]]; then
+            echo "## ✨ Features"
+            echo ""
+            echo "$FEATURES"
+            echo ""
+          fi
+
+          # Bug fixes
+          FIXES=$(git log "$FROM_TAG".."$TO_REF" --pretty=format:"- %s (%h)" --grep="^fix" 2>/dev/null || true)
+          if [[ -n "$FIXES" ]]; then
+            echo "## 🐛 Bug Fixes"
+            echo ""
+            echo "$FIXES"
+            echo ""
+          fi
+
+          # Documentation
+          DOCS=$(git log "$FROM_TAG".."$TO_REF" --pretty=format:"- %s (%h)" --grep="^docs" 2>/dev/null || true)
+          if [[ -n "$DOCS" ]]; then
+            echo "## 📚 Documentation"
+            echo ""
+            echo "$DOCS"
+            echo ""
+          fi
+
+          # Other changes
+          OTHERS=$(git log "$FROM_TAG".."$TO_REF" --pretty=format:"- %s (%h)" --grep="^chore\|^refactor\|^test\|^ci\|^build\|^perf" 2>/dev/null || true)
+          if [[ -n "$OTHERS" ]]; then
+            echo "## 🔧 Other Changes"
+            echo ""
+            echo "$OTHERS"
+            echo ""
+          fi
+
+          # Contributors
+          if [[ "$INCLUDE_CONTRIBUTORS" == "true" ]]; then
+            CONTRIBUTORS=$(git log "$FROM_TAG".."$TO_REF" --pretty=format:"%an" 2>/dev/null | sort -u | while read -r name; do echo "- $name"; done)
+            if [[ -n "$CONTRIBUTORS" ]]; then
+              echo "## 👥 Contributors"
+              echo ""
+              echo "$CONTRIBUTORS"
+              echo ""
+            fi
+          fi
+
+          echo "---"
+          echo ""
+          echo "**Full Changelog**: https://github.com/$REPO/compare/$FROM_TAG...$TO_REF"
+
+          echo 'EOF'
+        } >> "$GITHUB_OUTPUT"
