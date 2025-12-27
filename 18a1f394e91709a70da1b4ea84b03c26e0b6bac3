@@ -23,3 +23,15 @@ summary: '...showcasing your plugins and 100+ agent library'
 - Social badges for blog, LinkedIn, and GitHub
 
 **Consistent...
+
+---
+type: patterns
+timestamp: '2025-12-27T00:24:18.704876+00:00'
+summary: '...create one that:'
+---
+
+...create one that:
+- Auto-detects Python/TypeScript/Go/Rust from project markers
+- Applies your reusable workflows
+- Merges configs without destroying existing settings
+- Handles CLAUDE.md, Copilot...
