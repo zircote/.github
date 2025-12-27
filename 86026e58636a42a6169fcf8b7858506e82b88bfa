@@ -85,3 +85,24 @@ Built two complementary scripts for bringing the ecosystem to existing projects.
 ## Related Files
 - scripts/migrate-project.sh:1-420
 - scripts/sync-ecosystem.sh:1-370
+
+---
+type: progress
+timestamp: '2025-12-27T00:32:58.027921+00:00'
+summary: Added migration documentation to ecosystem README
+---
+
+Added migration documentation to ecosystem README
+## Summary
+Documented both migration scripts in the main README.md with usage examples, file strategies, and workflow explanations.
+
+## Changes Made
+- Added scripts to repository structure tree
+- Created new "Migrating Existing Projects" section
+- Documented `migrate-project.sh` one-time migration
+- Documented `sync-ecosystem.sh` git-based sync
+- Added file sync strategy table
+
+## Related Files
+- README.md:83-88 (structure tree)
+- README.md:135-198 (migration section)
