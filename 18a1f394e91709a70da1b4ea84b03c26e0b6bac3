@@ -35,3 +35,24 @@ summary: '...create one that:'
 - Applies your reusable workflows
 - Merges configs without destroying existing settings
 - Handles CLAUDE.md, Copilot...
+
+---
+type: patterns
+timestamp: '2025-12-27T00:28:16.325070+00:00'
+summary: '...copy_file "$template_dir/.gitignore" "$PROJECT_PATH/.gitignore"'
+tags:
+- auto-captured
+- post-tool-use
+- file:migrate-project.sh
+---
+
+...copy_file "$template_dir/.gitignore" "$PROJECT_PATH/.gitignore"
+        fi
+    fi
+}
+
+# Apply reusable workflow references
+apply_reusable_workflows() {
+    local type="$1"
+
+    log_info "Updating...
