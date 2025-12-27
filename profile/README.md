@@ -15,7 +15,7 @@
 
 **Robert Allen** is a DevOps engineer, technologist and open source maintainer based in Farmville, Virginia. By day, he drives infrastructure automation at [HMH](https://www.hmhco.com/). By evening, he builds developer tools that solve real problems in technology and agriculture. And somehow also runs a [regenerative pasture farm](https://epicpastures.com/).
 
-Creator of **[swagger-php](https://github.com/zircote/swagger-php)** (5K+ stars), the PHP library for generating OpenAPI documentation from annotations. Much appreaction to the community of contributors and users who have made it a success over the years.
+Creator of **[swagger-php](https://github.com/zircote/swagger-php)** (5K+ stars), the PHP library for generating OpenAPI documentation from annotations. Much appreciation to the community of contributors and users who have made it a success over the years.
 
 ### Focus Areas
 
