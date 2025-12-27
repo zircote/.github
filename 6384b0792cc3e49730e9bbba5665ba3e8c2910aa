@@ -33,3 +33,21 @@ Workflow had empty matrix array causing validation errors and js-yaml module res
 
 ## Related Files
 - .github/workflows/sync-labels.yml:86-113, 207-240
+
+---
+type: progress
+timestamp: '2025-12-27T00:38:15.951462+00:00'
+summary: Backpropagated sync-labels fix to template repo
+---
+
+Backpropagated sync-labels fix to template repo
+## Summary
+Applied same 3 fixes to the org-github template in zircote/github.
+
+## Changes Made
+- js-yaml@4.1.0 explicit install
+- Dynamic NODE_PATH via $(npm root -g)
+- Commented out empty batch-sync job
+
+## Related Files
+- github/org-github/.github/workflows/sync-labels.yml:86-113, 206-239
