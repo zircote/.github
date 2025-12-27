@@ -89,6 +89,7 @@ jobs:
       - name: Validate labels configuration
         run: |
           echo "Validating labels.yml format..."
+          export NODE_PATH="$(npm root -g)"
           node -e "
             const yaml = require('js-yaml');
             const fs = require('fs');
