@@ -378,3 +378,23 @@ jobs:
 ### Documentation Deployment
 
 ```yaml...
+
+---
+type: patterns
+timestamp: '2025-12-27T00:14:35.991314+00:00'
+summary: '...Documentation Deployment'
+tags:
+- auto-captured
+- post-tool-use
+- file:README.md
+---
+
+...Documentation Deployment
+
+```yaml
+jobs:
+  docs:
+    uses: zircote/.github/.github/workflows/reusable-docs.yml@main
+    with:
+      framework: astro  # or mkdocs, sphinx, docusaurus
+      deploy-to-pages...
