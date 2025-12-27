@@ -325,3 +325,29 @@ jobs:
 ```
 
 ### Security...
+
+---
+type: patterns
+timestamp: '2025-12-27T00:14:35.944743+00:00'
+summary: '...true'
+tags:
+- auto-captured
+- post-tool-use
+- file:README.md
+---
+
+...true
+```
+
+### Security Scanning
+
+```yaml
+jobs:
+  security:
+    uses: zircote/.github/.github/workflows/reusable-security.yml@main
+    with:
+      scan-secrets: true
+      scan-dependencies: true
+```
+
+###...
