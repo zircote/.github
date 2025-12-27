@@ -56,3 +56,22 @@ apply_reusable_workflows() {
     local type="$1"
 
     log_info "Updating...
+
+---
+type: patterns
+timestamp: '2025-12-27T00:28:16.344259+00:00'
+summary: '...references'
+tags:
+- auto-captured
+- post-tool-use
+- file:migrate-project.sh
+---
+
+...references
+apply_reusable_workflows() {
+    local type="$1"
+
+    log_info "Updating CI to use reusable workflows..."
+
+    local workflow_file="$PROJECT_PATH/.github/workflows/ci.yml"
+    if [[...
