@@ -90,3 +90,25 @@ tags:
 ...Organization Profile   | Public profile at github.com/zircote       | `profile/README.md`  |
 | Reusable Workflows     | CI/CD pipelines callable from any repo     | `.github/workflows/` |
 | Composite...
+
+---
+type: patterns
+timestamp: '2025-12-27T00:14:35.702289+00:00'
+summary: '...|'
+tags:
+- auto-captured
+- post-tool-use
+- file:README.md
+---
+
+...|
+
+## Repository Structure
+
+```
+.github/
+├── .github/
+│   ├── workflows/               # Reusable workflows
+│   │   ├── reusable-ci-python.yml
+│   │   ├── reusable-ci-typescript.yml
+│   │...
