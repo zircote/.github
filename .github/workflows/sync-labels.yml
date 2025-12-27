@@ -205,46 +205,36 @@ jobs:
           TRIGGER: ${{ github.event_name }}
 
   # Optional: Batch sync to multiple repositories
-  batch-sync:
-    name: Batch Sync (Scheduled)
-    runs-on: ubuntu-latest
-    if: github.event_name == 'schedule'
-
-    strategy:
-      fail-fast: false
-      matrix:
-        # Add repositories to sync on schedule
-        # Uncomment and configure as needed:
-        # repository:
-        #   - zircote/swagger-php
-        #   - zircote/other-repo
-        repository: []
-
-    steps:
-      - name: Skip if no repositories configured
-        if: matrix.repository == ''
-        run: |
-          echo "No repositories configured for batch sync"
-          echo "Configure the matrix.repository array in the workflow file"
-
-      - name: Trigger sync for repository
-        if: matrix.repository != ''
-        # actions/github-script v7.0.1 - 2024-01-31
-        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea
-        with:
-          script: |
-            const targetRepo = process.env.BATCH_TARGET_REPO;
-            await github.rest.actions.createWorkflowDispatch({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              workflow_id: 'sync-labels.yml',
-              ref: 'main',
-              inputs: {
-                target_repository: targetRepo,
-                dry_run: 'false',
-                allow_added_labels: 'true'
-              }
-            });
-            console.log(`Triggered sync for ${targetRepo}`);
-        env:
-          BATCH_TARGET_REPO: ${{ matrix.repository }}
+  # Uncomment this job and configure repositories when needed
+  # batch-sync:
+  #   name: Batch Sync (Scheduled)
+  #   runs-on: ubuntu-latest
+  #   if: github.event_name == 'schedule'
+  #
+  #   strategy:
+  #     fail-fast: false
+  #     matrix:
+  #       repository:
+  #         - zircote/swagger-php
+  #         - zircote/other-repo
+  #
+  #   steps:
+  #     - name: Trigger sync for repository
+  #       uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea
+  #       with:
+  #         script: |
+  #           const targetRepo = process.env.BATCH_TARGET_REPO;
+  #           await github.rest.actions.createWorkflowDispatch({
+  #             owner: context.repo.owner,
+  #             repo: context.repo.repo,
+  #             workflow_id: 'sync-labels.yml',
+  #             ref: 'main',
+  #             inputs: {
+  #               target_repository: targetRepo,
+  #               dry_run: 'false',
+  #               allow_added_labels: 'true'
+  #             }
+  #           });
+  #           console.log(`Triggered sync for ${targetRepo}`);
+  #       env:
+  #         BATCH_TARGET_REPO: ${{ matrix.repository }}
