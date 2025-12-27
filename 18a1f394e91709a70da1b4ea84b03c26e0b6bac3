@@ -141,3 +141,20 @@ tags:
     esac
 
     if [[ "$DRY_RUN" == true ]]; then...
+
+---
+type: patterns
+timestamp: '2025-12-27T00:28:16.441999+00:00'
+summary: '...esac'
+tags:
+- auto-captured
+- post-tool-use
+- file:migrate-project.sh
+---
+
+...esac
+
+    if [[ "$DRY_RUN" == true ]]; then
+        log_dry "Would suggest converting to reusable workflow: $workflow_name"
+    else
+        log_info "Consider replacing ci.yml with:"...
