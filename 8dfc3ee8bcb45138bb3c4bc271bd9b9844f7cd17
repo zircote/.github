@@ -299,3 +299,29 @@ jobs:
 ```
 
 ### Go...
+
+---
+type: patterns
+timestamp: '2025-12-27T00:14:35.921923+00:00'
+summary: '...run-tests: true'
+tags:
+- auto-captured
+- post-tool-use
+- file:README.md
+---
+
+...run-tests: true
+```
+
+### Go CI
+
+```yaml
+jobs:
+  ci:
+    uses: zircote/.github/.github/workflows/reusable-ci-go.yml@main
+    with:
+      go-version: "1.23"
+      run-race-detector: true
+```
+
+### Security...
