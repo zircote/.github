@@ -75,3 +75,18 @@ Organization-wide GitHub configuration, reusable workflows, and AI assistant int
 ## Overview
 
 This repository...
+
+---
+type: patterns
+timestamp: '2025-12-27T00:14:35.682926+00:00'
+summary: '...Organization Profile   | Public profile at github.com/zircote       |
+  `profile/README.md`  |'
+tags:
+- auto-captured
+- post-tool-use
+- file:README.md
+---
+
+...Organization Profile   | Public profile at github.com/zircote       | `profile/README.md`  |
+| Reusable Workflows     | CI/CD pipelines callable from any repo     | `.github/workflows/` |
+| Composite...
