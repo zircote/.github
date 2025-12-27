@@ -1,0 +1,17 @@
+---
+type: decisions
+timestamp: '2025-12-27T00:32:45.549131+00:00'
+summary: '...Dependabot (`.github/dependabot.yml`)'
+tags:
+- auto-captured
+- post-tool-use
+- file:README.md
+---
+
+...Dependabot (`.github/dependabot.yml`)
+
+**Conflict resolution options:** `[o]verwrite` `[s]kip` `[d]iff` `[m]erge`
+
+### Ongoing Git-Based Sync
+
+Use `sync-ecosystem.sh` for ongoing updates via...
