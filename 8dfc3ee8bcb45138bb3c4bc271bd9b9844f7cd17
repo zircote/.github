@@ -57,3 +57,21 @@ summary: '...showcasing your plugins and 100+ agent library'
 - Social badges for blog, LinkedIn, and GitHub
 
 **Consistent...
+
+---
+type: patterns
+timestamp: '2025-12-27T00:14:35.661931+00:00'
+summary: '# zircote/.github'
+tags:
+- auto-captured
+- post-tool-use
+- file:README.md
+---
+
+# zircote/.github
+
+Organization-wide GitHub configuration, reusable workflows, and AI assistant integrations for my repositories.
+
+## Overview
+
+This repository...
