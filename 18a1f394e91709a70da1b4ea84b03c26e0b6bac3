@@ -123,3 +123,21 @@ tags:
         go) workflow_name="reusable-ci-go.yml" ;;
         rust) workflow_name="reusable-ci-rust.yml" ;;
         *) return ;;...
+
+---
+type: patterns
+timestamp: '2025-12-27T00:28:16.420921+00:00'
+summary: '...ci-typescript.yml" ;;'
+tags:
+- auto-captured
+- post-tool-use
+- file:migrate-project.sh
+---
+
+...ci-typescript.yml" ;;
+        go) workflow_name="reusable-ci-go.yml" ;;
+        rust) workflow_name="reusable-ci-rust.yml" ;;
+        *) return ;;
+    esac
+
+    if [[ "$DRY_RUN" == true ]]; then...
