@@ -1,0 +1,14 @@
+---
+type: decisions
+timestamp: '2025-12-27T00:28:16.309923+00:00'
+summary: '...echo -e "${YELLOW}File exists:${NC} $relative_dest"'
+tags:
+- auto-captured
+- post-tool-use
+- file:migrate-project.sh
+---
+
+...echo -e "${YELLOW}File exists:${NC} $relative_dest"
+            echo "  [o]verwrite  [s]kip  [d]iff  [m]erge (if supported)  [q]uit"
+            read -r -p "Choice: " choice
+            case...
