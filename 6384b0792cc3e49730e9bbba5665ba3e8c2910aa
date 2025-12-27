@@ -13,3 +13,19 @@ The workflow accepts three inputs:
 
 ## Related Files
 - .github/workflows/sync-labels.yml:10-25
+
+---
+type: learnings
+timestamp: '2025-12-27T00:38:15.902317+00:00'
+summary: sync-labels.yml uses `target_repository` input (not `repo`)
+---
+
+sync-labels.yml uses `target_repository` input (not `repo`)
+## Context
+The workflow accepts three inputs:
+- `target_repository` (required): owner/repo format
+- `dry_run` (optional, default: true): preview mode
+- `allow_added_labels` (optional, default: true): preserve labels not in config
+
+## Related Files
+- .github/workflows/sync-labels.yml:10-25
