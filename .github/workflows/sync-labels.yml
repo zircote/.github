@@ -83,8 +83,8 @@ jobs:
         with:
           node-version: '20'
 
-      - name: Install github-label-sync
-        run: npm install -g github-label-sync@2.3.0
+      - name: Install dependencies
+        run: npm install -g github-label-sync@2.3.0 js-yaml@4.1.0
 
       - name: Validate labels configuration
         run: |
@@ -110,8 +110,6 @@ jobs:
               process.exit(1);
             }
           "
-        env:
-          NODE_PATH: /usr/local/lib/node_modules
 
       - name: Determine target repository
         id: target
