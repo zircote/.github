@@ -1,20 +1,20 @@
-# Organization GitHub Configuration
+# zircote/.github
 
-This repository contains organization-wide GitHub configuration, reusable workflows, composite actions, and AI assistant integrations for the **zircote** ecosystem.
+Organization-wide GitHub configuration, reusable workflows, and AI assistant integrations for my repositories.
 
-## What This Repository Provides
+## Overview
 
-When you create this as `zircote/.github`, GitHub automatically applies these configurations across all repositories in the organization:
+This repository provides shared infrastructure across all `zircote/*` repos:
 
-| Component | Purpose | Location |
-|-----------|---------|----------|
-| **Community Health Files** | Default SECURITY.md, CONTRIBUTING.md for all repos | Root directory |
-| **Organization Profile** | Public profile shown on github.com/zircote | `profile/README.md` |
-| **Reusable Workflows** | Callable CI/CD workflows for all repos | `.github/workflows/` |
-| **Composite Actions** | Shared action building blocks | `actions/` |
-| **Label Definitions** | Standardized issue/PR labels | `labels.yml` |
-| **Copilot Skills** | AI-assisted development capabilities | `.github/skills/` |
-| **Autonomous Agents** | Multi-step AI workflow automation | `agents/` |
+| Component              | Purpose                                    | Location             |
+| ---------------------- | ------------------------------------------ | -------------------- |
+| Community Health Files | Default SECURITY.md, CONTRIBUTING.md       | Root directory       |
+| Organization Profile   | Public profile at github.com/zircote       | `profile/README.md`  |
+| Reusable Workflows     | CI/CD pipelines callable from any repo     | `.github/workflows/` |
+| Composite Actions      | Shared action building blocks              | `actions/`           |
+| Label Definitions      | Standardized issue/PR labels               | `labels.yml`         |
+| Copilot Skills         | AI-assisted development capabilities       | `.github/skills/`    |
+| Autonomous Agents      | Multi-step AI workflow automation          | `agents/`            |
 
 ## Repository Structure
 
@@ -28,16 +28,15 @@ When you create this as `zircote/.github`, GitHub automatically applies these co
 │   │   ├── reusable-release.yml
 │   │   ├── reusable-security.yml
 │   │   ├── reusable-docs.yml
-│   │   ├── reusable-content.yml
 │   │   └── sync-labels.yml
-│   ├── skills/                  # Copilot Skills (Dec 2025+)
+│   ├── skills/                  # Copilot Skills
 │   │   ├── template-creation/
 │   │   ├── workflow-development/
 │   │   ├── security-baseline/
 │   │   ├── content-pipeline/
 │   │   ├── ecosystem-migration/
 │   │   └── ai-tuning/
-│   └── copilot-instructions.md  # Organization-wide Copilot context
+│   └── copilot-instructions.md
 ├── actions/                     # Composite Actions
 │   ├── setup-python-uv/
 │   ├── setup-node-pnpm/
@@ -51,17 +50,16 @@ When you create this as `zircote/.github`, GitHub automatically applies these co
 │   ├── ecosystem-migrator.md
 │   └── copilot-tuner.md
 ├── profile/
-│   └── README.md                # Organization profile
-├── labels.yml                   # Standard label definitions
-├── SECURITY.md                  # Security policy
-├── CONTRIBUTING.md              # Contribution guidelines
-├── FUNDING.yml                  # Sponsorship configuration
-└── README.md                    # This file
+│   └── README.md
+├── labels.yml
+├── SECURITY.md
+├── CONTRIBUTING.md
+└── FUNDING.yml
 ```
 
-## Reusable Workflows
+---
 
-Call these workflows from any repository in the organization:
+## Reusable Workflows
 
 ### Python CI
 
@@ -129,9 +127,9 @@ jobs:
       deploy-to-pages: true
 ```
 
-## Composite Actions
+---
 
-Use these actions in your workflow steps:
+## Composite Actions
 
 ### setup-python-uv
 
@@ -170,126 +168,85 @@ Use these actions in your workflow steps:
     output-file: CHANGELOG.md
 ```
 
+---
+
 ## Label Sync
 
-The `sync-labels.yml` workflow maintains consistent labels across repositories.
+Standardized labels maintained via `sync-labels.yml`:
 
-### Available Labels
-
-| Category | Labels |
-|----------|--------|
-| **Priority** | `priority: critical`, `priority: high`, `priority: medium`, `priority: low` |
-| **Type** | `type: bug`, `type: feature`, `type: enhancement`, `type: docs`, `type: security`, `type: performance` |
-| **Status** | `status: blocked`, `status: in-progress`, `status: needs-review`, `status: ready` |
-| **Area** | `area: ci-cd`, `area: testing`, `area: infrastructure`, `area: dependencies` |
-| **Effort** | `effort: small`, `effort: medium`, `effort: large`, `effort: epic` |
-
-### Manual Sync
+| Category     | Labels                                                                           |
+| ------------ | -------------------------------------------------------------------------------- |
+| **Priority** | `priority: critical`, `priority: high`, `priority: medium`, `priority: low`      |
+| **Type**     | `type: bug`, `type: feature`, `type: enhancement`, `type: docs`, `type: security`|
+| **Status**   | `status: blocked`, `status: in-progress`, `status: needs-review`, `status: ready`|
+| **Area**     | `area: ci-cd`, `area: testing`, `area: infrastructure`, `area: dependencies`     |
+| **Effort**   | `effort: small`, `effort: medium`, `effort: large`, `effort: epic`               |
 
 ```bash
-# Sync labels to a specific repo
+# Sync labels to a repo
 gh workflow run sync-labels.yml -f repo=zircote/my-repo
-
-# Sync to all repos (requires LABELS_TOKEN secret with repo scope)
-gh workflow run sync-labels.yml -f sync-all=true
 ```
 
-## AI Assistant Integration
+---
+
+## AI Integration
 
 ### Copilot Skills
 
-Skills provide focused capabilities for GitHub Copilot:
-
-| Skill | Trigger | Purpose |
-|-------|---------|---------|
-| `template-creation` | "create template for..." | Design and customize project templates |
-| `workflow-development` | "create workflow for..." | Build GitHub Actions workflows |
-| `security-baseline` | "security check", "audit" | Security scanning and remediation |
-| `content-pipeline` | "write blog post", "create content" | Content creation and publishing |
-| `ecosystem-migration` | "migrate to ecosystem" | Onboard projects to standards |
-| `ai-tuning` | "tune AI instructions" | Optimize CLAUDE.md and Copilot instructions |
+| Skill                  | Trigger                    | Purpose                                |
+| ---------------------- | -------------------------- | -------------------------------------- |
+| `template-creation`    | "create template for..."   | Design project templates               |
+| `workflow-development` | "create workflow for..."   | Build GitHub Actions workflows         |
+| `security-baseline`    | "security check", "audit"  | Security scanning and remediation      |
+| `content-pipeline`     | "write blog post"          | Content creation and publishing        |
+| `ecosystem-migration`  | "migrate to ecosystem"     | Onboard projects to standards          |
+| `ai-tuning`            | "tune AI instructions"     | Optimize CLAUDE.md/Copilot config      |
 
 ### Autonomous Agents
 
-Agents handle complex, multi-step workflows:
+| Agent                | Capabilities                                                   |
+| -------------------- | -------------------------------------------------------------- |
+| `template-architect` | Analyze requirements, design and create project structures     |
+| `workflow-engineer`  | Build CI/CD pipelines, optimize workflows, debug actions       |
+| `security-auditor`   | Security review, vulnerability detection and remediation       |
+| `content-strategist` | Content planning, SEO optimization, multi-platform publishing  |
+| `ecosystem-migrator` | Project onboarding, dependency updates, standards compliance   |
+| `copilot-tuner`      | Optimize AI assistant configurations for specific domains      |
 
-| Agent | Capabilities |
-|-------|-------------|
-| `template-architect` | Analyze requirements, design templates, create complete project structures |
-| `workflow-engineer` | Build CI/CD pipelines, optimize workflows, debug actions |
-| `security-auditor` | Comprehensive security review, vulnerability remediation |
-| `content-strategist` | Content calendar planning, SEO optimization, multi-platform publishing |
-| `ecosystem-migrator` | Project onboarding, dependency updates, standards compliance |
-| `copilot-tuner` | Optimize AI assistant configurations for specific domains |
-
-## Security Policy
-
-The `SECURITY.md` file defines:
-- Supported versions
-- Vulnerability reporting process
-- Security update timeline
-- Responsible disclosure guidelines
-
-## Contributing
-
-See `CONTRIBUTING.md` for:
-- Code of conduct
-- Pull request process
-- Coding standards
-- Review requirements
-
-## Setup for New Organizations
-
-To use this configuration for your organization:
-
-```bash
-# Clone the ecosystem repository
-git clone https://github.com/zircote/github.git
-cd github
-
-# Deploy to your organization
-./scripts/deploy-ecosystem.sh your-org-name
-
-# Or just the .github repo
-./scripts/setup-org.sh your-org-name
-```
-
-## Customization
-
-### Adding New Workflows
-
-1. Create workflow in `.github/workflows/`
-2. Use `workflow_call` trigger for reusability
-3. Document inputs and secrets in workflow comments
-4. Add usage example to this README
-
-### Adding New Actions
-
-1. Create directory in `actions/`
-2. Add `action.yml` with inputs, outputs, and steps
-3. Test in a repository before merging
-4. Document in this README
-
-### Modifying Labels
-
-1. Edit `labels.yml`
-2. Run sync workflow to apply changes
-3. Labels are additive (won't delete existing labels)
+---
 
 ## Related Repositories
 
-| Repository | Purpose |
-|------------|---------|
-| [python-template](https://github.com/zircote/python-template) | Python project template |
-| [typescript-template](https://github.com/zircote/typescript-template) | TypeScript project template |
-| [go-template](https://github.com/zircote/go-template) | Go project template |
-| [rust-template](https://github.com/zircote/rust-template) | Rust project template |
-| [java-template](https://github.com/zircote/java-template) | Java/Spring Boot template |
-| [data-science-template](https://github.com/zircote/data-science-template) | Data science template |
-| [docs-site-template](https://github.com/zircote/docs-site-template) | Documentation site template |
-| [content-pipeline-template](https://github.com/zircote/content-pipeline-template) | Content workflow template |
-| [devcontainer-template](https://github.com/zircote/devcontainer-template) | DevContainer template |
-| [video-template](https://github.com/zircote/video-template) | Video production template |
+### Project Templates
+
+| Template                                                           | Stack                           |
+| ------------------------------------------------------------------ | ------------------------------- |
+| [python-template](https://github.com/zircote/python-template)      | Python 3.12+, uv, ruff, pyright |
+| [typescript-template](https://github.com/zircote/typescript-template) | Node 22, pnpm, ESLint 9, Vitest |
+| [go-template](https://github.com/zircote/go-template)              | Go 1.23+, golangci-lint         |
+| [rust-template](https://github.com/zircote/rust-template)          | Stable, clippy, cargo-deny      |
+| [java-template](https://github.com/zircote/java-template)          | Java 21, Gradle, JUnit 5        |
+| [docs-site-template](https://github.com/zircote/docs-site-template)| Astro, Starlight, MDX           |
+
+### Tools & Plugins
+
+| Repository                                                            | Purpose                                    |
+| --------------------------------------------------------------------- | ------------------------------------------ |
+| [swagger-php](https://github.com/zircote/swagger-php)                 | OpenAPI documentation from PHP annotations |
+| [git-adr](https://github.com/zircote/git-adr)                         | Architecture Decision Records in git notes |
+| [git-notes-memory](https://github.com/zircote/git-notes-memory)       | Semantic memory storage for Claude Code    |
+| [claude-spec](https://github.com/zircote/claude-spec)                 | Project specification & lifecycle plugin   |
+| [.claude](https://github.com/zircote/.claude)                         | Claude Code dotfiles: agents, skills, commands |
+
+---
+
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines on pull requests, coding standards, and review process.
+
+## Security
+
+See [SECURITY.md](SECURITY.md) for vulnerability reporting and supported versions.
 
 ## License
 
