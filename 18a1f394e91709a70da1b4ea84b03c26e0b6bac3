@@ -12,3 +12,17 @@ tags:
             echo "  [o]verwrite  [s]kip  [d]iff  [m]erge (if supported)  [q]uit"
             read -r -p "Choice: " choice
             case...
+
+---
+type: decisions
+timestamp: '2025-12-27T00:30:27.360982+00:00'
+summary: '...workflow, CLAUDE.md, copilot-instructions)'
+---
+
+...workflow, CLAUDE.md, copilot-instructions)
+- Interactive conflict resolution: `[o]verwrite [s]kip [d]iff [m]erge`
+- Merges `.gitignore`, attempts `pyproject.toml`/`package.json` merge
+
+---
+
+##...
