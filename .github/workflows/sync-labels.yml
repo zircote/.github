@@ -70,7 +70,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        # actions/checkout v4.2.2 - 2024-10-31
+        # actions/checkout v6.0.1 - 2025-12-28
         uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8
         with:
           sparse-checkout: |
@@ -78,7 +78,7 @@ jobs:
           sparse-checkout-cone-mode: false
 
       - name: Setup Node.js
-        # actions/setup-node v4.1.0 - 2024-10-24
+        # actions/setup-node v6.1.0 - 2025-12-28
         uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f
         with:
           node-version: '20'
