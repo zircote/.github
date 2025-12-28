@@ -70,10 +70,10 @@ jobs:
     if: ${{ inputs.validate-frontmatter }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
 
       - name: Setup Node.js
-        uses: actions/setup-node@39370e3970a6d050c480ffad4ff0ed4d3fdee5af # v4.1.0
+        uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6.0.1
         with:
           node-version: ${{ inputs.node-version }}
 
@@ -122,10 +122,10 @@ jobs:
     if: ${{ inputs.lint-markdown }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
 
       - name: Setup Node.js
-        uses: actions/setup-node@39370e3970a6d050c480ffad4ff0ed4d3fdee5af # v4.1.0
+        uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6.0.1
         with:
           node-version: ${{ inputs.node-version }}
 
@@ -154,10 +154,10 @@ jobs:
     if: ${{ inputs.check-links }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
 
       - name: Run lychee
-        uses: lycheeverse/lychee-action@f613c4a64e50d792e0b31ec34bbcbba12263c6a6 # v2.3.0
+        uses: lycheeverse/lychee-action@a8c4c7cb88f0c7386610c35eb25108e448569cb0 # v2.3.0
         with:
           args: >-
             --verbose
@@ -178,7 +178,7 @@ jobs:
     if: ${{ inputs.check-spelling }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
 
       - name: Run cspell
         uses: streetsidesoftware/cspell-action@934c74da3775ac844ec89503f666f67efb427fed # v6.10.1
