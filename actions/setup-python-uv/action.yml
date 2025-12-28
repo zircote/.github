@@ -48,7 +48,7 @@ runs:
   steps:
     - name: Install uv
       id: uv
-      uses: astral-sh/setup-uv@681c641aba71e4a1c380be3ab5e12ad51f415867 # v6.0.1
+      uses: astral-sh/setup-uv@681c641aba71e4a1c380be3ab5e12ad51f415867 # v7.1.6
       with:
         enable-cache: true
         cache-dependency-glob: "${{ inputs.working-directory }}/uv.lock"
