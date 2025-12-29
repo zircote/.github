@@ -1,0 +1,241 @@
+# Presentation Generation from Issue
+# Triggers when an issue with the "presentation" label is created
+# Uses the reusable presentation workflow
+
+name: Generate Presentation from Issue
+
+on:
+  issues:
+    types: [opened, labeled]
+  workflow_dispatch:
+    inputs:
+      issue_number:
+        description: 'Issue number to process'
+        required: true
+        type: number
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+
+jobs:
+  check-trigger:
+    name: Check Trigger
+    runs-on: ubuntu-latest
+    outputs:
+      should-run: ${{ steps.check.outputs.should-run }}
+      issue-number: ${{ steps.check.outputs.issue-number }}
+    steps:
+      - name: Check Label
+        id: check
+        env:
+          GH_TOKEN: ${{ github.token }}
+          EVENT_NAME: ${{ github.event_name }}
+          ISSUE_NUMBER: ${{ github.event.issue.number || inputs.issue_number }}
+          LABELS: ${{ toJSON(github.event.issue.labels.*.name) }}
+        run: |
+          if [[ "$EVENT_NAME" == "workflow_dispatch" ]]; then
+            echo "Manual trigger for issue #$ISSUE_NUMBER"
+            echo "should-run=true" >> "$GITHUB_OUTPUT"
+            echo "issue-number=$ISSUE_NUMBER" >> "$GITHUB_OUTPUT"
+          elif echo "$LABELS" | grep -q "presentation"; then
+            echo "Presentation label found on issue #$ISSUE_NUMBER"
+            echo "should-run=true" >> "$GITHUB_OUTPUT"
+            echo "issue-number=$ISSUE_NUMBER" >> "$GITHUB_OUTPUT"
+          else
+            echo "No presentation label, skipping"
+            echo "should-run=false" >> "$GITHUB_OUTPUT"
+          fi
+
+  parse-issue:
+    name: Parse Issue
+    runs-on: ubuntu-latest
+    needs: [check-trigger]
+    if: ${{ needs.check-trigger.outputs.should-run == 'true' }}
+    outputs:
+      title: ${{ steps.parse.outputs.title }}
+      style: ${{ steps.parse.outputs.style }}
+      formats: ${{ steps.parse.outputs.formats }}
+      repository: ${{ steps.parse.outputs.repository }}
+      enable-research: ${{ steps.parse.outputs.enable-research }}
+      prompt: ${{ steps.parse.outputs.prompt }}
+    steps:
+      - name: Parse Issue Body
+        id: parse
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ISSUE_NUMBER: ${{ needs.check-trigger.outputs.issue-number }}
+        run: |
+          # Get issue body
+          BODY=$(gh issue view "$ISSUE_NUMBER" --json body --jq '.body')
+          ISSUE_TITLE=$(gh issue view "$ISSUE_NUMBER" --json title --jq '.title')
+
+          # Parse presentation title
+          PRES_TITLE=$(echo "$BODY" | grep -A1 "Presentation Title" | tail -1 | sed 's/^[[:space:]]*//')
+          if [[ -z "$PRES_TITLE" ]]; then
+            PRES_TITLE=$(echo "$ISSUE_TITLE" | sed 's/^\[PRESENTATION\] *//')
+          fi
+          echo "title=$PRES_TITLE" >> "$GITHUB_OUTPUT"
+
+          # Parse design style
+          STYLE="systematic-velocity"
+          if echo "$BODY" | grep -q "Clean Minimal"; then
+            STYLE="clean-minimal"
+          elif echo "$BODY" | grep -q "Technical Blueprint"; then
+            STYLE="technical-blueprint"
+          elif echo "$BODY" | grep -q "Marketing Bold"; then
+            STYLE="marketing-bold"
+          fi
+          echo "style=$STYLE" >> "$GITHUB_OUTPUT"
+
+          # Parse output formats
+          FORMATS=""
+          echo "$BODY" | grep -q "\[X\] PDF" && FORMATS="${FORMATS}pdf,"
+          echo "$BODY" | grep -q "\[X\] HTML" && FORMATS="${FORMATS}html,"
+          echo "$BODY" | grep -q "\[X\] PowerPoint" && FORMATS="${FORMATS}pptx,"
+          echo "$BODY" | grep -q "\[X\] Markdown" && FORMATS="${FORMATS}md,"
+          FORMATS=${FORMATS%,}  # Remove trailing comma
+          if [[ -z "$FORMATS" ]]; then
+            FORMATS="pdf"
+          fi
+          echo "formats=$FORMATS" >> "$GITHUB_OUTPUT"
+
+          # Parse repository
+          REPO=$(echo "$BODY" | grep -oP 'https://github.com/[a-zA-Z0-9_-]+/[a-zA-Z0-9_-]+' | head -1 || echo "")
+          if [[ -n "$REPO" ]]; then
+            REPO=$(echo "$REPO" | sed 's|https://github.com/||')
+          fi
+          echo "repository=$REPO" >> "$GITHUB_OUTPUT"
+
+          # Check research options
+          RESEARCH="false"
+          echo "$BODY" | grep -q "\[X\] Web Search" && RESEARCH="true"
+          echo "$BODY" | grep -q "\[X\] GitHub Repository Analysis" && RESEARCH="true"
+          echo "enable-research=$RESEARCH" >> "$GITHUB_OUTPUT"
+
+          # Extract prompt (between "Presentation Prompt" and next section)
+          PROMPT=$(echo "$BODY" | sed -n '/Presentation Prompt/,/###\|Slide Outline/p' | grep -v "Presentation Prompt" | grep -v "###" | head -20)
+          echo "prompt<<EOF" >> "$GITHUB_OUTPUT"
+          echo "$PROMPT" >> "$GITHUB_OUTPUT"
+          echo "EOF" >> "$GITHUB_OUTPUT"
+
+  create-source:
+    name: Create Source Markdown
+    runs-on: ubuntu-latest
+    needs: [check-trigger, parse-issue]
+    outputs:
+      source-path: ${{ steps.create.outputs.source-path }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Create Presentation Source
+        id: create
+        env:
+          TITLE: ${{ needs.parse-issue.outputs.title }}
+          STYLE: ${{ needs.parse-issue.outputs.style }}
+          FORMATS: ${{ needs.parse-issue.outputs.formats }}
+          PROMPT: ${{ needs.parse-issue.outputs.prompt }}
+          ISSUE_NUMBER: ${{ needs.check-trigger.outputs.issue-number }}
+        run: |
+          # Create slug from title
+          SLUG=$(echo "$TITLE" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9]/-/g' | sed 's/--*/-/g' | sed 's/^-//' | sed 's/-$//')
+
+          # Create source directory
+          mkdir -p docs/presentations/drafts
+
+          # Create markdown file with frontmatter
+          SOURCE_PATH="docs/presentations/drafts/${SLUG}.md"
+
+          cat > "$SOURCE_PATH" << EOF
+---
+title: "${TITLE}"
+subtitle: "Generated from Issue #${ISSUE_NUMBER}"
+author: "GitHub Actions"
+date: $(date +%Y-%m-%d)
+style: ${STYLE}
+format:
+$(echo "$FORMATS" | tr ',' '\n' | sed 's/^/  - /')
+---
+
+# ${TITLE}
+
+${PROMPT}
+
+---
+
+# Summary
+
+This presentation was generated from GitHub Issue #${ISSUE_NUMBER}.
+
+<!-- cta: text="View Issue" url="https://github.com/${GITHUB_REPOSITORY}/issues/${ISSUE_NUMBER}" -->
+EOF
+
+          echo "Created source: $SOURCE_PATH"
+          echo "source-path=$SOURCE_PATH" >> "$GITHUB_OUTPUT"
+
+      - name: Upload Source
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v4.6.0
+        with:
+          name: presentation-source
+          path: ${{ steps.create.outputs.source-path }}
+          retention-days: 7
+
+  generate:
+    name: Generate Presentation
+    needs: [check-trigger, parse-issue, create-source]
+    uses: ./.github/workflows/reusable-presentation.yml
+    with:
+      source: ${{ needs.create-source.outputs.source-path }}
+      formats: ${{ needs.parse-issue.outputs.formats }}
+      style: ${{ needs.parse-issue.outputs.style }}
+      enable-research: ${{ needs.parse-issue.outputs.enable-research == 'true' }}
+      repository-analysis: ${{ needs.parse-issue.outputs.repository }}
+      create-pr: true
+    secrets: inherit
+
+  update-issue:
+    name: Update Issue
+    runs-on: ubuntu-latest
+    needs: [check-trigger, generate]
+    if: always()
+    steps:
+      - name: Comment on Issue
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ISSUE_NUMBER: ${{ needs.check-trigger.outputs.issue-number }}
+          GENERATE_RESULT: ${{ needs.generate.result }}
+          PR_URL: ${{ needs.generate.outputs.pr-url }}
+          PDF_PATH: ${{ needs.generate.outputs.pdf-path }}
+          HTML_PATH: ${{ needs.generate.outputs.html-path }}
+          PPTX_PATH: ${{ needs.generate.outputs.pptx-path }}
+        run: |
+          if [[ "$GENERATE_RESULT" == "success" ]]; then
+            COMMENT="## ✅ Presentation Generated Successfully!
+
+### Generated Files
+$([ -n "$PDF_PATH" ] && echo "- PDF: \`$PDF_PATH\`")
+$([ -n "$HTML_PATH" ] && echo "- HTML: \`$HTML_PATH\`")
+$([ -n "$PPTX_PATH" ] && echo "- PPTX: \`$PPTX_PATH\`")
+
+### Pull Request
+$PR_URL
+
+---
+*Generated by presentation workflow*"
+          else
+            COMMENT="## ⚠️ Presentation Generation Failed
+
+Please check the [workflow run](https://github.com/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}) for details.
+
+---
+*Generated by presentation workflow*"
+          fi
+
+          gh issue comment "$ISSUE_NUMBER" --body "$COMMENT"
+
+          # Close issue if successful
+          if [[ "$GENERATE_RESULT" == "success" ]]; then
+            gh issue close "$ISSUE_NUMBER" --comment "Closing - presentation generated successfully."
+          fi

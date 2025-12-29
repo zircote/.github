@@ -1,0 +1,181 @@
+name: Presentation Request
+description: Request generation of a slide deck presentation
+title: "[PRESENTATION] "
+labels: ["presentation", "content", "copilot"]
+assignees: []
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Presentation Request
+
+        Use this template to request an AI-generated presentation. The system will:
+        1. Research the topic (web search, project analysis, or provided content)
+        2. Generate a slide outline with speaker notes
+        3. Produce the presentation in your chosen format(s)
+
+  - type: input
+    id: title
+    attributes:
+      label: Presentation Title
+      description: The title for your presentation
+      placeholder: "e.g., Q4 2025 Project Status Update"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: presentation-type
+    attributes:
+      label: Presentation Type
+      description: What kind of presentation is this?
+      options:
+        - Project Status/Update
+        - Technical Overview
+        - Sales/Marketing Pitch
+        - Tutorial/How-To
+        - Research Summary
+        - Conference Talk
+        - Internal Training
+        - Custom
+    validations:
+      required: true
+
+  - type: dropdown
+    id: audience
+    attributes:
+      label: Target Audience
+      description: Who will be viewing this presentation?
+      options:
+        - Technical (Engineers/Developers)
+        - Executive/Leadership
+        - Mixed/General
+        - Sales/Business Development
+        - External Stakeholders
+        - Students/Learners
+    validations:
+      required: true
+
+  - type: textarea
+    id: prompt
+    attributes:
+      label: Presentation Prompt
+      description: |
+        Describe what you want the presentation to cover. Be specific about:
+        - Key topics and sections
+        - Data points or metrics to include
+        - Specific projects or repositories to analyze
+        - Research topics for web search
+      placeholder: |
+        Create a presentation about the Personal GitHub Ecosystem framework.
+
+        Include:
+        - Overview of the 15 project templates
+        - ROI metrics and time savings
+        - Security features (SHA-pinned actions, OIDC)
+        - AI integration (Copilot, Claude Code)
+
+        Research: Latest GitHub Actions best practices for 2025
+
+        Project Analysis: zircote/github (show template usage stats)
+    validations:
+      required: true
+
+  - type: textarea
+    id: outline
+    attributes:
+      label: Slide Outline (Optional)
+      description: If you have a specific structure in mind, provide it here
+      placeholder: |
+        1. Title Slide
+        2. Problem Statement
+        3. Solution Overview
+        4. Key Features (3-4 slides)
+        5. Demo/Screenshots
+        6. Metrics & ROI
+        7. Next Steps
+        8. Q&A
+
+  - type: checkboxes
+    id: output-formats
+    attributes:
+      label: Output Formats
+      description: Select the format(s) you need
+      options:
+        - label: PDF (print-ready, static)
+          required: false
+        - label: HTML (web-based, Reveal.js)
+          required: false
+        - label: PowerPoint (.pptx)
+          required: false
+        - label: Markdown (source, editable)
+          required: false
+
+  - type: dropdown
+    id: slide-count
+    attributes:
+      label: Target Slide Count
+      description: Approximate number of slides
+      options:
+        - "5-8 (Lightning talk)"
+        - "10-15 (Standard)"
+        - "20-30 (Detailed)"
+        - "30+ (Comprehensive)"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: design-style
+    attributes:
+      label: Design Style
+      description: Visual style for the presentation
+      options:
+        - Systematic Velocity (Dark, geometric, data-focused)
+        - Clean Minimal (Light, spacious, professional)
+        - Technical Blueprint (Diagrams, code blocks, architecture)
+        - Marketing Bold (Vibrant, high-contrast, CTA-focused)
+      default: 0
+
+  - type: checkboxes
+    id: research-sources
+    attributes:
+      label: Research Sources
+      description: What sources should be used for content?
+      options:
+        - label: Web Search (latest news, documentation)
+          required: false
+        - label: GitHub Repository Analysis (commits, issues, PRs)
+          required: false
+        - label: Project Documentation (README, docs/)
+          required: false
+        - label: Provided Content Only (no external research)
+          required: false
+
+  - type: input
+    id: repository
+    attributes:
+      label: Repository to Analyze (Optional)
+      description: If analyzing a project, provide the repo URL
+      placeholder: "https://github.com/owner/repo"
+
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: Additional Context
+      description: Any other information, links, or files to include
+      placeholder: |
+        - Link to design assets: ...
+        - Previous presentation to reference: ...
+        - Brand guidelines: ...
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority
+      description: How urgent is this request?
+      options:
+        - Low (1-2 weeks)
+        - Medium (This week)
+        - High (2-3 days)
+        - Urgent (Today)
+      default: 1
