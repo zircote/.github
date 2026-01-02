@@ -41,10 +41,10 @@ Ranked by recent contributions, community engagement, and development activity.
 | [subcog](https://github.com/zircote/subcog) | Persistent memory system for AI coding assistants. Captures ... | Rust | ✨ Active |
 | [rust-lsp](https://github.com/zircote/rust-lsp) | Claude Code plugin for Rust development with rust-analyzer, ... | Shell | 📈 Growing |
 | [terraform-lsp](https://github.com/zircote/terraform-lsp) | Claude Code plugin for Terraform/Terragrunt with terraform-l... | HCL | 📈 Growing |
+| [.github](https://github.com/zircote/.github) | Organization shared workflows, policies, and community healt... | Python | 📈 Growing |
 | [lsp-marketplace](https://github.com/zircote/lsp-marketplace) | Curated marketplace of 28 LSP-enabled Claude Code plugins wi... | Shell | 📈 Growing |
 | [markdown-lsp](https://github.com/zircote/markdown-lsp) | Claude Code plugin for Markdown development with marksman LS... | JavaScript | 📈 Growing |
 | [lsp-tools](https://github.com/zircote/lsp-tools) | LSP-first code intelligence for Claude Code with strong enfo... | PowerShell | 📈 Growing |
-| [yaml-lsp](https://github.com/zircote/yaml-lsp) | Claude Code plugin for YAML development with yaml-language-s... | Shell | 📈 Growing |
 <!-- ACTIVE_REPOS_END -->
 
 ### Recently Created
