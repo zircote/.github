@@ -29,7 +29,7 @@ Creator of **[swagger-php](https://github.com/zircote/swagger-php)** (5K+ stars)
 ## Active Projects
 
 <!-- LAST_UPDATED_START -->
-*Last updated: 2026-01-02*
+ __Last updated: 2026-01-02__
 <!-- LAST_UPDATED_END -->
 
 ### Most Active Repositories
@@ -41,9 +41,9 @@ Ranked by recent contributions, community engagement, and development activity.
 |------------|-------------|------|----------|
 | [swagger-php](https://github.com/zircote/swagger-php) | A php swagger annotation and parsing library | PHP | ✨ Active |
 | [subcog](https://github.com/zircote/subcog) | Persistent memory system for AI coding assistants. Captures ... | Rust | ✨ Active |
+| [.github](https://github.com/zircote/.github) | Organization shared workflows, policies, and community healt... | Python | 📈 Growing |
 | [rust-lsp](https://github.com/zircote/rust-lsp) | Claude Code plugin for Rust development with rust-analyzer, ... | Shell | 📈 Growing |
 | [terraform-lsp](https://github.com/zircote/terraform-lsp) | Claude Code plugin for Terraform/Terragrunt with terraform-l... | HCL | 📈 Growing |
-| [.github](https://github.com/zircote/.github) | Organization shared workflows, policies, and community healt... | Python | 📈 Growing |
 | [lsp-marketplace](https://github.com/zircote/lsp-marketplace) | Curated marketplace of 28 LSP-enabled Claude Code plugins wi... | Shell | 📈 Growing |
 | [markdown-lsp](https://github.com/zircote/markdown-lsp) | Claude Code plugin for Markdown development with marksman LS... | JavaScript | 📈 Growing |
 | [lsp-tools](https://github.com/zircote/lsp-tools) | LSP-first code intelligence for Claude Code with strong enfo... | PowerShell | 📈 Growing |
