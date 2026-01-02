@@ -137,54 +137,14 @@ jobs:
             echo "Changes detected in README"
           fi
 
-      - name: Create Pull Request
+      - name: Commit and push changes
         if: steps.changes.outputs.changed == 'true' && inputs.dry-run != true
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          BRANCH="auto/profile-readme-update-$(date +%Y%m%d)"
-
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-
-          git checkout -b "$BRANCH"
           git add profile/README.md
-          git commit -m "docs(profile): update activity highlights
-
-          - Updated top active repositories
-          - Refreshed new repositories section
-          - Auto-generated from GitHub activity analysis
-
-          🤖 Generated with [Claude Code](https://claude.com/claude-code)
-
-          Co-Authored-By: GitHub Actions <actions@github.com>"
-
-          git push -u origin "$BRANCH"
-
-          gh pr create \
-            --title "docs(profile): Weekly profile README update" \
-            --body "$(cat <<'EOF'
-          ## Summary
-
-          Automated weekly update to profile README based on GitHub activity analysis.
-
-          ### Changes
-          - **Top Active Repos**: Updated ranking based on recent contributions, commits, and activity
-          - **New Repos**: Refreshed list of recently created repositories
-
-          ### Weighting Factors
-          - Commits in the last 90 days (40%)
-          - Stars received (20%)
-          - Forks (15%)
-          - Issues/PRs activity (15%)
-          - Recent pushes (10%)
-
-          ---
-
-          🤖 Generated with GitHub Actions
-          EOF
-          )" \
-            --label "documentation"
+          git commit -m "docs(profile): update activity highlights [skip ci]"
+          git push
 
       - name: Generate summary
         if: always()
