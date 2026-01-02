@@ -31,7 +31,11 @@ def generate_active_repos_section(repos: list[dict[str, Any]]) -> str:
     for repo in repos:
         name = repo["name"]
         url = repo["url"]
-        desc = repo["description"][:60] + "..." if len(repo["description"]) > 60 else repo["description"]
+        desc = (
+            repo["description"][:60] + "..."
+            if len(repo["description"]) > 60
+            else repo["description"]
+        )
         desc = desc.replace("|", "\\|")  # Escape pipes
         lang = repo["language"]
         score = repo["score"]
@@ -102,7 +106,7 @@ def update_readme(
 
     # Update timestamp marker if present
     timestamp_pattern = r"(<!-- LAST_UPDATED_START -->).*?(<!-- LAST_UPDATED_END -->)"
-    timestamp_replacement = rf"\1 _Last updated: {timestamp}_ \2"
+    timestamp_replacement = rf"\1\n __Last updated: {timestamp}__\n\2"
     content = re.sub(timestamp_pattern, timestamp_replacement, content, flags=re.DOTALL)
 
     if content == original:
