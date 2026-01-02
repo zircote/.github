@@ -1,6 +1,6 @@
 # zircote
 
-```
+```text
  _______ _             _
 |__   (_) |           | |
    / / _ _ __ ___ ___ | |_ ___
@@ -109,7 +109,7 @@ jobs:
 
 ## Technology Stack
 
-```
+```text
 Languages        PHP | Python | TypeScript | Go
 Infrastructure   AWS | Docker | Kubernetes | Terraform | GitHub Actions
 AI Integration   Claude Code | GitHub Copilot | MCP Protocol
