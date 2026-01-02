@@ -59,18 +59,6 @@ Ranked by recent contributions, community engagement, and development activity.
 
 ---
 
-## Featured Projects
-
-| Project                                                         | Description                                         | Tech   |
-| --------------------------------------------------------------- | --------------------------------------------------- | ------ |
-| [swagger-php](https://github.com/zircote/swagger-php)           | OpenAPI/Swagger documentation from PHP annotations  | PHP    |
-| [git-adr](https://github.com/zircote/git-adr)                   | Architecture Decision Records in git notes          | Python |
-| [git-notes-memory](https://github.com/zircote/git-notes-memory) | Semantic memory storage for Claude Code             | Python |
-| [claude-spec](https://github.com/zircote/claude-spec)           | Project specification & lifecycle management plugin | Python |
-| [.claude](https://github.com/zircote/.claude)                   | Claude Code dotfiles: agents, skills, commands      | Python |
-
----
-
 ## Claude Code Ecosystem
 
 I maintain a comprehensive ecosystem of Claude Code extensions for AI-assisted development:
