@@ -28,7 +28,9 @@ Creator of **[swagger-php](https://github.com/zircote/swagger-php)** (5K+ stars)
 
 ## Active Projects
 
-<!-- LAST_UPDATED_START --> _Last updated: 2026-01-02_ <!-- LAST_UPDATED_END -->
+<!-- LAST_UPDATED_START -->
+*Last updated: 2026-01-02*
+<!-- LAST_UPDATED_END -->
 
 ### Most Active Repositories
 
