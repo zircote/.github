@@ -144,7 +144,12 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add profile/README.md
           git commit -m "docs(profile): update activity highlights [skip ci]"
-          git push
+          # Pull with rebase to handle concurrent updates, then push with retry
+          for i in 1 2 3; do
+            git pull --rebase origin main && git push && break
+            echo "Push attempt $i failed, retrying..."
+            sleep 2
+          done
 
       - name: Generate summary
         if: always()
