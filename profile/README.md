@@ -29,7 +29,7 @@ Creator of **[swagger-php](https://github.com/zircote/swagger-php)** (5K+ stars)
 ## Active Projects
 
 <!-- LAST_UPDATED_START -->
- __Last updated: 2026-01-04__
+ __Last updated: 2026-01-11__
 <!-- LAST_UPDATED_END -->
 
 ### Most Active Repositories
@@ -41,12 +41,12 @@ Ranked by recent contributions, community engagement, and development activity.
 |------------|-------------|------|----------|
 | [swagger-php](https://github.com/zircote/swagger-php) | A php swagger annotation and parsing library | PHP | ✨ Active |
 | [subcog](https://github.com/zircote/subcog) | Persistent memory system for AI coding assistants. Captures ... | Rust | ✨ Active |
-| [rust-lsp](https://github.com/zircote/rust-lsp) | Claude Code plugin for Rust development with rust-analyzer, ... | Shell | 📈 Growing |
+| [homebrew-tap](https://github.com/zircote/homebrew-tap) | Homebrew formula for git-adr - Architecture Decision Records... | Ruby | 📈 Growing |
 | [.github](https://github.com/zircote/.github) | Organization shared workflows, policies, and community healt... | Python | 📈 Growing |
-| [terraform-lsp](https://github.com/zircote/terraform-lsp) | Claude Code plugin for Terraform/Terragrunt with terraform-l... | HCL | 📈 Growing |
-| [markdown-lsp](https://github.com/zircote/markdown-lsp) | Claude Code plugin for Markdown development with marksman LS... | JavaScript | 📈 Growing |
+| [rust-lsp](https://github.com/zircote/rust-lsp) | Claude Code plugin for Rust development with rust-analyzer, ... | Shell | 📈 Growing |
 | [lsp-marketplace](https://github.com/zircote/lsp-marketplace) | Curated marketplace of 28 LSP-enabled Claude Code plugins wi... | Shell | 📈 Growing |
-| [swift-lsp](https://github.com/zircote/swift-lsp) | Claude Code plugin for Swift development with sourcekit-lsp ... | Swift | 📈 Growing |
+| [terraform-lsp](https://github.com/zircote/terraform-lsp) | Claude Code plugin for Terraform/Terragrunt with terraform-l... | HCL | 📈 Growing |
+| [svelte-lsp](https://github.com/zircote/svelte-lsp) | Claude Code plugin for Svelte development with svelte-langua... | Svelte | 📈 Growing |
 <!-- ACTIVE_REPOS_END -->
 
 ### Recently Created
