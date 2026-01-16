@@ -12,15 +12,21 @@ allowed-tools:
 
 # Ecosystem Migration Skill
 
-Migrate existing repositories to the Personal GitHub Ecosystem.
+## Purpose
 
-## Trigger Phrases
+Migrate existing repositories to use Personal GitHub Ecosystem templates and patterns, including workflow conversion and AI integration adoption.
+
+## Triggers
 
 - "migrate this repo to the ecosystem"
 - "adopt the python template"
 - "convert to reusable workflows"
 - "upgrade my CI to ecosystem standards"
 - "add ecosystem AI integration"
+
+## Usage
+
+Point this skill at an existing repository to assess its current state and receive a migration plan. Choose from full adoption, workflow-only, or incremental strategies based on project complexity.
 
 ## Migration Assessment
 

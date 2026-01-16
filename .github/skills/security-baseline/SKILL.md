@@ -12,9 +12,11 @@ allowed-tools:
 
 # Security Baseline Skill
 
-Implement and audit security controls for GitHub repositories.
+## Purpose
 
-## Trigger Phrases
+Audit and implement security best practices for GitHub repositories, including secret scanning, dependency audits, and security hardening.
+
+## Triggers
 
 - "audit repository security"
 - "add secret scanning"
@@ -22,6 +24,10 @@ Implement and audit security controls for GitHub repositories.
 - "security hardening"
 - "add pre-commit hooks"
 - "configure dependabot"
+
+## Usage
+
+Run a security audit on any repository to identify gaps, then use the provided checklists and commands to implement security controls systematically.
 
 ## Security Audit Checklist
 

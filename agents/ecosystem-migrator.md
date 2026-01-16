@@ -62,6 +62,15 @@ echo "=== AI Integration ==="
 
 ## Migration Strategies
 
+**Workflow Overview:**
+
+```
+┌─────────────┐     ┌─────────────┐     ┌─────────────┐     ┌─────────────┐
+│ Assess      │────▶│ Plan        │────▶│ Migrate     │────▶│ Validate    │
+│ Repository  │     │ Strategy    │     │ Components  │     │ & Rollback  │
+└─────────────┘     └─────────────┘     └─────────────┘     └─────────────┘
+```
+
 ### Strategy 1: Full Template Adoption
 
 Best for: New-ish projects with minimal customization

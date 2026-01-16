@@ -15,9 +15,11 @@ allowed-tools:
 
 # Presentation Generation Skill
 
-Generate professional slide deck presentations from prompts, with support for research, project analysis, and multiple output formats.
+## Purpose
 
-## Trigger Phrases
+Generate slide deck presentations from prompts, with support for research, project analysis, and multiple output formats (PDF, HTML, PPTX).
+
+## Triggers
 
 - "create presentation about..."
 - "generate slides for..."
@@ -25,6 +27,10 @@ Generate professional slide deck presentations from prompts, with support for re
 - "presentation for [audience]..."
 - "slides covering..."
 - "pitch deck for..."
+
+## Usage
+
+Describe your presentation topic, audience, and desired style. The skill will research, outline, and generate a complete slide deck in your chosen format (PDF, HTML, or PPTX).
 
 ## Workflow Overview
 

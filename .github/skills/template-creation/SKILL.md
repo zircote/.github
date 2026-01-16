@@ -12,15 +12,21 @@ allowed-tools:
 
 # Template Creation Skill
 
-Create and customize project templates for the Personal GitHub Ecosystem.
+## Purpose
 
-## Trigger Phrases
+Create new project templates or customize existing ones with CI/CD, tooling, and AI integration for the Personal GitHub Ecosystem.
+
+## Triggers
 
 - "create a new template for [framework]"
 - "customize the python template"
 - "add a FastAPI template"
 - "new template with [features]"
 - "template for [use case]"
+
+## Usage
+
+Use this skill to create new project templates from scratch or customize existing ones. Start with the closest existing template and modify it for your specific framework or use case.
 
 ## Template Structure
 

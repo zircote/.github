@@ -70,3 +70,10 @@ See individual repositories for specific policies.
 - Keep dependencies updated
 - Validate all user inputs
 - Use parameterized queries
+
+## Changelog
+
+| Date | Change |
+|------|--------|
+| 2026-01-16 | Added changelog section |
+| 2025-12-20 | Initial release with vulnerability reporting and security best practices |

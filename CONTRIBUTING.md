@@ -105,3 +105,10 @@ All submissions require review:
 - Stay updated: Watch repositories
 
 Thank you for contributing!
+
+## Changelog
+
+| Date | Change |
+|------|--------|
+| 2026-01-16 | Added changelog section |
+| 2025-12-20 | Initial release with contribution guidelines and code review process |

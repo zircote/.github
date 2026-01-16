@@ -12,9 +12,11 @@ allowed-tools:
 
 # Content Pipeline Skill
 
-Create, manage, and automate content across platforms.
+## Purpose
 
-## Trigger Phrases
+Create and manage content for blogs, social media, video, and newsletters with automated pipelines.
+
+## Triggers
 
 - "create a blog post about [topic]"
 - "write a Twitter thread"
@@ -22,6 +24,10 @@ Create, manage, and automate content across platforms.
 - "repurpose this blog to social"
 - "video script for [topic]"
 - "schedule content for Q1"
+
+## Usage
+
+Request content creation by specifying the type (blog, social, video) and topic. The skill will generate properly formatted content following established templates and SEO guidelines.
 
 ## Content Directory Structure
 

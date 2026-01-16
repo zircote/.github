@@ -12,9 +12,11 @@ allowed-tools:
 
 # Workflow Development Skill
 
-Design, debug, and optimize GitHub Actions workflows with security best practices.
+## Purpose
 
-## Trigger Phrases
+Create, debug, and optimize GitHub Actions workflows with security best practices.
+
+## Triggers
 
 - "create a CI workflow"
 - "add a release workflow"
@@ -22,6 +24,10 @@ Design, debug, and optimize GitHub Actions workflows with security best practice
 - "make this workflow reusable"
 - "workflow security audit"
 - "add [language] CI"
+
+## Usage
+
+Invoke this skill to create new CI/CD workflows, debug failing workflows, or convert existing workflows to use reusable patterns with proper SHA pinning and minimal permissions.
 
 ## Security Requirements (Non-Negotiable)
 

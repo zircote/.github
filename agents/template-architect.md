@@ -105,6 +105,20 @@ jobs:
 
 ## Template Customization Workflow
 
+**Workflow Overview:**
+
+```
+┌─────────────┐     ┌──────────────┐     ┌─────────────┐
+│ Identify    │────▶│ Copy &       │────▶│ Customize   │
+│ Base        │     │ Rename       │     │ Tooling     │
+└─────────────┘     └──────────────┘     └─────────────┘
+                                                │
+┌─────────────┐     ┌──────────────┐            │
+│ Validate    │◀────│ Update CI &  │◀───────────┘
+│ Template    │     │ AI Config    │
+└──────────────┘     └──────────────┘
+```
+
 1. **Identify base template**: Start from the closest existing template
 2. **Copy and rename**: Create new template directory
 3. **Update placeholders**: Replace `{{project_name}}`, `{{package_name}}`
