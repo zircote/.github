@@ -193,14 +193,15 @@ gh workflow run sync-labels.yml -f repo=zircote/my-repo
 
 ### Copilot Skills
 
-| Skill                  | Trigger                    | Purpose                                |
-| ---------------------- | -------------------------- | -------------------------------------- |
-| `template-creation`    | "create template for..."   | Design project templates               |
-| `workflow-development` | "create workflow for..."   | Build GitHub Actions workflows         |
-| `security-baseline`    | "security check", "audit"  | Security scanning and remediation      |
-| `content-pipeline`     | "write blog post"          | Content creation and publishing        |
-| `ecosystem-migration`  | "migrate to ecosystem"     | Onboard projects to standards          |
-| `ai-tuning`            | "tune AI instructions"     | Optimize CLAUDE.md/Copilot config      |
+| Skill                    | Trigger                    | Purpose                                |
+| ------------------------ | -------------------------- | -------------------------------------- |
+| `template-creation`      | "create template for..."   | Design project templates               |
+| `workflow-development`   | "create workflow for..."   | Build GitHub Actions workflows         |
+| `security-baseline`      | "security check", "audit"  | Security scanning and remediation      |
+| `content-pipeline`       | "write blog post"          | Content creation and publishing        |
+| `ecosystem-migration`    | "migrate to ecosystem"     | Onboard projects to standards          |
+| `ai-tuning`              | "tune AI instructions"     | Optimize CLAUDE.md/Copilot config      |
+| `presentation-generation`| "create presentation"      | Generate slide decks from markdown     |
 
 ### Autonomous Agents
 
@@ -212,6 +213,7 @@ gh workflow run sync-labels.yml -f repo=zircote/my-repo
 | `content-strategist` | Content planning, SEO optimization, multi-platform publishing  |
 | `ecosystem-migrator` | Project onboarding, dependency updates, standards compliance   |
 | `copilot-tuner`      | Optimize AI assistant configurations for specific domains      |
+| `profile-maintainer` | Automated profile README updates, GitHub activity tracking     |
 
 ---
 
@@ -247,6 +249,18 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines on pull requests, coding s
 ## Security
 
 See [SECURITY.md](SECURITY.md) for vulnerability reporting and supported versions.
+
+## Version History
+
+Recent updates to this organization configuration:
+
+| Date | Change | Impact |
+|------|--------|--------|
+| 2026-01 | Added presentation-generation skill | New slide deck generation from markdown |
+| 2026-01 | Added profile-maintainer agent | Automated profile README updates |
+| 2025-12 | Initial ecosystem setup | Reusable workflows, templates, AI integration |
+
+For detailed history, see [commit log](https://github.com/zircote/.github/commits/main).
 
 ## License
 

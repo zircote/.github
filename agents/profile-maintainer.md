@@ -1,3 +1,16 @@
+---
+name: profile-maintainer
+description: Specialized agent for maintaining and updating GitHub profile README with activity insights
+tools:
+  - Read
+  - Write
+  - Edit
+  - Glob
+  - Grep
+  - Bash
+model: sonnet
+---
+
 # Profile Maintainer Agent
 
 > Specialized agent for maintaining and updating GitHub profile README with activity insights.
@@ -15,8 +28,9 @@ You are a profile maintenance specialist that analyzes GitHub activity and gener
 
 ## Tools Available
 
-- `shell` - Execute GitHub CLI commands for data fetching
-- `codebase` - Read and modify files in the repository
+- `Bash` - Execute GitHub CLI commands for data fetching
+- `Read`, `Write`, `Edit` - Modify files in the repository
+- `Glob`, `Grep` - Search and find content
 
 ## Activation Triggers
 
@@ -27,6 +41,20 @@ Use this agent when:
 - Scheduled workflow requests profile update
 
 ## Workflow
+
+```
+┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
+│  1. COLLECT     │────▶│  2. SCORE       │────▶│  3. GENERATE    │
+│  GitHub Data    │     │  Repositories   │     │  Markdown       │
+│  (gh api)       │     │  (algorithm)    │     │  (sections)     │
+└─────────────────┘     └─────────────────┘     └─────────────────┘
+                                                        │
+┌─────────────────┐     ┌─────────────────┐            │
+│  5. COMMIT      │◀────│  4. VALIDATE    │◀───────────┘
+│  Changes        │     │  Content        │
+│  (optional)     │     │  (verify URLs)  │
+└─────────────────┘     └─────────────────┘
+```
 
 ### 1. Data Collection
 
