@@ -1,9 +1,9 @@
 # zircote
 
 ```text
- _______ _             _
-|__   (_) |           | |
-   / / _ _ __ ___ ___ | |_ ___
+ _______               _
+|__   (_)             | |
+   / / _ ____ ___ ___ | |_ ___
   / / | | '__/ __/ _ \| __/ _ \
  / /__| | | | (_| (_) | ||  __/
 /_____|_|_|  \___\___/ \__\___|
@@ -29,7 +29,7 @@ Creator of **[swagger-php](https://github.com/zircote/swagger-php)** (5K+ stars)
 ## Active Projects
 
 <!-- LAST_UPDATED_START -->
- __Last updated: 2026-01-11__
+*Last updated: 2026-01-16*
 <!-- LAST_UPDATED_END -->
 
 ### Most Active Repositories
@@ -67,12 +67,15 @@ I maintain a comprehensive ecosystem of Claude Code extensions for AI-assisted d
 
 ### Plugins
 
-- **[claude-spec](https://github.com/zircote/claude-spec)** - Socratic project planning with implementation tracking
-- **[git-notes-memory](https://github.com/zircote/git-notes-memory)** - Git-native semantic memory with vector search
+- **[marketplace](https://github.com/zircote/marketplace)** - Claude Plugin Marketplace listing Claude Code plugins
+- **[lsp-marketplace](https://github.com/zircote/lsp-marketplace)** - Curated marketplace of 28 LSP-enabled Claude Code plugins with strong enforcement patterns
+- **[subcog](https://github.com/zircote/subcog)** - Semantic memory with vector search and RRF retrieval
+- **[documentation-management](https://github.com/zircote/marketplace?tab=readme-ov-file#documentation-review---documentation-management)** - Plugin for managing architecture docs, ADRs, decision tracking
+- **[adr-lifecycle-management](https://github.com/zircote/marketplace?tab=readme-ov-file#adr---adr-lifecycle-management)** - Plugin for creating, updating, and tracking ADRs
 
 ### Agent Library
 
-The [.claude](https://github.com/zircote/.claude) repository contains 100+ specialized agents organized by domain:
+The [marketplace](https://github.com/zircote/marketplace) repository contains 100+ specialized agents organized by domain:
 
 | Category             | Agents                                                  |
 | -------------------- | ------------------------------------------------------- |
@@ -112,7 +115,7 @@ jobs:
 ## Technology Stack
 
 ```text
-Languages        PHP | Python | TypeScript | Go
+Languages        PHP | Python | TypeScript | Go | Rust
 Infrastructure   AWS | Docker | Kubernetes | Terraform | GitHub Actions
 AI Integration   Claude Code | GitHub Copilot | MCP Protocol
 Platforms        Linux | macOS | AWS (Solutions Architect certified)
@@ -139,7 +142,3 @@ Platforms        Linux | macOS | AWS (Solutions Architect certified)
 - **Pull Requests** - The best way to propose changes
 
 ---
-
-<sub>
-Building in the open | [View Ecosystem](https://github.com/zircote/github)
-</sub>

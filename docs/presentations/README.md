@@ -131,20 +131,53 @@ def hello():
 
 ```
 docs/presentations/
-├── generate.py          # Main generation script
-├── README.md            # This file
-├── templates/           # Style templates (future)
-├── drafts/              # Source markdown files
-│   └── example.md
-├── output/              # Generated presentations
-│   ├── example.pdf
-│   ├── example.pptx
-│   └── example/
-│       └── index.html
-└── assets/              # Shared assets
-    ├── fonts/
-    ├── images/
-    └── brand/
+├── generate.py          # Main generation script - handles PDF, PPTX, HTML output
+├── README.md            # This documentation file
+├── templates/           # Style templates for theming
+│   ├── systematic-velocity/   # Dark theme with coral accents (default)
+│   ├── clean-minimal/         # Light theme with blue accents
+│   ├── technical-blueprint/   # Dark blue with cyan, code-focused
+│   └── marketing-bold/        # White with gradient CTAs
+├── drafts/              # Source markdown files for presentations
+│   └── example-presentation.md  # Sample presentation demonstrating format
+├── output/              # Generated presentation files
+│   ├── example.pdf      # Print-ready PDF with embedded fonts
+│   ├── example.pptx     # Editable PowerPoint format
+│   └── example/         # Reveal.js HTML presentation
+│       ├── index.html   # Main presentation file
+│       └── assets/      # Bundled CSS, JS, and images
+└── assets/              # Shared resources across presentations
+    ├── fonts/           # Custom typography (Inter, JetBrains Mono)
+    ├── images/          # Logos, icons, and graphics
+    └── brand/           # Color palettes and style guides
+```
+
+## Example Output
+
+When you generate a presentation from markdown, you get:
+
+| Format | Output | Description |
+|--------|--------|-------------|
+| **PDF** | `output/my-deck.pdf` | Fixed-layout slides with embedded fonts, ideal for printing or sharing |
+| **PPTX** | `output/my-deck.pptx` | Editable PowerPoint with speaker notes, animations supported |
+| **HTML** | `output/my-deck/index.html` | Reveal.js presentation with keyboard navigation, presenter mode |
+
+### Sample Generated Slide (Systematic Velocity Style)
+
+```
+┌─────────────────────────────────────────────┐
+│  ████████████████████████████████████████   │  <- #1A1A1A background
+│                                             │
+│     THE CHALLENGE                           │  <- #EBEBEB heading
+│                                             │
+│     > "Quote highlighting pain point"       │  <- #DA7756 accent
+│                                             │
+│     • Problem statement 1                   │
+│     • Problem statement 2                   │
+│     • Problem statement 3                   │
+│                                             │
+│  ████████████████████████████████████████   │
+└─────────────────────────────────────────────┘
 ```
 
 ## Workflow Integration
@@ -201,5 +234,5 @@ pip install jinja2 markdown
 
 ## Related
 
-- [Presentation Skill](../.github/skills/presentation-generation/SKILL.md) - AI skill definition
-- [Issue Template](../.github/ISSUE_TEMPLATE/presentation_request.yml) - GitHub issue form
+- [Presentation Skill](../../.github/skills/presentation-generation/SKILL.md) - AI skill definition
+- [Issue Template](../../.github/ISSUE_TEMPLATE/presentation_request.yml) - GitHub issue form
