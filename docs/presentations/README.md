@@ -234,5 +234,5 @@ pip install jinja2 markdown
 
 ## Related
 
-- [Presentation Skill](../../.github/skills/presentation-generation/SKILL.md) - AI skill definition
-- [Issue Template](../../.github/ISSUE_TEMPLATE/presentation_request.yml) - GitHub issue form
+- [Presentation Skill](https://github.com/zircote/.github/blob/main/.github/skills/presentation-generation/SKILL.md) - AI skill definition
+- [Issue Template](https://github.com/zircote/.github/blob/main/.github/ISSUE_TEMPLATE/presentation_request.yml) - GitHub issue form
