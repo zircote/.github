@@ -29,7 +29,7 @@ Creator of **[swagger-php](https://github.com/zircote/swagger-php)** (5K+ stars)
 ## Active Projects
 
 <!-- LAST_UPDATED_START -->
-*Last updated: 2026-01-16*
+ __Last updated: 2026-01-18__
 <!-- LAST_UPDATED_END -->
 
 ### Most Active Repositories
@@ -41,22 +41,22 @@ Ranked by recent contributions, community engagement, and development activity.
 |------------|-------------|------|----------|
 | [swagger-php](https://github.com/zircote/swagger-php) | A php swagger annotation and parsing library | PHP | ✨ Active |
 | [subcog](https://github.com/zircote/subcog) | Persistent memory system for AI coding assistants. Captures ... | Rust | ✨ Active |
+| [git-adr](https://github.com/zircote/git-adr) | 🏛️ Architecture Decision Records in git notes - no files, no... | Rust | 📈 Growing |
 | [homebrew-tap](https://github.com/zircote/homebrew-tap) | Homebrew formula for git-adr - Architecture Decision Records... | Ruby | 📈 Growing |
-| [.github](https://github.com/zircote/.github) | Organization shared workflows, policies, and community healt... | Python | 📈 Growing |
-| [rust-lsp](https://github.com/zircote/rust-lsp) | Claude Code plugin for Rust development with rust-analyzer, ... | Shell | 📈 Growing |
-| [lsp-marketplace](https://github.com/zircote/lsp-marketplace) | Curated marketplace of 28 LSP-enabled Claude Code plugins wi... | Shell | 📈 Growing |
-| [terraform-lsp](https://github.com/zircote/terraform-lsp) | Claude Code plugin for Terraform/Terragrunt with terraform-l... | HCL | 📈 Growing |
-| [svelte-lsp](https://github.com/zircote/svelte-lsp) | Claude Code plugin for Svelte development with svelte-langua... | Svelte | 📈 Growing |
+| [adrscope](https://github.com/zircote/adrscope) | A lightweight visualization tool for Architecture Decision R... | Rust | 📈 Growing |
+| [structured-madr](https://github.com/zircote/structured-madr) | Structured MADR: Machine-readable Architectural Decision Rec... | JavaScript | 📈 Growing |
+| [human-voice](https://github.com/zircote/human-voice) | Claude Code plugin to detect and prevent AI-generated writin... | JavaScript | 📈 Growing |
+| [lsp-tools](https://github.com/zircote/lsp-tools) | LSP-first code intelligence for Claude Code with strong enfo... | Shell | 📈 Growing |
 <!-- ACTIVE_REPOS_END -->
 
 ### Recently Created
 
 <!-- NEW_REPOS_START -->
-- **[lsp-tools](https://github.com/zircote/lsp-tools)** (PowerShell) - LSP-first code intelligence for Claude Code with strong enforcement patterns. Pa...
-- **[yaml-lsp](https://github.com/zircote/yaml-lsp)** (Shell) - Claude Code plugin for YAML development with yaml-language-server and yamllint h...
-- **[vue-lsp](https://github.com/zircote/vue-lsp)** (Vue) - Claude Code plugin for Vue.js development with Volar LSP and eslint-plugin-vue h...
-- **[svelte-lsp](https://github.com/zircote/svelte-lsp)** (Svelte) - Claude Code plugin for Svelte development with svelte-language-server and eslint...
-- **[sql-lsp](https://github.com/zircote/sql-lsp)** (PLpgSQL) - Claude Code plugin for SQL development with sql-language-server and sqlfluff hoo...
+- **[aesth](https://github.com/zircote/aesth)** (Unknown) - Craft-focused design system management plugin for Claude Code, powered by Subcog...
+- **[gh](https://github.com/zircote/gh)** (Python) - Claude Code plugin with 12 git workflow commands, GitHub Copilot configuration, ...
+- **[agents](https://github.com/zircote/agents)** (Python) - Claude Code plugin with 115+ specialized Opus 4.5 agents organized by domain, 54...
+- **[nsip](https://github.com/zircote/nsip)** (Python) - Claude Code plugin for NSIP (National Sheep Improvement Program) sheep breeding ...
+- **[documentation-review](https://github.com/zircote/documentation-review)** (Unknown) - Claude Code plugin for comprehensive documentation management: review, create, u...
 <!-- NEW_REPOS_END -->
 
 ---
