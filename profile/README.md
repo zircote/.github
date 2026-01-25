@@ -29,7 +29,7 @@ Creator of **[swagger-php](https://github.com/zircote/swagger-php)** (5K+ stars)
 ## Active Projects
 
 <!-- LAST_UPDATED_START -->
- __Last updated: 2026-01-18__
+ __Last updated: 2026-01-25__
 <!-- LAST_UPDATED_END -->
 
 ### Most Active Repositories
@@ -41,22 +41,22 @@ Ranked by recent contributions, community engagement, and development activity.
 |------------|-------------|------|----------|
 | [swagger-php](https://github.com/zircote/swagger-php) | A php swagger annotation and parsing library | PHP | ✨ Active |
 | [subcog](https://github.com/zircote/subcog) | Persistent memory system for AI coding assistants. Captures ... | Rust | ✨ Active |
-| [git-adr](https://github.com/zircote/git-adr) | 🏛️ Architecture Decision Records in git notes - no files, no... | Rust | 📈 Growing |
+| [sdlc-quality](https://github.com/zircote/sdlc-quality) | Software Development Lifecycle standards plugin for AI codin... | Shell | 📈 Growing |
+| [mnemonic](https://github.com/zircote/mnemonic) | Persistent filesystem-based memory system for Claude Code. P... | Python | 📈 Growing |
 | [homebrew-tap](https://github.com/zircote/homebrew-tap) | Homebrew formula for git-adr - Architecture Decision Records... | Ruby | 📈 Growing |
-| [adrscope](https://github.com/zircote/adrscope) | A lightweight visualization tool for Architecture Decision R... | Rust | 📈 Growing |
-| [structured-madr](https://github.com/zircote/structured-madr) | Structured MADR: Machine-readable Architectural Decision Rec... | JavaScript | 📈 Growing |
-| [human-voice](https://github.com/zircote/human-voice) | Claude Code plugin to detect and prevent AI-generated writin... | JavaScript | 📈 Growing |
-| [lsp-tools](https://github.com/zircote/lsp-tools) | LSP-first code intelligence for Claude Code with strong enfo... | Shell | 📈 Growing |
+| [rlm-rs](https://github.com/zircote/rlm-rs) | Rust CLI implementing the Recursive Language Model (RLM) pat... | Rust | 📈 Growing |
+| [sigint](https://github.com/zircote/sigint) | Market intelligence toolkit for Claude Code. Iterative resea... | Unknown | 📈 Growing |
+| [rlm-rs-plugin](https://github.com/zircote/rlm-rs-plugin) | Claude Code plugin for processing documents 100x larger than... | Unknown | 📈 Growing |
 <!-- ACTIVE_REPOS_END -->
 
 ### Recently Created
 
 <!-- NEW_REPOS_START -->
-- **[aesth](https://github.com/zircote/aesth)** (Unknown) - Craft-focused design system management plugin for Claude Code, powered by Subcog...
-- **[gh](https://github.com/zircote/gh)** (Python) - Claude Code plugin with 12 git workflow commands, GitHub Copilot configuration, ...
-- **[agents](https://github.com/zircote/agents)** (Python) - Claude Code plugin with 115+ specialized Opus 4.5 agents organized by domain, 54...
-- **[nsip](https://github.com/zircote/nsip)** (Python) - Claude Code plugin for NSIP (National Sheep Improvement Program) sheep breeding ...
-- **[documentation-review](https://github.com/zircote/documentation-review)** (Unknown) - Claude Code plugin for comprehensive documentation management: review, create, u...
+- **[mnemonic](https://github.com/zircote/mnemonic)** (Python) - Persistent filesystem-based memory system for Claude Code. Pure MIF Level 3 comp...
+- **[MIF](https://github.com/zircote/MIF)** (Unknown) - Open standard for portable AI memory interchange. JSON-LD + Markdown dual format...
+- **[sigint](https://github.com/zircote/sigint)** (Unknown) - Market intelligence toolkit for Claude Code. Iterative research workflows, trend...
+- **[auto-harness](https://github.com/zircote/auto-harness)** (Shell) - Hook-driven test framework for Claude Code plugins - automates integration testi...
+- **[oolong-pairs](https://github.com/zircote/oolong-pairs)** (Python) - Benchmark harness for A/B testing Claude Code plugins against OOLONG long-contex...
 <!-- NEW_REPOS_END -->
 
 ---
