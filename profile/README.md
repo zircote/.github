@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="zircote-banner.svg" alt="zircote" width="800">
+  <img src="https://raw.githubusercontent.com/zircote/.github/main/profile/zircote-banner.svg" alt="zircote" width="800">
 </p>
 
 <p align="center">
@@ -37,7 +37,7 @@ The intersection of cognitive science and AI systems presents a compelling quest
 
 Human memory isn't a tape recorder—it's a constructive process where our mental models (ontology) shape what we encode, and our memories reshape how we understand the world. This recursive loop is central to how we learn, adapt, and make sense of novel situations.
 
-![The Recursive Loop: How Memory and Ontology Shape Our Reality](../docs/_assets/memory-ontology-recursion.jpg)
+![The Recursive Loop: How Memory and Ontology Shape Our Reality](https://raw.githubusercontent.com/zircote/.github/main/docs/_assets/memory-ontology-recursion.jpg)
 
 This exploration drives projects like **[subcog](https://github.com/zircote/subcog)**—a persistent memory system for AI coding assistants. Rather than treating context as disposable, subcog implements structured memory that persists across sessions, enabling AI to build genuine understanding over time:
 
