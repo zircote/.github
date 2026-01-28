@@ -1,4 +1,4 @@
 # Ignore all files in the .memory directory
 .memory/
-
+.fastembed_cache/
 ~/
