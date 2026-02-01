@@ -53,7 +53,7 @@ The goal: AI assistants that don't just respond—they accumulate knowledge, rec
 ## Active Projects
 
 <!-- LAST_UPDATED_START -->
- __Last updated: 2026-01-25__
+ __Last updated: 2026-02-01__
 <!-- LAST_UPDATED_END -->
 
 ### Most Active Repositories
@@ -65,22 +65,22 @@ Ranked by recent contributions, community engagement, and development activity.
 |------------|-------------|------|----------|
 | [swagger-php](https://github.com/zircote/swagger-php) | A php swagger annotation and parsing library | PHP | ✨ Active |
 | [subcog](https://github.com/zircote/subcog) | Persistent memory system for AI coding assistants. Captures ... | Rust | ✨ Active |
-| [sdlc-quality](https://github.com/zircote/sdlc-quality) | Software Development Lifecycle standards plugin for AI codin... | Shell | 📈 Growing |
+| [rlm-rs](https://github.com/zircote/rlm-rs) | Rust CLI implementing the Recursive Language Model (RLM) pat... | Rust | 📈 Growing |
 | [mnemonic](https://github.com/zircote/mnemonic) | Persistent filesystem-based memory system for Claude Code. P... | Python | 📈 Growing |
 | [homebrew-tap](https://github.com/zircote/homebrew-tap) | Homebrew formula for git-adr - Architecture Decision Records... | Ruby | 📈 Growing |
-| [rlm-rs](https://github.com/zircote/rlm-rs) | Rust CLI implementing the Recursive Language Model (RLM) pat... | Rust | 📈 Growing |
 | [sigint](https://github.com/zircote/sigint) | Market intelligence toolkit for Claude Code. Iterative resea... | Unknown | 📈 Growing |
-| [rlm-rs-plugin](https://github.com/zircote/rlm-rs-plugin) | Claude Code plugin for processing documents 100x larger than... | Unknown | 📈 Growing |
+| [sdlc-quality](https://github.com/zircote/sdlc-quality) | Software Development Lifecycle standards plugin for AI codin... | Shell | 📈 Growing |
+| [MIF](https://github.com/zircote/MIF) | Open standard for portable AI memory interchange. JSON-LD + ... | Python | 📈 Growing |
 <!-- ACTIVE_REPOS_END -->
 
 ### Recently Created
 
 <!-- NEW_REPOS_START -->
+- **[github4farmers](https://github.com/zircote/github4farmers)** (JavaScript) - No description
 - **[mnemonic](https://github.com/zircote/mnemonic)** (Python) - Persistent filesystem-based memory system for Claude Code. Pure MIF Level 3 comp...
-- **[MIF](https://github.com/zircote/MIF)** (Unknown) - Open standard for portable AI memory interchange. JSON-LD + Markdown dual format...
+- **[MIF](https://github.com/zircote/MIF)** (Python) - Open standard for portable AI memory interchange. JSON-LD + Markdown dual format...
 - **[sigint](https://github.com/zircote/sigint)** (Unknown) - Market intelligence toolkit for Claude Code. Iterative research workflows, trend...
 - **[auto-harness](https://github.com/zircote/auto-harness)** (Shell) - Hook-driven test framework for Claude Code plugins - automates integration testi...
-- **[oolong-pairs](https://github.com/zircote/oolong-pairs)** (Python) - Benchmark harness for A/B testing Claude Code plugins against OOLONG long-contex...
 <!-- NEW_REPOS_END -->
 
 
