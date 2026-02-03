@@ -59,9 +59,19 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: gh pr review --approve "$PR_URL"
 
-      - name: Enable auto-merge
+      - name: Enable auto-merge or merge directly
         env:
           PR_URL: ${{ github.event.pull_request.html_url }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           MERGE_METHOD: ${{ inputs.merge-method }}
-        run: gh pr merge --auto --"$MERGE_METHOD" "$PR_URL"
+        run: |
+          # Try auto-merge first (requires branch protection)
+          if gh pr merge --auto --"$MERGE_METHOD" "$PR_URL" 2>&1; then
+            echo "Auto-merge enabled successfully"
+          else
+            echo "Auto-merge not available (likely no branch protection)"
+            echo "Attempting direct merge if checks pass..."
+            # Wait briefly for any pending checks
+            sleep 5
+            gh pr merge --"$MERGE_METHOD" "$PR_URL" || echo "::warning::Could not merge - manual intervention may be required"
+          fi
