@@ -1,0 +1,67 @@
+# Reusable Dependabot Auto-Merge Workflow
+# Automatically approves and merges Dependabot PRs after CI passes
+#
+# Security Note: This workflow uses pull_request_target which runs in the context
+# of the base branch. It only acts on PRs from dependabot[bot] and requires
+# all status checks to pass before merging.
+#
+# Usage in consuming workflows:
+#   jobs:
+#     automerge:
+#       uses: zircote/.github/.github/workflows/reusable-dependabot-automerge.yml@main
+#       secrets: inherit
+
+name: Dependabot Auto-Merge
+
+on:
+  workflow_call:
+    inputs:
+      merge-method:
+        description: 'Merge method: merge, squash, or rebase'
+        required: false
+        type: string
+        default: 'squash'
+      runs-on:
+        description: 'Runner to use'
+        required: false
+        type: string
+        default: 'ubuntu-latest'
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  dependabot-automerge:
+    name: Auto-Merge Dependabot PR
+    runs-on: ${{ inputs.runs-on }}
+    if: github.actor == 'dependabot[bot]'
+    steps:
+      - name: Fetch Dependabot metadata
+        id: metadata
+        uses: dependabot/fetch-metadata@d7267f607e9d3fb96fc2fbe83e0af444713e90b7 # v2.3.0
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Log update details
+        env:
+          DEP_NAME: ${{ steps.metadata.outputs.dependency-names }}
+          UPDATE_TYPE: ${{ steps.metadata.outputs.update-type }}
+          ECOSYSTEM: ${{ steps.metadata.outputs.package-ecosystem }}
+        run: |
+          echo "Dependency: $DEP_NAME"
+          echo "Update type: $UPDATE_TYPE"
+          echo "Ecosystem: $ECOSYSTEM"
+
+      - name: Approve PR
+        env:
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh pr review --approve "$PR_URL"
+
+      - name: Enable auto-merge
+        env:
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          MERGE_METHOD: ${{ inputs.merge-method }}
+        run: gh pr merge --auto --"$MERGE_METHOD" "$PR_URL"
