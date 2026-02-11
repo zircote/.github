@@ -39,14 +39,58 @@ Human memory isn't a tape recorder—it's a constructive process where our menta
 
 ![The Recursive Loop: How Memory and Ontology Shape Our Reality](https://raw.githubusercontent.com/zircote/.github/main/docs/_assets/memory-ontology-recursion.jpg)
 
-This exploration drives projects like **[subcog](https://github.com/zircote/subcog)**—a persistent memory system for AI coding assistants. Rather than treating context as disposable, subcog implements structured memory that persists across sessions, enabling AI to build genuine understanding over time:
-
-- **Episodic memory** captures session events and debugging journeys
-- **Semantic memory** stores decisions, knowledge, and learned concepts
-- **Procedural memory** encodes patterns and reusable workflows
-- **Ontology-driven discovery** identifies entities worth remembering
-
 The goal: AI assistants that don't just respond—they accumulate knowledge, recognize patterns, and evolve their understanding of your codebase and preferences.
+
+---
+
+## Featured Projects
+
+### [mnemonic](https://github.com/zircote/mnemonic) — Persistent Memory for Claude Code
+
+A pure filesystem-based memory system that gives Claude Code long-term memory across sessions. Memories are stored as markdown files with YAML frontmatter in a git-versioned directory, organized by cognitive type:
+
+- **Semantic memory** — decisions, knowledge, entities
+- **Episodic memory** — incidents, sessions, debugging journeys
+- **Procedural memory** — runbooks, patterns, workflows
+
+[MIF Level 3](https://github.com/zircote/MIF) compliant with ontology-driven entity discovery, bi-temporal tracking, memory decay, and relationship graphs. Research-validated on the Letta LoCoMo benchmark (74.0% accuracy vs 68.5% for graph-based approaches) — proving that LLMs work best with the filesystem operations they were pre-trained on.
+
+Ships as a Claude Code plugin with 13 commands, 4 autonomous agents, and event-driven hooks that enable proactive recall and silent capture.
+
+### [claude-team-orchestration](https://github.com/zircote/claude-team-orchestration) — Multi-Agent Orchestration & RLM
+
+A production-grade framework for coordinating teams of Claude Code agents. Built on Claude Code's agent teams API, it provides team management, shared task lists, inter-agent messaging, and seven proven orchestration patterns — from parallel specialists to self-organizing swarms.
+
+The standout capability is its **content-aware RLM (Recursive Language Model)** implementation based on [arXiv:2512.24601](https://arxiv.org/abs/2512.24601), which processes files and directories that exceed context limits:
+
+- **Automatic content-type detection** — source code, CSV/TSV, JSON/JSONL, logs, prose
+- **Semantic chunking** — respects function boundaries, preserves CSV headers, maintains valid JSON per partition
+- **Specialized analyst agents** — code-aware, data-aware, JSON-aware, and general-purpose analyzers run on Haiku for cost efficiency
+- **Multi-file directory analysis** — routes mixed content types to the right analysts, synthesizes findings across file types in two phases
+- **Context protection** — findings written to task descriptions (pass-by-reference), keeping the leader's context under 2K characters even with 30 active analysts
+
+Ships as a Claude Code plugin with 8 modular skills and 5 custom agent definitions.
+
+### [nsip](https://github.com/zircote/nsip) — Sheep Genetic Evaluation CLI & MCP Server
+
+A Rust CLI and Model Context Protocol server for the National Sheep Improvement Program database — 400,000+ animals with Estimated Breeding Values (EBVs), pedigrees, and performance data.
+
+Beyond basic search and lookup, nsip provides breeding intelligence:
+
+- **Inbreeding analysis** — Wright's coefficient of inbreeding with traffic-light risk classification
+- **Weighted trait ranking** — custom breeding objective scoring with accuracy weighting
+- **Mating recommendations** — optimal sire pairings ranked by trait complementarity and inbreeding risk
+- **Flock summary** — aggregate genetics across a flock
+
+The MCP server exposes 13 tools, 5 resources, 4 resource templates, and 7 guided prompts — enabling AI assistants to provide expert breeding advice through natural conversation. Published as a Docker image at `ghcr.io/zircote/nsip`.
+
+### [nsip-example](https://github.com/zircote/nsip-example) — GitHub as a Farm Management System
+
+A working demonstration of **GitHub4Farms** — using GitHub Issues as the record-keeping interface for a sheep operation, with automated genetic enrichment powered by the nsip MCP server and GitHub Copilot.
+
+Farmers create issues for breeding events (mating, lambing, health, weaning, sales) using structured templates. A Copilot agent automatically enriches each record with genetic data: inbreeding risk assessment, EBV comparisons, predicted offspring traits, and breeding recommendations. Flock-wide analyses — ranking, mating optimization, inbreeding matrices — are generated as markdown reports via issue-triggered workflows.
+
+Seven issue templates, eleven runbooks, and comprehensive user documentation make it accessible to farmers with no technical background.
 
 ---
 
