@@ -24,14 +24,53 @@ Creator of **[swagger-php](https://github.com/zircote/swagger-php)**, the PHP li
 
 ### Focus Areas
 
-- **Open Source Tooling** - Creating and maintaining tools that developers actually use
+- **Open Standards for AI Tooling** - Authoring specifications that make AI development portable and interoperable
 - **AI-Assisted Development** - Building Claude Code plugins, agents, and workflows
 - **DevOps & Platform Engineering** - Infrastructure automation, CI/CD, AWS architecture
-- **Architecture Documentation** - ADRs, decision tracking, knowledge capture
+- **Open Source Tooling** - Creating and maintaining tools that developers actually use
 
 ---
 
-## Current Exploration: Memory, Ontology & AI
+## Open Specifications
+
+Two open specifications currently occupy the center of my development attention — both aimed at solving fragmentation in the AI coding assistant ecosystem.
+
+### [Memory Interchange Format (MIF)](https://mif-spec.dev) — Portable AI Memory
+
+<a href="https://mif-spec.dev"><img src="https://img.shields.io/badge/spec-mif--spec.dev-blue?style=for-the-badge" alt="mif-spec.dev"></a>
+
+The AI memory ecosystem is fragmented — Mem0, Zep, Letta, LangMem, and others all use proprietary schemas with no interoperability. MIF defines a common data model with dual representations: human-readable **Markdown** files (Obsidian-compatible) and machine-processable **JSON-LD** documents.
+
+MIF solves vendor lock-in, data ownership, and future-proofing for AI memory. Key features:
+
+- **Dual format** — Lossless conversion between `.memory.md` and `.memory.json`
+- **Three conformance levels** — Core (4 fields), Standard (+ namespaces, entities, relationships), Full (+ bi-temporal, decay, provenance, embeddings, citations)
+- **Ontology system** — Semantic/episodic/procedural memory types with domain-extensible entity discovery
+- **W3C PROV provenance** and **JSON Schema validation**
+- **Migration guides** from Mem0, Zep, Letta, Subcog, and Basic Memory
+
+**Status:** v0.1.0-draft &bull; [Specification](https://mif-spec.dev/SPECIFICATION) &bull; [GitHub](https://github.com/zircote/MIF)
+
+### [ccpkg](https://ccpkg.dev) — Portable Packaging for AI Coding Extensions
+
+<a href="https://ccpkg.dev"><img src="https://img.shields.io/badge/spec-ccpkg.dev-blue?style=for-the-badge" alt="ccpkg.dev"></a>
+
+AI coding assistants are increasingly extensible, but sharing extensions is fragmented and fragile — Git-based installs break silently, startup latency scales with plugin count, and there are no trust signals or version pinning. ccpkg defines a self-contained archive format (`.ccpkg`) for packaging and distributing skills, agents, commands, hooks, MCP servers, and LSP servers as a single portable unit.
+
+One file, one install, zero post-install steps. Key features:
+
+- **Cross-tool portability** — Works across Claude Code, Gemini CLI, Codex, Copilot, and other compatible tools
+- **Self-contained archives** — All dependencies vendored, no runtime network fetches
+- **Lazy loading** — Only metadata loaded at startup; twenty packages have the same startup time as zero
+- **Deterministic lockfiles** — `ccpkg-lock.json` pins exact versions with checksums for reproducible team environments
+- **Decentralized registries** — JSON files hostable on GitHub Pages, S3, or any static server
+- **Built on open standards** — Agent Skills, MCP, LSP, SemVer, JSON Schema
+
+**Status:** Draft (2026-02-14) &bull; [Specification](https://ccpkg.dev/spec/specification.html) &bull; [GitHub](https://github.com/zircote/plugin-packaging)
+
+---
+
+## Memory, Ontology & AI
 
 The intersection of cognitive science and AI systems presents a compelling question: **how do we build AI that remembers meaningfully?**
 
@@ -39,7 +78,7 @@ Human memory isn't a tape recorder—it's a constructive process where our menta
 
 ![The Recursive Loop: How Memory and Ontology Shape Our Reality](https://raw.githubusercontent.com/zircote/.github/main/docs/_assets/memory-ontology-recursion.jpg)
 
-The goal: AI assistants that don't just respond—they accumulate knowledge, recognize patterns, and evolve their understanding of your codebase and preferences.
+The goal: AI assistants that don't just respond—they accumulate knowledge, recognize patterns, and evolve their understanding of your codebase and preferences. MIF grew directly from this research — encoding these cognitive principles into an interoperable specification.
 
 ---
 
@@ -133,9 +172,10 @@ Ranked by recent contributions, community engagement, and development activity.
 ## Technology Stack
 
 ```text
-Languages        Rust | Python | TypeScript | Go 
+Languages        Rust | Python | TypeScript | Go
 Infrastructure   AWS | Docker | Kubernetes | Terraform | GitHub Actions
 AI Integration   Claude Code | GitHub Copilot | MCP Protocol
+Specifications   MIF (mif-spec.dev) | ccpkg (ccpkg.dev)
 Platforms        Linux | macOS | AWS (Solutions Architect certified)
 ```
 
