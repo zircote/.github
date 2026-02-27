@@ -137,6 +137,45 @@ Or use github-label-sync directly:
 npx github-label-sync --access-token $GITHUB_TOKEN --labels labels.yml zircote/repo-name
 ```
 
+## gh-aw Agentic Workflows
+
+The `org-monitor.md` workflow uses GitHub Agentic Workflows (gh-aw). Key conventions:
+
+### Compiling
+
+gh-aw workflows are markdown files that compile to `.lock.yml` via `gh aw compile`. The lock file is auto-generated — do not edit it directly.
+
+```bash
+# Compile all gh-aw workflows
+gh aw compile
+
+# Compile specific workflow
+gh aw compile org-monitor
+```
+
+**Known issue:** Repos named `.github` trigger a runtime-import path bug ([github/gh-aw#18711](https://github.com/github/gh-aw/issues/18711)). Use the patching script instead:
+
+```bash
+# Compile + patch for .github repo runtime-import bug
+bash scripts/compile-org-monitor.sh
+```
+
+### gh-aw Frontmatter Rules
+
+- `permissions:` block is **read-only** — write operations go through `safe-outputs:`
+- Event triggers (`issues`, `pull_request`, `issue_comment`) require `reaction: eyes`
+- Schedule triggers (`schedule: daily`) do NOT need `reaction: eyes`
+- `add-comment` safe-output defaults to `discussions:write` — add `discussions: false` unless needed
+- `tools.github.app` requests ALL workflow-level permissions for the App token — the GitHub App must have every permission in the `permissions:` block
+- Validate with `gh aw compile` before committing — it catches trigger errors, permission mismatches, and safe-output violations
+
+### GitHub App (zircote-org-monitor)
+
+Cross-repo MCP access uses a GitHub App. Required App permissions must match the workflow's `permissions:` block exactly. Credentials:
+- `GH_APP_ID` — repository variable
+- `GH_APP_PRIVATE_KEY` — repository secret
+- `COPILOT_GITHUB_TOKEN` — fine-grained PAT with Copilot Requests: Read (account permission, not repo)
+
 ## Git Conventions
 
 - Use [Conventional Commits](https://www.conventionalcommits.org/): `feat:`, `fix:`, `docs:`, `chore:`, `refactor:`, `perf:`, `test:`, `ci:`
