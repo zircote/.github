@@ -9,15 +9,14 @@ on:
   workflow_dispatch:
 
 permissions:
+  contents: read
   issues: read
   pull-requests: read
   discussions: read
   actions: read
 
 engine:
-  id: claude
-  thinking: true
-  max-turns: 10
+  id: copilot
 
 tools:
   cache-memory:
