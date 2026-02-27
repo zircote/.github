@@ -303,7 +303,7 @@ main() {
 		process_repo "$SINGLE_REPO"
 	else
 		local repos
-		repos=$(gh api --paginate "users/$ORG/repos" \
+		repos=$(gh api --paginate "orgs/$ORG/repos" --field type=all \
 			--jq '.[] | select(.archived == false and .fork == false) | .name' |
 			sort)
 
