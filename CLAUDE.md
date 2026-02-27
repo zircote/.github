@@ -139,24 +139,31 @@ npx github-label-sync --access-token $GITHUB_TOKEN --labels labels.yml zircote/r
 
 ## gh-aw Agentic Workflows
 
-The `org-monitor.md` workflow uses GitHub Agentic Workflows (gh-aw). Key conventions:
+The following gh-aw agentic workflows are defined in `.github/workflows/`:
+
+| Workflow | Tracker ID | Schedule | Timeout |
+|----------|-----------|----------|---------|
+| `org-monitor.md` | `orgmon01` | daily | 15 min |
+| `agent-health-monitor.md` | `agenthm01` | daily | 10 min |
+| `stale-health-check.md` | `stlhlt01` | weekly | 20 min |
+| `dependency-ecosystem.md` | `depeco01` | weekly | 25 min |
 
 ### Compiling
 
 gh-aw workflows are markdown files that compile to `.lock.yml` via `gh aw compile`. The lock file is auto-generated — do not edit it directly.
 
-```bash
-# Compile all gh-aw workflows
-gh aw compile
-
-# Compile specific workflow
-gh aw compile org-monitor
-```
-
-**Known issue:** Repos named `.github` trigger a runtime-import path bug ([github/gh-aw#18711](https://github.com/github/gh-aw/issues/18711)). Use the patching script instead:
+**Known issue:** Repos named `.github` trigger a runtime-import path bug ([github/gh-aw#18711](https://github.com/github/gh-aw/issues/18711)). Use the generic patching script instead:
 
 ```bash
-# Compile + patch for .github repo runtime-import bug
+# Compile + patch a single workflow
+bash scripts/compile-gh-aw.sh <workflow-name>
+
+# Compile + patch all gh-aw workflows
+for wf in org-monitor stale-health-check dependency-ecosystem agent-health-monitor; do
+  bash scripts/compile-gh-aw.sh "$wf"
+done
+
+# Legacy wrapper (org-monitor only)
 bash scripts/compile-org-monitor.sh
 ```
 
@@ -165,7 +172,6 @@ bash scripts/compile-org-monitor.sh
 - `permissions:` block is **read-only** — write operations go through `safe-outputs:`
 - Event triggers (`issues`, `pull_request`, `issue_comment`) require `reaction: eyes`
 - Schedule triggers (`schedule: daily`) do NOT need `reaction: eyes`
-- `add-comment` safe-output defaults to `discussions:write` — add `discussions: false` unless needed
 - `tools.github.app` requests ALL workflow-level permissions for the App token — the GitHub App must have every permission in the `permissions:` block
 - Validate with `gh aw compile` before committing — it catches trigger errors, permission mismatches, and safe-output violations
 
