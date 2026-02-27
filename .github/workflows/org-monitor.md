@@ -23,11 +23,6 @@ tools:
 
   github:
     toolsets: [context, repos, issues, pull_requests, discussions, orgs, search, actions]
-    app:
-      app-id: ${{ vars.GH_APP_ID }}
-      private-key: ${{ secrets.GH_APP_PRIVATE_KEY }}
-      owner: "zircote"
-      repositories: ["*"]
 
   bash:
     - "echo"
