@@ -1,0 +1,31 @@
+# Dependabot Rollout
+# Runs weekly to ensure all zircote repos have Dependabot config + automerge.
+# Uses scripts/rollout-dependabot.sh which handles:
+#   - Language-appropriate dependabot.yml generation
+#   - Automerge workflow deployment
+#   - Auto-merge repo setting enablement
+#
+# Can also be triggered manually via workflow_dispatch.
+# Security: No user-controlled inputs are interpolated in this workflow.
+
+name: Dependabot Rollout
+
+on:
+  schedule:
+    - cron: "30 9 * * 1" # Monday 09:30 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  rollout:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Run Dependabot rollout
+        env:
+          GH_TOKEN: ${{ secrets.ROLLOUT_PAT }}
+        run: bash scripts/rollout-dependabot.sh
