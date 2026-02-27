@@ -140,3 +140,15 @@
 - name: "org-monitor"
   color: "0E8A16"
   description: "Organization-wide monitoring report from org-monitor workflow"
+
+- name: "stale-health"
+  color: "FF6B35"
+  description: "Stale project health report"
+
+- name: "dep-ecosystem"
+  color: "0366D6"
+  description: "Dependency ecosystem analysis"
+
+- name: "agent-health"
+  color: "5319E7"
+  description: "Agent health monitoring"
