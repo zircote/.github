@@ -150,6 +150,10 @@ process_pr() {
 process_repo() {
 	local repo="$1"
 
+	if is_excluded "$repo"; then
+		return 0
+	fi
+
 	# Get open Dependabot PRs
 	local prs
 	prs=$(gh pr list --repo "$ORG/$repo" --author "app/dependabot" --state open \
@@ -172,9 +176,10 @@ main() {
 	if [[ -n "$SINGLE_REPO" ]]; then
 		process_repo "$SINGLE_REPO"
 	else
+		# Use authenticated endpoint to include private repos
 		local repos
-		repos=$(gh api --paginate "orgs/$ORG/repos" --field type=all \
-			--jq '.[] | select(.archived == false and .fork == false) | .name' |
+		repos=$(gh api --paginate "user/repos?affiliation=owner&per_page=100" \
+			--jq ".[] | select(.owner.login == \"$ORG\" and .archived == false and .fork == false) | .name" |
 			sort)
 
 		local total
