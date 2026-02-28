@@ -35,7 +35,7 @@ jobs:
   dependabot-automerge:
     name: Auto-Merge Dependabot PR
     runs-on: ${{ inputs.runs-on }}
-    if: github.actor == 'dependabot[bot]'
+    if: github.event.pull_request.user.login == 'dependabot[bot]'
     steps:
       - name: Fetch Dependabot metadata
         id: metadata
