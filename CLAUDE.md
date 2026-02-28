@@ -137,6 +137,13 @@ Or use github-label-sync directly:
 npx github-label-sync --access-token $GITHUB_TOKEN --labels labels.yml zircote/repo-name
 ```
 
+## Scheduled Workflows (Standard GitHub Actions)
+
+| Workflow | Schedule | Purpose |
+|----------|----------|---------|
+| `dependabot-rollout.yml` | Weekly (Mon 09:30 UTC) | Ensure all repos have Dependabot config + automerge |
+| `dependabot-sweep.yml` | Daily (10:00 UTC) | Approve + merge open Dependabot PRs with passing CI |
+
 ## gh-aw Agentic Workflows
 
 The following gh-aw agentic workflows are defined in `.github/workflows/`:
