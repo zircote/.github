@@ -1,114 +1,75 @@
-# Contributing to zircote Projects
+# Contributing to .github
 
-Thank you for your interest in contributing! This document provides guidelines for contributing to repositories in the zircote organization.
-
-## Getting Started
-
-1. Fork the repository
-2. Clone your fork locally
-3. Set up the development environment (see repository-specific README)
-4. Create a feature branch
-5. Make your changes
-6. Submit a pull request
+Thank you for your interest in contributing to .github! This document provides guidelines and information for contributors.
 
 ## How to Contribute
 
 ### Reporting Bugs
 
-Before submitting:
-1. Search existing issues
-2. Check documentation
-3. Test with latest version
-
-Include in your report:
-- Clear title and description
-- Steps to reproduce
-- Expected vs actual behavior
-- Environment details
-- Error messages/logs
-- Minimal reproducible example
+1. **Search existing issues** at [github.com/zircote/.github/issues](https://github.com/zircote/.github/issues) to avoid duplicates.
+2. If no existing issue matches, [open a new bug report](https://github.com/zircote/.github/issues/new?template=bug_report.yml).
+3. Include as much detail as possible: steps to reproduce, expected vs actual behavior, environment details, and logs or screenshots.
 
 ### Suggesting Features
 
-Before submitting:
-1. Search existing issues/discussions
-2. Consider project scope
-3. Think through implementation
+1. **Check discussions and issues** to see if the feature has already been proposed.
+2. [Open a feature request](https://github.com/zircote/.github/issues/new?template=feature_request.yml) with a clear description of the problem and your proposed solution.
 
-Include:
-- Problem statement
-- Proposed solution
-- Alternatives considered
-- Additional context
+### Submitting Pull Requests
 
-### Pull Request Process
+1. **Fork the repository** and create a branch from `main`.
+2. **Make your changes** in a focused, well-scoped branch.
+3. **Write or update tests** to cover your changes.
+4. **Update documentation** if your changes affect public APIs or user-facing behavior.
+5. **Open a pull request** against `main` using the PR template.
 
-1. Create an issue first for significant changes
-2. Fork and create a feature branch
-3. Make focused, small changes
-4. Write or update tests
-5. Update documentation
-6. Follow code style guidelines
-7. Write clear commit messages
-8. Submit and complete the PR template
+## Development Setup
 
-## Development Guidelines
+1. Clone your fork:
+   ```bash
+   git clone https://github.com/<your-username>/.github.git
+   cd .github
+   ```
+2. Install dependencies (see README for project-specific instructions).
+3. Run the test suite to verify your setup.
 
-### Code Style
+## Code Style
 
-- Follow existing patterns in the codebase
-- Write clear, readable code
-- Prefer simple solutions
-- Document public APIs
+- Follow the existing code style and conventions in the project.
+- Run linters and formatters before committing.
+- Keep changes focused: one logical change per commit.
 
-### Commit Message Conventions
+## Commit Messages
 
-We follow [Conventional Commits](https://www.conventionalcommits.org/):
+Use clear, descriptive commit messages:
 
 ```
-<type>[scope]: <description>
+<type>: <short summary>
 
-[body]
-
-[footer]
+<optional body with more detail>
 ```
 
-Types:
-- `feat`: New feature
-- `fix`: Bug fix
-- `docs`: Documentation
-- `style`: Formatting
-- `refactor`: Code restructuring
-- `perf`: Performance improvement
-- `test`: Test changes
-- `build`: Build system
-- `ci`: CI configuration
-- `chore`: Other changes
-- `revert`: Revert commit
+Types: `feat`, `fix`, `docs`, `style`, `refactor`, `test`, `chore`, `ci`
 
-### Code Review
+Examples:
+- `feat: add user profile page`
+- `fix: correct date parsing for ISO 8601 format`
+- `docs: update API reference for v2 endpoints`
 
-All submissions require review:
-1. CI must pass
-2. At least one maintainer approval
-3. Address all feedback
-4. Final approval and merge
+## Pull Request Process
 
-**For Reviewers**: Be constructive, explain reasoning, distinguish required vs suggested changes.
+1. Fill out the PR template completely.
+2. Link related issues using `Fixes #123` or `Closes #456`.
+3. Ensure all CI checks pass.
+4. Request a review from a maintainer or code owner.
+5. Address review feedback promptly.
+6. Once approved, a maintainer will merge your PR.
 
-**For Contributors**: Respond to all comments, push fixes as new commits, ask for clarification when needed.
+## Code of Conduct
 
-## Community
+This project follows the [Contributor Covenant Code of Conduct](CODE_OF_CONDUCT.md). By participating, you are expected to uphold this code. Report unacceptable behavior to the project maintainers.
 
-- Questions: GitHub Discussions or issues
-- Security issues: See [SECURITY.md](SECURITY.md)
-- Stay updated: Watch repositories
+## Questions?
 
-Thank you for contributing!
-
-## Changelog
-
-| Date | Change |
-|------|--------|
-| 2026-01-16 | Added changelog section |
-| 2025-12-20 | Initial release with contribution guidelines and code review process |
+- Open a [discussion](https://github.com/zircote/.github/discussions) for general questions.
+- Check the [support document](SUPPORT.md) for additional resources.
