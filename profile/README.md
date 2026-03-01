@@ -136,7 +136,7 @@ Seven issue templates, eleven runbooks, and comprehensive user documentation mak
 ## Active Projects
 
 <!-- LAST_UPDATED_START -->
- __Last updated: 2026-02-22__
+ __Last updated: 2026-03-01__
 <!-- LAST_UPDATED_END -->
 
 ### Most Active Repositories
@@ -147,23 +147,23 @@ Ranked by recent contributions, community engagement, and development activity.
 | Repository | Description | Tech | Activity |
 |------------|-------------|------|----------|
 | [swagger-php](https://github.com/zircote/swagger-php) | A php swagger annotation and parsing library | PHP | ✨ Active |
-| [nsip](https://github.com/zircote/nsip) | Sheep genetic evaluation CLI & MCP server -- search animals,... | Rust | ✨ Active |
-| [farm-notebook-examples](https://github.com/zircote/farm-notebook-examples) | Beginner-friendly Jupyter notebooks for farmers, ranchers & ... | Jupyter Notebook | 📈 Growing |
-| [rust-template](https://github.com/zircote/rust-template) | Template for rust projects | Rust | 📈 Growing |
-| [nsip-example](https://github.com/zircote/nsip-example) | GitHub-powered farm management with NSIP sheep breeding inte... | Unknown | 📈 Growing |
-| [mnemonic](https://github.com/zircote/mnemonic) | Persistent filesystem-based memory system for Claude Code. P... | Python | 📈 Growing |
-| [github-agentic-workflows](https://github.com/zircote/github-agentic-workflows) | Claude Code plugin for authoring, validating (via gh aw comp... | Unknown | 📈 Growing |
+| [maker-rs](https://github.com/zircote/maker-rs) | Zero-error LLM execution via SPRT voting. Rust library and M... | Rust | 📈 Growing |
 | [github4farms-training](https://github.com/zircote/github4farms-training) |  | Unknown | 📈 Growing |
+| [github4farms](https://github.com/zircote/github4farms) | 12-session hands-on GitHub training curriculum for farmers —... | HTML | 📈 Growing |
+| [.github](https://github.com/zircote/.github) | Organization shared workflows, policies, and community healt... | Python | 📈 Growing |
+| [lsp-tools](https://github.com/zircote/lsp-tools) | LSP-first code intelligence for Claude Code with strong enfo... | Shell | 📈 Growing |
+| [cpp-lsp](https://github.com/zircote/cpp-lsp) | Claude Code plugin for C/C++ development with clangd LSP, cl... | C++ | 📈 Growing |
+| [csharp-lsp](https://github.com/zircote/csharp-lsp) | Claude Code plugin for C# development with OmniSharp LSP and... | C# | 📈 Growing |
 <!-- ACTIVE_REPOS_END -->
 
 ### Recently Created
 
 <!-- NEW_REPOS_START -->
+- **[refactor](https://github.com/zircote/refactor)** (Unknown) - Swarm-orchestrated code refactoring plugin for Claude Code. Four AI agents itera...
+- **[tone-police](https://github.com/zircote/tone-police)** (Python) - Your diplomatic bodyguard for the AI age. Claude Code plugin that silently filte...
 - **[farm-notebook-examples](https://github.com/zircote/farm-notebook-examples)** (Jupyter Notebook) - Beginner-friendly Jupyter notebooks for farmers, ranchers & agronomists — soil h...
 - **[github-agentic-workflows](https://github.com/zircote/github-agentic-workflows)** (Unknown) - Claude Code plugin for authoring, validating (via gh aw compile), and improving ...
 - **[ccpkg](https://github.com/zircote/ccpkg)** (MDX) - Open packaging format for AI coding assistant extensions -- one archive installs...
-- **[version-guard](https://github.com/zircote/version-guard)** (Unknown) - Claude Code plugin that verifies library versions against live documentation bef...
-- **[claude-team-orchestration](https://github.com/zircote/claude-team-orchestration)** (Unknown) - Multi-agent orchestration plugin for Claude Code. Coordinate agent teams with sh...
 <!-- NEW_REPOS_END -->
 
 
