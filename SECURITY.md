@@ -1,79 +1,38 @@
 # Security Policy
 
-## Reporting a Vulnerability
-
-The zircote organization takes security seriously. We appreciate responsible disclosure of security vulnerabilities.
-
-### How to Report
-
-**Email**: security@zircote.com
-
-Please include:
-- Type of vulnerability
-- Location of affected source code (file path, tag/branch/commit)
-- Steps to reproduce
-- Proof-of-concept if available
-- Potential impact assessment
-
-### What to Expect
-
-1. **Acknowledgment**: Within 48 hours
-2. **Assessment**: Validity and severity determination within 7 days
-3. **Resolution**: Fix development and coordinated disclosure
-4. **Credit**: Recognition in release notes (with permission)
-
-### Scope
-
-**In Scope**:
-- Source code in zircote repositories
-- Configuration and infrastructure code
-- Authentication and authorization
-- Data handling and API endpoints
-
-**Out of Scope**:
-- Social engineering
-- Physical security
-- Denial of service
-- Third-party services
-- Already reported issues
-
-### Disclosure Policy
-
-- Allow 90 days for remediation before public disclosure
-- Coordinate disclosure timing
-- Security advisories via GitHub Security Advisories
-
-### Safe Harbor
-
-Security research conducted under this policy is:
-- Authorized under applicable laws
-- Protected from legal action for good-faith violations
-- Valued as contribution to security
-
-Please:
-- Avoid privacy violations and data destruction
-- Only test accounts you own or have permission for
-- Stop and report immediately upon encountering sensitive data
-
 ## Supported Versions
 
-- Latest major version
-- Previous major version (6 months after new major release)
+| Version | Supported |
+|---------|-----------|
+| Latest  | Yes       |
 
-See individual repositories for specific policies.
+## Reporting a Vulnerability
 
-## Security Best Practices
+If you discover a security vulnerability in this project, please report it responsibly.
 
-- Never commit secrets or credentials
-- Use environment variables for sensitive data
-- Follow least privilege principles
-- Keep dependencies updated
-- Validate all user inputs
-- Use parameterized queries
+**Please do NOT open a public GitHub issue for security vulnerabilities.**
 
-## Changelog
+Instead, please send an email to the project maintainers at security@zircote.com with:
 
-| Date | Change |
-|------|--------|
-| 2026-01-16 | Added changelog section |
-| 2025-12-20 | Initial release with vulnerability reporting and security best practices |
+1. A description of the vulnerability
+2. Steps to reproduce the issue
+3. Potential impact assessment
+4. Any suggested fixes (if applicable)
+
+## Response Timeline
+
+- **Acknowledgment**: Within 48 hours of receipt
+- **Initial assessment**: Within 5 business days
+- **Resolution target**: Within 30 days for confirmed vulnerabilities
+
+## Disclosure Policy
+
+We follow coordinated disclosure. We ask that you:
+
+1. Allow us reasonable time to address the issue before public disclosure
+2. Make a good-faith effort to avoid privacy violations, data loss, and service disruption
+3. Do not exploit the vulnerability beyond what is necessary to demonstrate it
+
+## Recognition
+
+We appreciate the efforts of security researchers. Contributors who report valid vulnerabilities will be acknowledged (with permission) in our release notes.
