@@ -10,9 +10,104 @@ central_repo: zircote/.github
 
 repos:
   - zircote/.github
+  - zircote/adr
+  - zircote/adrscope
+  - zircote/aesth
+  - zircote/agents
+  - zircote/ApiProblem
   - zircote/atlatl
   - zircote/atlatl-spec
+  - zircote/auto-harness
+  - zircote/bash-lsp
+  - zircote/Bloom
+  - zircote/ccpkg
+  - zircote/chef-composer
+  - zircote/claude-plugin-template
+  - zircote/claude-team-orchestration
+  - zircote/content-pipeline-template
+  - zircote/cpp-lsp
+  - zircote/csharp-lsp
+  - zircote/daedalus
+  - zircote/data-science-template
+  - zircote/dockerfile-lsp
+  - zircote/docs-site-template
+  - zircote/documentation-review
+  - zircote/elixir-lsp
+  - zircote/farm-notebook-examples
+  - zircote/gh
+  - zircote/gh-agentic-workflows
+  - zircote/gh-aw-trial
+  - zircote/ghe-migration
+  - zircote/git-adr
+  - zircote/github
+  - zircote/github-agentic-workflows
+  - zircote/github-migration
+  - zircote/github-project-manager
+  - zircote/github-social
+  - zircote/github4farms
+  - zircote/github4farms-training
+  - zircote/go-lsp
+  - zircote/graphql-lsp
+  - zircote/Hal
+  - zircote/haskell-lsp
+  - zircote/homebrew-tap
+  - zircote/html-css-lsp
+  - zircote/human-voice
+  - zircote/java-lsp
+  - zircote/java-template
+  - zircote/json-lsp
+  - zircote/kotlin-lsp
+  - zircote/latex-lsp
   - zircote/lro-bench
+  - zircote/lsp-marketplace
+  - zircote/lsp-tools
+  - zircote/lua-lsp
+  - zircote/maker-rs
+  - zircote/markdown-lsp
+  - zircote/marketplace
+  - zircote/memory-benchmark-harness
+  - zircote/memory-capture-plugin
+  - zircote/MIF
+  - zircote/mnemonic
+  - zircote/notebook-template
+  - zircote/nsip
+  - zircote/nsip-example
+  - zircote/nsip-plugin
+  - zircote/oolong-pairs
+  - zircote/php-lsp
+  - zircote/project-planning-template
+  - zircote/python-lsp
+  - zircote/python-template
+  - zircote/refactor
+  - zircote/Rhubarb
+  - zircote/rlm-rs
+  - zircote/rlm-rs-plugin
+  - zircote/ruby-lsp
+  - zircote/rust-lsp
+  - zircote/rust-template
+  - zircote/scala-lsp
+  - zircote/sdlc-quality
+  - zircote/sigint
+  - zircote/sql-lsp
+  - zircote/structured-madr
+  - zircote/subcog
+  - zircote/subcog-enterprise
+  - zircote/svelte-lsp
+  - zircote/swift-lsp
+  - zircote/terraform-lsp
+  - zircote/tone-police
+  - zircote/typescript-lsp
+  - zircote/typescript-template
+  - zircote/USearch
+  - zircote/Uuid
+  - zircote/version-guard
+  - zircote/video-production
+  - zircote/video-template
+  - zircote/vscode-git-adr
+  - zircote/vue-lsp
+  - zircote/yaml-lsp
+  - zircote/zig-lsp
+  - zircote/zircote.github.io
 
 # Explicitly excluded repositories (never manage)
 excluded_repos:
