@@ -1,0 +1,41 @@
+---
+# GitHub Project Manager Configuration
+# Generated: 2026-03-01
+
+# central repo for cross-repo coordination;
+# repos manage own issues/PRs locally
+mode: hybrid
+
+central_repo: zircote/.github
+
+repos:
+  - zircote/.github
+  - zircote/atlatl
+  - zircote/atlatl-spec
+  - zircote/lro-bench
+
+# Explicitly excluded repositories (never manage)
+excluded_repos:
+  - zircote/swagger-php
+
+project:
+  number: 1
+  org: zircote
+  url: https://github.com/users/zircote/projects/1
+
+labels:
+  sync: true
+  prefix: ""
+
+review:
+  # Self-merge OK for zircote
+  required_approvals: 0
+  # 2 approvals for non-owner PRs
+  required_approvals_external: 2
+  auto_assign: true
+  codeowners: true
+
+automation:
+  stale_days: 30
+  auto_close_days: 60
+  auto_label: true
