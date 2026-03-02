@@ -89,7 +89,7 @@ jobs:
         uses: pnpm/action-setup@41ff72655975bd51cab0327fa583b6e92b6d3061 # v6.0.1
 
       - name: Setup Node.js
-        uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6.0.1
+        uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238 # v6.0.1
         with:
           node-version: ${{ inputs.node-version }}
           cache: 'pnpm'
@@ -121,7 +121,7 @@ jobs:
         uses: pnpm/action-setup@41ff72655975bd51cab0327fa583b6e92b6d3061 # v6.0.1
 
       - name: Setup Node.js
-        uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6.0.1
+        uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238 # v6.0.1
         with:
           node-version: ${{ inputs.node-version }}
           cache: 'pnpm'
@@ -153,7 +153,7 @@ jobs:
         uses: pnpm/action-setup@41ff72655975bd51cab0327fa583b6e92b6d3061 # v6.0.1
 
       - name: Setup Node.js
-        uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6.0.1
+        uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238 # v6.0.1
         with:
           node-version: ${{ inputs.node-version }}
           cache: 'pnpm'
@@ -220,7 +220,7 @@ jobs:
         uses: pnpm/action-setup@41ff72655975bd51cab0327fa583b6e92b6d3061 # v6.0.1
 
       - name: Setup Node.js
-        uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6.0.1
+        uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238 # v6.0.1
         with:
           node-version: ${{ matrix.node-version }}
           cache: 'pnpm'
@@ -261,7 +261,7 @@ jobs:
         uses: pnpm/action-setup@41ff72655975bd51cab0327fa583b6e92b6d3061 # v6.0.1
 
       - name: Setup Node.js
-        uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6.0.1
+        uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238 # v6.0.1
         with:
           node-version: ${{ inputs.node-version }}
           cache: 'pnpm'
