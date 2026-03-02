@@ -1,0 +1,177 @@
+---
+name: "Maintenance Board"
+description: "Audits project board consistency and fixes mismatched item statuses"
+tracker-id: mntbrd01
+timeout-minutes: 30
+
+on:
+  schedule: daily
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: read
+  pull-requests: read
+
+engine:
+  id: copilot
+
+tools:
+  github:
+    toolsets: [context, repos, issues, pull_requests, orgs, search, projects]
+    app:
+      app-id: ${{ vars.GH_APP_ID }}
+      private-key: ${{ secrets.GH_APP_PRIVATE_KEY }}
+      owner: "zircote"
+      repositories: ["*"]
+
+  bash:
+    - "echo"
+    - "date"
+    - "jq"
+    - "sort"
+    - "uniq"
+    - "wc"
+    - "head"
+    - "tail"
+
+safe-outputs:
+  create-issue:
+    title-prefix: "[Board Audit] "
+    labels: [gpm/report]
+    close-older-issues: true
+    target-repo: "zircote/.github"
+  add-comment:
+    hide-older-comments: true
+  update-issue:
+  update-project:
+    max: 20
+    project: "https://github.com/orgs/zircote/projects/1"
+
+metadata:
+  team: platform
+  priority: high
+---
+
+# GPM Maintenance Board
+
+## Context
+
+You are a GPM automation agent for the **zircote** GitHub organization.
+
+Determine today's date by running `date -u +%Y-%m-%d` via bash before starting.
+Run ID: ${{ github.run_id }}
+
+This workflow runs from the `zircote/.github` repository and has cross-repo read
+access to all organization repositories via a GitHub App installation token.
+
+## Configuration
+
+Read the repository's `.github/gpm-config.yml` using the GitHub MCP `get_file_contents` tool:
+- owner: `zircote`, repo: `.github`, path: `.github/gpm-config.yml`
+- Decode the base64 content and parse the YAML
+- Use the `repos` list as the managed repositories
+- Use `excluded_repos` to skip excluded repositories
+- Use `project.number` (1) and `project.org` (zircote) for project board operations
+
+Project board URL: `https://github.com/orgs/zircote/projects/1`
+
+## Instructions
+
+### Audit Board Consistency
+
+1. Fetch all items on the organization project board (project number 1)
+2. For each item, check its board status column against the item's actual GitHub state:
+
+**Mismatches to detect:**
+- Closed issues in "In Progress" or "To Do" columns — should be "Done"
+- Merged PRs not in "Done" column — should be "Done"
+- Open issues with assignees in "To Do" column — check if work has started (recent commits or comments) and flag for potential move to "In Progress"
+- Items in "Done" that are actually still open — should not be in "Done"
+- Archived items that have been reopened — should be moved back to active columns
+
+### Fix Mismatched Items
+
+Using the `update-project` safe-output (max 20 updates per run):
+
+- Move closed issues and merged PRs to "Done" column
+- Flag items with ambiguous status for manual review (do not auto-move these)
+- Prioritize fixing clearly wrong states (closed but "In Progress") over ambiguous ones
+
+### Find Missing Items
+
+Identify open issues and PRs across managed repos that are NOT on the project board:
+
+1. List all open issues and PRs from managed repos
+2. Cross-reference against project board items
+3. For missing items, determine appropriate column:
+   - Issues with assignees and recent activity → "In Progress"
+   - Issues with assignees but no recent activity → "To Do"
+   - Unassigned issues → "To Do"
+   - Open PRs → "In Progress"
+
+Add missing items to the board using `update-project` safe-output.
+
+### Report Board Health
+
+Compile board health metrics:
+- Total items on board (by column)
+- Items fixed (moved to correct column)
+- Items added (missing items placed on board)
+- Items needing manual review
+- Board utilization: items per column, ratio of active to backlog
+
+## Output
+
+Post board health report as an issue using the `create-issue` safe-output:
+
+```markdown
+## [Board Audit] Board Health Report — {YYYY-MM-DD}
+
+**Project**: zircote/projects/1 | **Repos scanned**: {N}
+
+### Board Summary
+
+| Column | Items | Changed |
+|--------|-------|---------|
+| To Do | {n} | +{added} |
+| In Progress | {n} | +{added} -{moved} |
+| Done | {n} | +{moved} |
+
+### Actions Taken
+
+| Action | Count |
+|--------|-------|
+| Mismatched items fixed | {n} |
+| Missing items added | {n} |
+| Items flagged for review | {n} |
+
+### Mismatches Fixed
+
+| Item | Repo | Was | Now | Reason |
+|------|------|-----|-----|--------|
+| #{number} | {repo} | In Progress | Done | Issue closed |
+| #{number} | {repo} | To Do | Done | PR merged |
+
+### Items Needing Manual Review
+
+| Item | Repo | Current Column | Issue |
+|------|------|----------------|-------|
+| #{number} | {repo} | {column} | {reason} |
+
+<details>
+<summary>Missing Items Added ({n})</summary>
+
+| Item | Repo | Column | Reason |
+|------|------|--------|--------|
+| #{number} | {repo} | {column} | {reason} |
+
+</details>
+```
+
+## Fallback
+
+If the safe-output (issue creation) fails (e.g., label missing, quota exceeded), output the complete report as your final response text so it is captured in the workflow run log.
+
+---
+*Generated by maintenance-board workflow — ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}*

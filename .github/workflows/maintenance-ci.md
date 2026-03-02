@@ -1,0 +1,175 @@
+---
+name: "Maintenance CI"
+description: "Monitors CI workflow health and pass rates across managed repos"
+tracker-id: mntci001
+timeout-minutes: 30
+
+on:
+  schedule: daily
+  workflow_dispatch:
+
+permissions:
+  actions: read
+  contents: read
+  issues: read
+  pull-requests: read
+
+engine:
+  id: copilot
+
+tools:
+  github:
+    toolsets: [context, repos, issues, pull_requests, orgs, search, actions]
+    app:
+      app-id: ${{ vars.GH_APP_ID }}
+      private-key: ${{ secrets.GH_APP_PRIVATE_KEY }}
+      owner: "zircote"
+      repositories: ["*"]
+
+  bash:
+    - "echo"
+    - "date"
+    - "jq"
+    - "sort"
+    - "uniq"
+    - "wc"
+    - "head"
+    - "tail"
+
+safe-outputs:
+  create-issue:
+    title-prefix: "[CI Health] "
+    labels: [gpm/report]
+    close-older-issues: true
+    target-repo: "zircote/.github"
+
+metadata:
+  team: platform
+  priority: high
+---
+
+# GPM Maintenance CI
+
+## Context
+
+You are a GPM automation agent for the **zircote** GitHub organization.
+
+Determine today's date by running `date -u +%Y-%m-%d` via bash before starting.
+Run ID: ${{ github.run_id }}
+
+This workflow runs from the `zircote/.github` repository and has cross-repo read
+access to all organization repositories via a GitHub App installation token.
+
+## Configuration
+
+Read the repository's `.github/gpm-config.yml` using the GitHub MCP `get_file_contents` tool:
+- owner: `zircote`, repo: `.github`, path: `.github/gpm-config.yml`
+- Decode the base64 content and parse the YAML
+- Use the `repos` list as the managed repositories
+- Use `excluded_repos` to skip excluded repositories
+- Use `project.number` (1) and `project.org` (zircote) for project board operations
+
+## Instructions
+
+### Check Workflow Health
+
+For each managed repository:
+
+1. **List all workflows** — use the Actions API to list workflow definitions
+2. **Identify failing workflows** — check the most recent run of each workflow on the default branch:
+   - Conclusion: `failure`, `timed_out`, or `cancelled`
+   - Record the failure reason, run URL, and timestamp
+3. **Identify disabled workflows** — workflows with `state: disabled_manually` or `state: disabled_inactivity`
+4. **Check for stale workflows** — workflows that haven't run in over 7 days on the default branch
+
+Use batch queries where possible. For repos with many workflows, paginate results.
+
+### Track Pass Rates
+
+For each workflow in each managed repository:
+
+1. Fetch the last 10 runs on the default branch (last 7 days where available)
+2. Calculate pass rate: `successful_runs / total_runs * 100`
+3. Categorize:
+   - **Healthy** (green): >= 90% pass rate
+   - **Warning** (yellow): 80-89% pass rate
+   - **Critical** (red): < 80% pass rate
+4. Identify trends:
+   - **Declining**: last 3 runs have more failures than first 3
+   - **Improving**: last 3 runs have more successes than first 3
+   - **Stable**: no significant change
+
+### Identify Common Failures
+
+Look for patterns across failing workflows:
+- Same error messages across repos (dependency issue, infrastructure problem)
+- Flaky tests (intermittent failures in same workflow)
+- Timeout patterns (workflows consistently timing out)
+
+### Report CI Health
+
+Compile per-repo CI health scores:
+- **Repo health score**: weighted average of workflow pass rates
+- **Overall org health**: average of all repo health scores
+
+## Output
+
+Post CI health report as an issue using the `create-issue` safe-output:
+
+```markdown
+## [CI Health] CI Health Report — {YYYY-MM-DD}
+
+**Repos scanned**: {N} | **Overall health**: {score}%
+
+### Organization Summary
+
+| Status | Workflows | Repos |
+|--------|-----------|-------|
+| :green_circle: Healthy (>=90%) | {n} | {n} |
+| :yellow_circle: Warning (80-89%) | {n} | {n} |
+| :red_circle: Critical (<80%) | {n} | {n} |
+| :white_circle: Disabled | {n} | {n} |
+| :grey_question: Stale (>7d) | {n} | {n} |
+
+### Failing Workflows
+
+| Repo | Workflow | Pass Rate | Last Failure | Trend |
+|------|----------|-----------|--------------|-------|
+| `{repo}` | {workflow} | {rate}% | {date} | {trend} |
+
+### Disabled Workflows
+
+| Repo | Workflow | Reason | Last Run |
+|------|----------|--------|----------|
+| `{repo}` | {workflow} | {reason} | {date} |
+
+### Stale Workflows (No runs in 7+ days)
+
+| Repo | Workflow | Last Run |
+|------|----------|----------|
+| `{repo}` | {workflow} | {date} |
+
+<details>
+<summary>Per-Repo Health Scores</summary>
+
+| Repo | Health Score | Workflows | Failing | Disabled |
+|------|-------------|-----------|---------|----------|
+| `{repo}` | {score}% | {total} | {failing} | {disabled} |
+
+</details>
+
+<details>
+<summary>Common Failure Patterns</summary>
+
+- **{pattern}**: seen in {n} workflows across {m} repos
+  - {repo}/{workflow}: {error_snippet}
+
+</details>
+```
+
+## Fallback
+
+If the safe-output (issue creation) fails (e.g., label missing, quota exceeded), output the complete report as your final response text so it is captured in the workflow run log.
+
+---
+*Generated by maintenance-ci workflow — ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}*

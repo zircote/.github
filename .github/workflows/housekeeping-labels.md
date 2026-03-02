@@ -1,0 +1,213 @@
+---
+name: "Housekeeping: Label Audit"
+description: "Audits and synchronizes label consistency across managed repos"
+tracker-id: hklbls01
+timeout-minutes: 30
+
+on:
+  schedule: weekly on monday
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: read
+  pull-requests: read
+
+engine:
+  id: copilot
+
+tools:
+  github:
+    toolsets: [context, repos, issues, pull_requests, orgs, search, labels]
+    app:
+      app-id: ${{ vars.GH_APP_ID }}
+      private-key: ${{ secrets.GH_APP_PRIVATE_KEY }}
+      owner: "zircote"
+      repositories: ["*"]
+
+  bash:
+    - "echo"
+    - "date"
+    - "jq"
+    - "sort"
+    - "uniq"
+    - "wc"
+    - "head"
+    - "tail"
+
+safe-outputs:
+  add-labels:
+    max: 50
+  create-issue:
+    title-prefix: "[Label Audit] "
+    labels: [gpm/report]
+    close-older-issues: true
+    target-repo: "zircote/.github"
+
+metadata:
+  team: platform
+  priority: high
+---
+
+# GPM Housekeeping: Label Audit
+
+## Context
+
+You are a GPM automation agent for the **zircote** GitHub organization.
+
+Determine today's date by running `date -u +%Y-%m-%d` via bash before starting.
+Run ID: ${{ github.run_id }}
+
+This workflow runs from the `zircote/.github` repository and has cross-repo read
+access to all organization repositories via a GitHub App installation token.
+
+## Configuration
+
+Read the repository's `.github/gpm-config.yml` using the GitHub MCP `get_file_contents` tool:
+- owner: `zircote`, repo: `.github`, path: `.github/gpm-config.yml`
+- Decode the base64 content and parse the YAML
+- Use the `repos` list as the managed repositories
+- Use `excluded_repos` to skip excluded repositories
+- Use `project.number` (1) and `project.org` (zircote) for project board operations
+
+### Label Taxonomy
+
+Load the canonical label taxonomy from `labels.yml` in the root of the `zircote/.github` repository:
+- owner: `zircote`, repo: `.github`, path: `labels.yml`
+- Decode the base64 content and parse the YAML
+- This defines the authoritative set of labels (name, color, description) that every managed repo should have
+
+## Instructions
+
+### Phase 1: Audit Labels
+
+For each managed repository from the config:
+
+1. Fetch all current labels from the repo using the labels toolset
+2. Compare against the canonical label taxonomy from `labels.yml`
+3. For each repo, identify:
+   - **Missing labels**: Labels in the taxonomy that do not exist in the repo
+   - **Extra labels**: Labels in the repo that are not in the taxonomy
+   - **Inconsistent labels**: Labels that exist but have a different color or description than the taxonomy
+4. Calculate a consistency score per repo: `(matching labels / total taxonomy labels) * 100`
+
+### Phase 2: Synchronize Labels
+
+For repos with missing or inconsistent labels:
+
+1. **Create missing labels** from the taxonomy definition (name, color, description)
+2. **Update inconsistent labels** to match the taxonomy color and description
+3. **Do NOT delete extra labels** — report them for manual review only
+4. Use the `add-labels` safe-output for label operations (max 50 per run)
+
+### Phase 3: Report Label Drift
+
+Compile findings across all managed repos into a report.
+
+### Phase 4: Generate Report
+
+Create an issue in `zircote/.github` with the following structure:
+
+#### Report Format
+
+```
+### [Label Audit] Weekly Report — {YYYY-MM-DD}
+
+**Scanned:** {N} repositories | **Run:** ${{ github.run_id }}
+
+---
+
+#### Summary
+
+| Metric | Count |
+|--------|-------|
+| Repos scanned | {n} |
+| Taxonomy labels defined | {n} |
+| Labels created (missing) | {n} |
+| Labels updated (inconsistent) | {n} |
+| Extra labels found (not in taxonomy) | {n} |
+| Repos at 100% consistency | {n} |
+
+---
+
+#### Consistency Scores
+
+| Repository | Score | Missing | Inconsistent | Extra |
+|------------|-------|---------|--------------|-------|
+| `{repo}` | {score}% | {n} | {n} | {n} |
+
+---
+
+#### Labels Created
+
+For each repo where labels were created:
+
+<details>
+<summary>{repo-name} — {count} labels created</summary>
+
+| Label | Color | Description |
+|-------|-------|-------------|
+| `{name}` | #{color} | {description} |
+
+</details>
+
+---
+
+#### Labels Updated
+
+For each repo where labels were updated:
+
+<details>
+<summary>{repo-name} — {count} labels updated</summary>
+
+| Label | Field | Was | Now |
+|-------|-------|-----|-----|
+| `{name}` | color | #{old} | #{new} |
+| `{name}` | description | {old} | {new} |
+
+</details>
+
+---
+
+#### Extra Labels (Manual Review)
+
+For each repo with extra labels not in the taxonomy:
+
+<details>
+<summary>{repo-name} — {count} extra labels</summary>
+
+| Label | Color | Description | Issue/PR Count |
+|-------|-------|-------------|----------------|
+| `{name}` | #{color} | {description} | {n} |
+
+</details>
+
+---
+
+#### Fully Consistent Repositories
+
+<details>
+<summary>{M} repositories at 100% consistency</summary>
+
+{comma-separated list}
+
+</details>
+
+---
+
+*Generated by housekeeping-labels workflow — ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}*
+```
+
+## Edge Cases
+
+- If a repository returns an API error (rate limit, permission denied), skip it and note the error in the report footer
+- If all repos are at 100% consistency, still create a report confirming the clean state
+- If a repository has been archived since the last run, exclude it
+- If rate limits are approaching, prioritize repos with the lowest consistency scores
+- If the `labels.yml` file cannot be read, abort and report the error
+- If a label create/update fails, log the error and continue with remaining labels
+- Batch label operations where possible to stay within rate limits and the max-50 safe-output limit
+
+## Fallback
+
+If the safe-output (issue creation) fails (e.g., label missing, quota exceeded), output the complete report as your final response text so it is captured in the workflow run log.
