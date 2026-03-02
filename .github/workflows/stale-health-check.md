@@ -42,6 +42,7 @@ tools:
 safe-outputs:
   create-discussion:
     title-prefix: "[stale-health] "
+    target-repo: "zircote/.github"
     category: "Project Reports"
     expires: 7d
     max: 1

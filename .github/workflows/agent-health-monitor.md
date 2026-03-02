@@ -42,6 +42,7 @@ tools:
 safe-outputs:
   create-discussion:
     title-prefix: "[agent-health] "
+    target-repo: "zircote/.github"
     category: "Project Reports"
     expires: 3d
     max: 2

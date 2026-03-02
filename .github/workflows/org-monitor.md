@@ -42,6 +42,7 @@ tools:
 safe-outputs:
   create-discussion:
     title-prefix: "[org-monitor] "
+    target-repo: "zircote/.github"
     category: "Project Reports"
     expires: 7d
     max: 1

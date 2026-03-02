@@ -44,6 +44,7 @@ tools:
 safe-outputs:
   create-discussion:
     title-prefix: "[dep-ecosystem] "
+    target-repo: "zircote/.github"
     category: "Project Reports"
     expires: 7d
     max: 1
