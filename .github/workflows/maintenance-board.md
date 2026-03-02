@@ -43,10 +43,6 @@ safe-outputs:
     target-repo: "zircote/.github"
   add-comment:
     hide-older-comments: true
-  update-issue:
-  update-project:
-    max: 20
-    project: "https://github.com/orgs/zircote/projects/1"
 
 metadata:
   team: platform
@@ -90,13 +86,13 @@ Project board URL: `https://github.com/orgs/zircote/projects/1`
 - Items in "Done" that are actually still open — should not be in "Done"
 - Archived items that have been reopened — should be moved back to active columns
 
-### Fix Mismatched Items
+### Identify Mismatched Items
 
-Using the `update-project` safe-output (max 20 updates per run):
+Flag items with incorrect status for the report:
 
-- Move closed issues and merged PRs to "Done" column
-- Flag items with ambiguous status for manual review (do not auto-move these)
-- Prioritize fixing clearly wrong states (closed but "In Progress") over ambiguous ones
+- Closed issues/merged PRs not in "Done" — recommend moving to "Done"
+- Items with ambiguous status — flag for manual review
+- Prioritize clearly wrong states (closed but "In Progress")
 
 ### Find Missing Items
 
@@ -104,13 +100,13 @@ Identify open issues and PRs across managed repos that are NOT on the project bo
 
 1. List all open issues and PRs from managed repos
 2. Cross-reference against project board items
-3. For missing items, determine appropriate column:
+3. For missing items, recommend appropriate column:
    - Issues with assignees and recent activity → "In Progress"
    - Issues with assignees but no recent activity → "To Do"
    - Unassigned issues → "To Do"
    - Open PRs → "In Progress"
 
-Add missing items to the board using `update-project` safe-output.
+List missing items in the report for manual addition.
 
 ### Report Board Health
 

@@ -23,7 +23,7 @@
 #
 # Audits project board consistency and fixes mismatched item statuses
 #
-# gh-aw-metadata: {"schema_version":"v1","frontmatter_hash":"7b88d3bf5b6d116ec93d2131213ee28fc0ca2e56260954050e9f1b3ca40e83e0","compiler_version":"v0.51.4"}
+# gh-aw-metadata: {"schema_version":"v1","frontmatter_hash":"0b006345353294a52e428b6d023e2294a4332e218786a33eb66ee074a9739fba","compiler_version":"v0.51.4"}
 
 name: "Maintenance Board"
 "on":
@@ -126,7 +126,7 @@ jobs:
           cat "/opt/gh-aw/prompts/safe_outputs_prompt.md"
           cat << 'GH_AW_PROMPT_EOF'
           <safe-output-tools>
-          Tools: add_comment, create_issue, update_issue, update_project, missing_tool, missing_data, noop
+          Tools: add_comment, create_issue, missing_tool, missing_data, noop
           </safe-output-tools>
           <github-context>
           The following GitHub context information is available for this workflow:
@@ -199,13 +199,13 @@ jobs:
           - Items in "Done" that are actually still open — should not be in "Done"
           - Archived items that have been reopened — should be moved back to active columns
 
-          ### Fix Mismatched Items
+          ### Identify Mismatched Items
 
-          Using the `update-project` safe-output (max 20 updates per run):
+          Flag items with incorrect status for the report:
 
-          - Move closed issues and merged PRs to "Done" column
-          - Flag items with ambiguous status for manual review (do not auto-move these)
-          - Prioritize fixing clearly wrong states (closed but "In Progress") over ambiguous ones
+          - Closed issues/merged PRs not in "Done" — recommend moving to "Done"
+          - Items with ambiguous status — flag for manual review
+          - Prioritize clearly wrong states (closed but "In Progress")
 
           ### Find Missing Items
 
@@ -213,13 +213,13 @@ jobs:
 
           1. List all open issues and PRs from managed repos
           2. Cross-reference against project board items
-          3. For missing items, determine appropriate column:
+          3. For missing items, recommend appropriate column:
              - Issues with assignees and recent activity → "In Progress"
              - Issues with assignees but no recent activity → "To Do"
              - Unassigned issues → "To Do"
              - Open PRs → "In Progress"
 
-          Add missing items to the board using `update-project` safe-output.
+          List missing items in the report for manual addition.
 
           ### Report Board Health
 
@@ -438,7 +438,7 @@ jobs:
           mkdir -p /tmp/gh-aw/safeoutputs
           mkdir -p /tmp/gh-aw/mcp-logs/safeoutputs
           cat > /opt/gh-aw/safeoutputs/config.json << 'GH_AW_SAFE_OUTPUTS_CONFIG_EOF'
-          {"add_comment":{"max":1},"create_issue":{"max":1},"missing_data":{},"missing_tool":{},"noop":{"max":1},"update_issue":{"max":1},"update_project":{"max":20}}
+          {"add_comment":{"max":1},"create_issue":{"max":1},"missing_data":{},"missing_tool":{},"noop":{"max":1}}
           GH_AW_SAFE_OUTPUTS_CONFIG_EOF
           cat > /opt/gh-aw/safeoutputs/tools.json << 'GH_AW_SAFE_OUTPUTS_TOOLS_EOF'
           [
@@ -505,70 +505,6 @@ jobs:
               "name": "add_comment"
             },
             {
-              "description": "Update an existing GitHub issue's title, body, labels, assignees, or milestone WITHOUT closing it. This tool is primarily for editing issue metadata and content. While it supports changing status between 'open' and 'closed', use close_issue instead when you want to close an issue with a closing comment. Body updates support replacing, appending to, prepending content, or updating a per-run \"island\" section. CONSTRAINTS: Maximum 1 issue(s) can be updated.",
-              "inputSchema": {
-                "additionalProperties": false,
-                "properties": {
-                  "assignees": {
-                    "description": "Replace the issue assignees with this list of GitHub usernames (e.g., ['octocat', 'mona']).",
-                    "items": {
-                      "type": "string"
-                    },
-                    "type": "array"
-                  },
-                  "body": {
-                    "description": "Issue body content in Markdown. For 'replace', this becomes the entire body. For 'append'/'prepend', this content is added with a separator and an attribution footer. For 'replace-island', only the run-specific section is updated.",
-                    "type": "string"
-                  },
-                  "issue_number": {
-                    "description": "Issue number to update. This is the numeric ID from the GitHub URL (e.g., 789 in github.com/owner/repo/issues/789). Required when the workflow target is '*' (any issue).",
-                    "type": [
-                      "number",
-                      "string"
-                    ]
-                  },
-                  "labels": {
-                    "description": "Replace the issue labels with this list (e.g., ['bug', 'tracking:foo']). Labels must exist in the repository.",
-                    "items": {
-                      "type": "string"
-                    },
-                    "type": "array"
-                  },
-                  "milestone": {
-                    "description": "Milestone number to assign (e.g., 1). Use null to clear.",
-                    "type": [
-                      "number",
-                      "string"
-                    ]
-                  },
-                  "operation": {
-                    "description": "How to update the issue body: 'append' (default - add to end with separator), 'prepend' (add to start with separator), 'replace' (overwrite entire body), or 'replace-island' (update a run-specific section).",
-                    "enum": [
-                      "replace",
-                      "append",
-                      "prepend",
-                      "replace-island"
-                    ],
-                    "type": "string"
-                  },
-                  "status": {
-                    "description": "New issue status: 'open' to reopen a closed issue, 'closed' to close an open issue.",
-                    "enum": [
-                      "open",
-                      "closed"
-                    ],
-                    "type": "string"
-                  },
-                  "title": {
-                    "description": "New issue title to replace the existing title.",
-                    "type": "string"
-                  }
-                },
-                "type": "object"
-              },
-              "name": "update_issue"
-            },
-            {
               "description": "Report that a tool or capability needed to complete the task is not available, or share any information you deem important about missing functionality or limitations. Use this when you cannot accomplish what was requested because the required functionality is missing or access is restricted.",
               "inputSchema": {
                 "additionalProperties": false,
@@ -609,142 +545,6 @@ jobs:
                 "type": "object"
               },
               "name": "noop"
-            },
-            {
-              "description": "Manage GitHub Projects: add issues/pull requests/draft issues, update item fields (status, priority, effort, dates), manage custom fields, and create project views. Use this to organize work by adding items to projects, updating field values, creating custom fields up-front, and setting up project views (table, board, roadmap).\n\nThree modes: (1) Add or update project items with custom field values; (2) Create project fields; (3) Create project views. This is the primary tool for ProjectOps automation - add items to projects, set custom fields for tracking, and organize project boards. CONSTRAINTS: Maximum 20 project operation(s) can be performed. Default project URL: \"https://github.com/orgs/zircote/projects/1\".",
-              "inputSchema": {
-                "additionalProperties": false,
-                "properties": {
-                  "content_number": {
-                    "description": "Issue or pull request number to add to the project. This is the numeric ID from the GitHub URL (e.g., 123 in github.com/owner/repo/issues/123 for issue #123, or 456 in github.com/owner/repo/pull/456 for PR #456), or a temporary ID from a recent create_issue call (e.g., 'aw_abc123', '#aw_Test123'). Required when content_type is 'issue' or 'pull_request'.",
-                    "type": [
-                      "number",
-                      "string"
-                    ]
-                  },
-                  "content_type": {
-                    "description": "Type of item to add to the project. Use 'issue' or 'pull_request' to add existing repo content, or 'draft_issue' to create a draft item inside the project. Required when operation is not specified.",
-                    "enum": [
-                      "issue",
-                      "pull_request",
-                      "draft_issue"
-                    ],
-                    "type": "string"
-                  },
-                  "create_if_missing": {
-                    "description": "Whether to create the project if it doesn't exist. Defaults to false. Requires projects:write permission when true.",
-                    "type": "boolean"
-                  },
-                  "draft_body": {
-                    "description": "Optional body for a Projects v2 draft issue (markdown). Only used when content_type is 'draft_issue'.",
-                    "type": "string"
-                  },
-                  "draft_issue_id": {
-                    "description": "Temporary ID of an existing draft issue to update (e.g., 'aw_abc1', '#aw_Test123'). Use this to reference a draft created earlier with a matching temporary_id. When provided, draft_title is not required for updates.",
-                    "pattern": "^#?aw_[A-Za-z0-9]{3,8}$",
-                    "type": "string"
-                  },
-                  "draft_title": {
-                    "description": "Title for a Projects v2 draft issue. Required when content_type is 'draft_issue'.",
-                    "type": "string"
-                  },
-                  "field_definitions": {
-                    "description": "Field definitions to create when operation is create_fields. Required when operation='create_fields'.",
-                    "items": {
-                      "additionalProperties": false,
-                      "properties": {
-                        "data_type": {
-                          "description": "Field type. Use SINGLE_SELECT with options for enumerated values.",
-                          "enum": [
-                            "TEXT",
-                            "NUMBER",
-                            "DATE",
-                            "SINGLE_SELECT",
-                            "ITERATION"
-                          ],
-                          "type": "string"
-                        },
-                        "name": {
-                          "description": "Field name to create (e.g., 'size', 'priority').",
-                          "type": "string"
-                        },
-                        "options": {
-                          "description": "Options for SINGLE_SELECT fields.",
-                          "items": {
-                            "type": "string"
-                          },
-                          "type": "array"
-                        }
-                      },
-                      "required": [
-                        "name",
-                        "data_type"
-                      ],
-                      "type": "object"
-                    },
-                    "type": "array"
-                  },
-                  "fields": {
-                    "description": "Custom field values to set on the project item (e.g., {'Status': 'In Progress', 'Priority': 'High'}). Field names must match custom fields defined in the project.",
-                    "type": "object"
-                  },
-                  "operation": {
-                    "description": "Optional operation mode. Use create_fields to create required fields up-front, or create_view to add a project view. When omitted, the tool adds/updates project items.",
-                    "enum": [
-                      "create_fields",
-                      "create_view"
-                    ],
-                    "type": "string"
-                  },
-                  "project": {
-                    "description": "Full GitHub project URL (e.g., 'https://github.com/orgs/myorg/projects/42' or 'https://github.com/users/username/projects/5'), or a temporary project ID from a recent create_project call (e.g., '#aw_abc1', 'aw_Test123'). Project names or numbers alone are NOT accepted.",
-                    "pattern": "^(https://github\\.com/(orgs|users)/[^/]+/projects/\\d+|#?aw_[A-Za-z0-9]{3,8})$",
-                    "type": "string"
-                  },
-                  "temporary_id": {
-                    "description": "Unique temporary identifier for this draft issue (e.g., 'aw_abc1', '#aw_Test123'). Provide this when creating a new draft to enable future updates via draft_issue_id. Format: optional leading '#', then 'aw_' followed by 3 to 8 alphanumeric characters.",
-                    "pattern": "^#?aw_[A-Za-z0-9]{3,8}$",
-                    "type": "string"
-                  },
-                  "view": {
-                    "additionalProperties": false,
-                    "description": "View definition to create when operation is create_view. Required when operation='create_view'.",
-                    "properties": {
-                      "filter": {
-                        "type": "string"
-                      },
-                      "layout": {
-                        "enum": [
-                          "table",
-                          "board",
-                          "roadmap"
-                        ],
-                        "type": "string"
-                      },
-                      "name": {
-                        "type": "string"
-                      },
-                      "visible_fields": {
-                        "description": "Field IDs to show in the view (table/board only).",
-                        "items": {
-                          "type": "number"
-                        },
-                        "type": "array"
-                      }
-                    },
-                    "required": [
-                      "name",
-                      "layout"
-                    ],
-                    "type": "object"
-                  }
-                },
-                "required": [
-                  "project"
-                ],
-                "type": "object"
-              },
-              "name": "update_project"
             },
             {
               "description": "Report that data or information needed to complete the task is not available. Use this when you cannot accomplish what was requested because required data, context, or information is missing.",
@@ -882,103 +682,6 @@ jobs:
                   "type": "string",
                   "sanitize": true,
                   "maxLength": 65000
-                }
-              }
-            },
-            "update_issue": {
-              "defaultMax": 1,
-              "fields": {
-                "assignees": {
-                  "type": "array",
-                  "itemType": "string",
-                  "itemSanitize": true,
-                  "itemMaxLength": 39
-                },
-                "body": {
-                  "type": "string",
-                  "sanitize": true,
-                  "maxLength": 65000
-                },
-                "issue_number": {
-                  "issueOrPRNumber": true
-                },
-                "labels": {
-                  "type": "array",
-                  "itemType": "string",
-                  "itemSanitize": true,
-                  "itemMaxLength": 128
-                },
-                "milestone": {
-                  "optionalPositiveInteger": true
-                },
-                "operation": {
-                  "type": "string",
-                  "enum": [
-                    "replace",
-                    "append",
-                    "prepend",
-                    "replace-island"
-                  ]
-                },
-                "repo": {
-                  "type": "string",
-                  "maxLength": 256
-                },
-                "status": {
-                  "type": "string",
-                  "enum": [
-                    "open",
-                    "closed"
-                  ]
-                },
-                "title": {
-                  "type": "string",
-                  "sanitize": true,
-                  "maxLength": 128
-                }
-              },
-              "customValidation": "requiresOneOf:status,title,body"
-            },
-            "update_project": {
-              "defaultMax": 10,
-              "fields": {
-                "content_number": {
-                  "issueNumberOrTemporaryId": true
-                },
-                "content_type": {
-                  "type": "string",
-                  "enum": [
-                    "issue",
-                    "pull_request",
-                    "draft_issue"
-                  ]
-                },
-                "draft_body": {
-                  "type": "string",
-                  "sanitize": true,
-                  "maxLength": 65000
-                },
-                "draft_title": {
-                  "type": "string",
-                  "sanitize": true,
-                  "maxLength": 256
-                },
-                "fields": {
-                  "type": "object"
-                },
-                "issue": {
-                  "optionalPositiveInteger": true
-                },
-                "project": {
-                  "required": true,
-                  "type": "string",
-                  "sanitize": true,
-                  "maxLength": 512,
-                  "pattern": "^https://[^/]+/(orgs|users)/[^/]+/projects/\\d+",
-                  "patternError": "must be a full GitHub project URL (e.g., https://github.com/orgs/myorg/projects/42)"
-                },
-                "pull_request": {
-                  "optionalPositiveInteger": true
                 }
               }
             }
@@ -1523,7 +1226,6 @@ jobs:
         uses: github/gh-aw/actions/setup@e422993ded9178a8a35804fbc44b1ca761513d15 # v0.51.4
         with:
           destination: /opt/gh-aw/actions
-          safe-output-projects: 'true'
       - name: Download agent output artifact
         continue-on-error: true
         uses: actions/download-artifact@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3 # v8
@@ -1543,11 +1245,9 @@ jobs:
           GH_AW_ALLOWED_DOMAINS: "api.business.githubcopilot.com,api.enterprise.githubcopilot.com,api.github.com,api.githubcopilot.com,api.individual.githubcopilot.com,api.snapcraft.io,archive.ubuntu.com,azure.archive.ubuntu.com,crl.geotrust.com,crl.globalsign.com,crl.identrust.com,crl.sectigo.com,crl.thawte.com,crl.usertrust.com,crl.verisign.com,crl3.digicert.com,crl4.digicert.com,crls.ssl.com,github.com,host.docker.internal,json-schema.org,json.schemastore.org,keyserver.ubuntu.com,ocsp.digicert.com,ocsp.geotrust.com,ocsp.globalsign.com,ocsp.identrust.com,ocsp.sectigo.com,ocsp.ssl.com,ocsp.thawte.com,ocsp.usertrust.com,ocsp.verisign.com,packagecloud.io,packages.cloud.google.com,packages.microsoft.com,ppa.launchpad.net,raw.githubusercontent.com,registry.npmjs.org,s.symcb.com,s.symcd.com,security.ubuntu.com,telemetry.enterprise.githubcopilot.com,ts-crl.ws.symantec.com,ts-ocsp.ws.symantec.com"
           GITHUB_SERVER_URL: ${{ github.server_url }}
           GITHUB_API_URL: ${{ github.api_url }}
-          GH_AW_SAFE_OUTPUTS_HANDLER_CONFIG: "{\"add_comment\":{\"hide_older_comments\":true,\"max\":1},\"create_issue\":{\"close_older_issues\":true,\"labels\":[\"gpm/report\"],\"max\":1,\"target-repo\":\"zircote/.github\",\"title_prefix\":\"[Board Audit] \"},\"missing_data\":{},\"missing_tool\":{},\"update_issue\":{\"allow_body\":true,\"max\":1},\"update_project\":{\"max\":20,\"project\":\"https://github.com/orgs/zircote/projects/1\"}}"
-          GH_AW_PROJECT_URL: "https://github.com/orgs/zircote/projects/1"
-          GH_AW_PROJECT_GITHUB_TOKEN: ${{ secrets.GH_AW_PROJECT_GITHUB_TOKEN }}
+          GH_AW_SAFE_OUTPUTS_HANDLER_CONFIG: "{\"add_comment\":{\"hide_older_comments\":true,\"max\":1},\"create_issue\":{\"close_older_issues\":true,\"labels\":[\"gpm/report\"],\"max\":1,\"target-repo\":\"zircote/.github\",\"title_prefix\":\"[Board Audit] \"},\"missing_data\":{},\"missing_tool\":{}}"
         with:
-          github-token: ${{ secrets.GH_AW_PROJECT_GITHUB_TOKEN }}
+          github-token: ${{ secrets.GH_AW_GITHUB_TOKEN || secrets.GITHUB_TOKEN }}
           script: |
             const { setupGlobals } = require('/opt/gh-aw/actions/setup_globals.cjs');
             setupGlobals(core, github, context, exec, io);
