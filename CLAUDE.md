@@ -154,6 +154,19 @@ The following gh-aw agentic workflows are defined in `.github/workflows/`:
 | `agent-health-monitor.md` | `agenthm01` | daily | 10 min |
 | `stale-health-check.md` | `stlhlt01` | weekly | 20 min |
 | `dependency-ecosystem.md` | `depeco01` | weekly | 25 min |
+| `daily-standup.md` | `dlystd01` | daily weekdays | 20 min |
+| `daily-review-nudge.md` | `dlyrnu01` | daily weekdays | 20 min |
+| `daily-triage.md` | `dlytri01` | daily weekdays | 20 min |
+| `maintenance-board.md` | `mntbrd01` | daily | 30 min |
+| `maintenance-ci.md` | `mntci001` | daily | 30 min |
+| `smart-alerts.md` | `smalrt01` | every 6 hours | 20 min |
+| `housekeeping-branches.md` | `hkbran01` | weekly sun | 30 min |
+| `housekeeping-deps.md` | `hkdeps01` | weekly mon | 30 min |
+| `housekeeping-labels.md` | `hklbls01` | weekly mon | 30 min |
+| `housekeeping-stale.md` | `hkstale1` | weekly sun | 30 min |
+| `maintenance-release.md` | `mntrel01` | weekly mon | 30 min |
+| `smart-retro.md` | `smretro1` | every 14 days | 30 min |
+| `scheduler.md` | `sched001` | daily | 15 min |
 
 ### Compiling
 
@@ -166,7 +179,10 @@ gh-aw workflows are markdown files that compile to `.lock.yml` via `gh aw compil
 bash scripts/compile-gh-aw.sh <workflow-name>
 
 # Compile + patch all gh-aw workflows
-for wf in org-monitor stale-health-check dependency-ecosystem agent-health-monitor; do
+for wf in org-monitor agent-health-monitor stale-health-check dependency-ecosystem \
+          daily-standup daily-review-nudge daily-triage maintenance-board maintenance-ci \
+          smart-alerts housekeeping-branches housekeeping-deps housekeeping-labels \
+          housekeeping-stale maintenance-release smart-retro scheduler; do
   bash scripts/compile-gh-aw.sh "$wf"
 done
 
