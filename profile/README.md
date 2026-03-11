@@ -24,10 +24,11 @@ Creator of **[swagger-php](https://github.com/zircote/swagger-php)**, the PHP li
 
 ### Focus Areas
 
-- **Open Standards for AI Tooling** - Authoring specifications that make AI development portable and interoperable
-- **AI-Assisted Development** - Building Claude Code plugins, agents, and workflows
+- **AI Memory Systems** - Building [Atlatl](https://github.com/zircote/atlatl), a structured memory server for AI agents implementing the MIF specification
+- **Open Standards for AI Tooling** - Authoring specifications (MIF, ccpkg) that make AI development portable and interoperable
+- **Agentic Workflows** - GitHub Agentic Workflows (`gh-aw`) for autonomous, event-driven repository operations at scale
+- **AI-Assisted Development** - Claude Code plugins, agents, and multi-agent orchestration
 - **DevOps & Platform Engineering** - Infrastructure automation, CI/CD, AWS architecture
-- **Open Source Tooling** - Creating and maintaining tools that developers actually use
 
 ---
 
@@ -78,23 +79,28 @@ Human memory isn't a tape recorder—it's a constructive process where our menta
 
 ![The Recursive Loop: How Memory and Ontology Shape Our Reality](https://raw.githubusercontent.com/zircote/.github/main/docs/_assets/memory-ontology-recursion.jpg)
 
-The goal: AI assistants that don't just respond—they accumulate knowledge, recognize patterns, and evolve their understanding of your codebase and preferences. MIF grew directly from this research — encoding these cognitive principles into an interoperable specification.
+MIF grew directly from this research, and **[Atlatl](https://github.com/zircote/atlatl)** is where it comes to life — my 5th+ iteration of a memory system, now focused on bringing the MIF specification into its full vision. Current capabilities include **custom ontologies** (user-definable taxonomies for domain-specific memory organization), a **Large Result Offloading (LRO)** pattern for managing result sets that exceed context limits, and **agentic custodial activities** — autonomous housekeeping, confidence decay, garbage collection, and reindexing that keep the memory store healthy without human intervention.
+
+I'm also writing an academic paper with experiments measuring memory system impact across different LLM models. One of the more interesting findings so far is how much variance there is in model performance — some models handle structured recall significantly better than others in ways that aren't obvious from general benchmarks.
+
+I hadn't planned to become this deep in the space. It turned out to be far more complex and fascinating than I expected, and I'm constantly reminded of how much there is still to learn. Between the farm and the day job, time is scarce — but I'm finding genuine, enjoyable success with Atlatl and hoping to have a preview ready for sharing soon.
+
+On the automation front, **GitHub Agentic Workflows (`gh-aw`)** have been equally captivating — both professionally and personally. The ability to define autonomous, event-driven agent workflows as markdown that compile to GitHub Actions has changed how I think about repository operations at scale. This repo alone runs 17 agentic workflows for everything from daily triage and standup to dependency housekeeping and retrospectives across the organization.
 
 ---
 
 ## Featured Projects
 
-### [mnemonic](https://github.com/zircote/mnemonic) — Persistent Memory for Claude Code
+### [Atlatl](https://github.com/zircote/atlatl) — Structured Memory Server for AI Agents
 
-A pure filesystem-based memory system that gives Claude Code long-term memory across sessions. Memories are stored as markdown files with YAML frontmatter in a git-versioned directory, organized by cognitive type:
+A Rust MCP server implementing the [MIF specification](https://mif-spec.dev) — providing AI agents with persistent, structured memory that compounds knowledge across sessions. Built around hybrid search combining BM25 text relevance and vector similarity via Reciprocal Rank Fusion:
 
-- **Semantic memory** — decisions, knowledge, entities
-- **Episodic memory** — incidents, sessions, debugging journeys
-- **Procedural memory** — runbooks, patterns, workflows
+- **Custom ontologies** — user-definable namespace taxonomies for domain-specific memory organization (semantic, episodic, procedural, and beyond)
+- **Large Result Offloading (LRO)** — transparently writes large result sets to JSONL files with schema descriptors and jq recipes, keeping agent context windows lean
+- **Agentic custodial activities** — autonomous confidence decay, garbage collection, text reindexing, and stale offload cleanup on configurable schedules
+- **Blackboard system** — ephemeral key-value scratchpads with TTL and an alert subsystem for cross-agent coordination within tasks
 
-[MIF Level 3](https://github.com/zircote/MIF) compliant with ontology-driven entity discovery, bi-temporal tracking, memory decay, and relationship graphs. Research-validated on the Letta LoCoMo benchmark (74.0% accuracy vs 68.5% for graph-based approaches) — proving that LLMs work best with the filesystem operations they were pre-trained on.
-
-Ships as a Claude Code plugin with 13 commands, 4 autonomous agents, and event-driven hooks that enable proactive recall and silent capture.
+6,056 tests passing, 100/100 composite quality score after 10 rounds of swarm-orchestrated refactoring. Supports local embeddings (fastembed/ONNX), Ollama, and OpenAI-compatible embedding providers.
 
 ### [claude-team-orchestration](https://github.com/zircote/claude-team-orchestration) — Multi-Agent Orchestration & RLM
 
@@ -136,7 +142,7 @@ Seven issue templates, eleven runbooks, and comprehensive user documentation mak
 ## Active Projects
 
 <!-- LAST_UPDATED_START -->
- __Last updated: 2026-03-01__
+ __Last updated: 2026-03-11__
 <!-- LAST_UPDATED_END -->
 
 ### Most Active Repositories
