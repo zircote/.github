@@ -100,8 +100,6 @@ A Rust MCP server implementing the [MIF specification](https://mif-spec.dev) —
 - **Agentic custodial activities** — autonomous confidence decay, garbage collection, text reindexing, and stale offload cleanup on configurable schedules
 - **Blackboard system** — ephemeral key-value scratchpads with TTL and an alert subsystem for cross-agent coordination within tasks
 
-6,056 tests passing, 100/100 composite quality score after 10 rounds of swarm-orchestrated refactoring. Supports local embeddings (fastembed/ONNX), Ollama, and OpenAI-compatible embedding providers.
-
 ### [claude-team-orchestration](https://github.com/zircote/claude-team-orchestration) — Multi-Agent Orchestration & RLM
 
 A production-grade framework for coordinating teams of Claude Code agents. Built on Claude Code's agent teams API, it provides team management, shared task lists, inter-agent messaging, and seven proven orchestration patterns — from parallel specialists to self-organizing swarms.
