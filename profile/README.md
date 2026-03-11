@@ -24,7 +24,7 @@ Creator of **[swagger-php](https://github.com/zircote/swagger-php)**, the PHP li
 
 ### Focus Areas
 
-- **AI Memory Systems** - Building [Atlatl](https://github.com/zircote/atlatl), a structured memory server for AI agents implementing the MIF specification
+- **AI Memory Systems** - Building **Atlatl**, a structured memory server for AI agents implementing the MIF specification
 - **Open Standards for AI Tooling** - Authoring specifications (MIF, ccpkg) that make AI development portable and interoperable
 - **Agentic Workflows** - GitHub Agentic Workflows (`gh-aw`) for autonomous, event-driven repository operations at scale
 - **AI-Assisted Development** - Claude Code plugins, agents, and multi-agent orchestration
@@ -79,7 +79,7 @@ Human memory isn't a tape recorder—it's a constructive process where our menta
 
 ![The Recursive Loop: How Memory and Ontology Shape Our Reality](https://raw.githubusercontent.com/zircote/.github/main/docs/_assets/memory-ontology-recursion.jpg)
 
-MIF grew directly from this research, and **[Atlatl](https://github.com/zircote/atlatl)** is where it comes to life — my 5th+ iteration of a memory system, now focused on bringing the MIF specification into its full vision. Current capabilities include **custom ontologies** (user-definable taxonomies for domain-specific memory organization), a **Large Result Offloading (LRO)** pattern for managing result sets that exceed context limits, and **agentic custodial activities** — autonomous housekeeping, confidence decay, garbage collection, and reindexing that keep the memory store healthy without human intervention.
+MIF grew directly from this research, and **Atlatl** is where it comes to life — my 5th+ iteration of a memory system, now focused on bringing the MIF specification into its full vision. Current capabilities include **custom ontologies** (user-definable taxonomies for domain-specific memory organization), a **Large Result Offloading (LRO)** pattern for managing result sets that exceed context limits, and **agentic custodial activities** — autonomous housekeeping, confidence decay, garbage collection, and reindexing that keep the memory store healthy without human intervention.
 
 I'm also writing an academic paper with experiments measuring memory system impact across different LLM models. One of the more interesting findings so far is how much variance there is in model performance — some models handle structured recall significantly better than others in ways that aren't obvious from general benchmarks.
 
@@ -91,7 +91,7 @@ On the automation front, **GitHub Agentic Workflows (`gh-aw`)** have been equall
 
 ## Featured Projects
 
-### [Atlatl](https://github.com/zircote/atlatl) — Structured Memory Server for AI Agents
+### Atlatl — Structured Memory Server for AI Agents
 
 A Rust MCP server implementing the [MIF specification](https://mif-spec.dev) — providing AI agents with persistent, structured memory that compounds knowledge across sessions. Built around hybrid search combining BM25 text relevance and vector similarity via Reciprocal Rank Fusion:
 
