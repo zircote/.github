@@ -132,7 +132,7 @@ jobs:
           echo "Research content generated"
 
       - name: Upload Research Artifact
-        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v4.6.0
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4.6.0
         with:
           name: research-content
           path: research-content.md
@@ -212,7 +212,7 @@ jobs:
           fi
 
       - name: Upload Presentation Artifacts
-        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v4.6.0
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4.6.0
         with:
           name: presentation-output
           path: ${{ inputs.output-dir }}/
