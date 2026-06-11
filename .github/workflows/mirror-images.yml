@@ -34,10 +34,10 @@ jobs:
           # (driver-opts: image=...) in consumer repos.
           - source: docker.io/moby/buildkit:buildx-stable-1
             dest: ghcr.io/zircote/mirror/buildkit:buildx-stable-1
-          # Rust builder base (ccab Dockerfile builder stage).
+          # Example: language builder base image.
           - source: docker.io/library/rust:1.96-alpine
             dest: ghcr.io/zircote/mirror/rust:1.96-alpine
-          # Distroless runtime base (ccab Dockerfile runtime stage).
+          # Example: minimal runtime base image.
           - source: gcr.io/distroless/static-debian12:nonroot
             dest: ghcr.io/zircote/mirror/static-debian12:nonroot
     steps:

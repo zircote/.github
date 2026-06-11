@@ -102,14 +102,14 @@ jobs:
 
           # 2) Deployment-frequency count metric
           jq -cn --argjson now "$now" --argjson tags "$tags" \
-            '{series:[{metric:"hmh.dora.deployment", points:[[$now,1]], type:"count", tags:$tags}]}' \
+            '{series:[{metric:"__org__.dora.deployment", points:[[$now,1]], type:"count", tags:$tags}]}' \
             | curl -fsS -X POST "https://api.${DD_SITE}/api/v1/series" \
                 -H "DD-API-KEY: ${DD_API_KEY}" -H 'Content-Type: application/json' -d @- >/dev/null
 
           # 3) Lead-time gauge (only when known)
           if [ "${LEAD_TIME}" != "0" ]; then
             jq -cn --argjson now "$now" --argjson lt "${LEAD_TIME}" --argjson tags "$tags" \
-              '{series:[{metric:"hmh.dora.lead_time_seconds", points:[[$now,$lt]], type:"gauge", tags:$tags}]}' \
+              '{series:[{metric:"__org__.dora.lead_time_seconds", points:[[$now,$lt]], type:"gauge", tags:$tags}]}' \
               | curl -fsS -X POST "https://api.${DD_SITE}/api/v1/series" \
                   -H "DD-API-KEY: ${DD_API_KEY}" -H 'Content-Type: application/json' -d @- >/dev/null
           fi
