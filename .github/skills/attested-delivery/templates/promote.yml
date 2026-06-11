@@ -1,0 +1,140 @@
+# Centralized reusable workflow: referrer-aware promotion between registries.
+#
+# Promotes an immutable digest from a source registry (e.g. GHCR) to a destination
+# (e.g. ECR per environment) using `cosign copy`, which carries the signature and
+# all attestations (SLSA provenance, SBOM, vuln) as OCI referrers. This is the
+# deliberate replacement for `crane cp`, which copies only the image manifest and
+# orphans every referrer (breaking the promotion invariant).
+#
+# A post-copy verification job re-verifies the attestations at the destination and
+# fails the promotion if they do not re-verify.
+#
+# Primary sources:
+#   - cosign copy (carries sig/att/sbom referrers): https://docs.sigstore.dev/cosign/signing/copy/
+#   - OCI referrers / reference types:              https://github.com/opencontainers/distribution-spec/blob/main/spec.md#listing-referrers
+#   - AWS ECR + Sigstore referrers:                 https://docs.aws.amazon.com/AmazonECR/latest/userguide/referrers-api.html
+
+name: promote
+
+on:
+  workflow_call:
+    inputs:
+      source-ref:
+        description: "Source image by digest (registry/repo@sha256:...)"
+        required: true
+        type: string
+      dest-repo:
+        description: "Destination repository WITHOUT tag/digest (e.g. <acct>.dkr.ecr.us-east-1.amazonaws.com/app)"
+        required: true
+        type: string
+      target-env:
+        description: "Environment label this promotion targets (int|cert|prod)"
+        required: true
+        type: string
+      aws-role-arn:
+        description: "IAM role to assume for the destination ECR registry"
+        required: true
+        type: string
+      aws-region:
+        required: false
+        type: string
+        default: "us-east-1"
+      signer-profile-arn:
+        description: "Optional AWS Signer signing-profile ARN; when set, add an ECR-native Notation secondary signature on the promoted digest"
+        required: false
+        type: string
+        default: ""
+
+permissions: {}
+
+jobs:
+  copy:
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.target-env }}
+    permissions:
+      id-token: write
+      contents: read
+      packages: read
+    outputs:
+      dest-ref: ${{ steps.compute.outputs.dest-ref }}
+    steps:
+      - name: Compute destination ref (digest preserved => byte-identical)
+        id: compute
+        run: |
+          set -euo pipefail
+          case "${SOURCE_REF}" in
+            *@sha256:*) ;;
+            *) echo "::error::source-ref must be digest-pinned (registry/repo@sha256:...), got '${SOURCE_REF}'"; exit 1 ;;
+          esac
+          DIGEST="${SOURCE_REF##*@}"
+          echo "dest-ref=${DEST_REPO}@${DIGEST}" >> "$GITHUB_OUTPUT"
+        env:
+          SOURCE_REF: ${{ inputs.source-ref }}
+          DEST_REPO: ${{ inputs.dest-repo }}
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@e7f100cf4c008499ea8adda475de1042d6975c7b  # v6.2.0
+        with:
+          role-to-assume: ${{ inputs.aws-role-arn }}
+          aws-region: ${{ inputs.aws-region }}
+      - name: Login to ECR (destination)
+        uses: aws-actions/amazon-ecr-login@fa648b43de3d4d023bcb3f89ed6940096949c419  # v2.1.5
+      - name: Login to GHCR (source)
+        uses: docker/login-action@650006c6eb7dba73a995cc03b0b2d7f5ca915bee  # v4.2.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ github.token }}
+      - name: Install cosign
+        uses: sigstore/cosign-installer@6f9f17788090df1f26f669e9d70d6ae9567deba6  # v4.1.2
+        with:
+          cosign-release: v3.0.6
+      - name: Referrer-aware copy (image + sig + attestations)
+        env:
+          SOURCE_REF: ${{ inputs.source-ref }}
+          DEST_REF: ${{ steps.compute.outputs.dest-ref }}
+        run: cosign copy -f "${SOURCE_REF}" "${DEST_REF}"
+
+      # OPTIONAL secondary, ECR-native signature via AWS Signer + Notation.
+      # Runs only when `signer-profile-arn` is supplied (the signing profile is
+      # environment-specific). Installer + sign commands per AWS Signer docs:
+      #   https://docs.aws.amazon.com/signer/latest/developerguide/image-signing-prerequisites.html
+      #   https://docs.aws.amazon.com/signer/latest/developerguide/image-signing-steps.html
+      - name: AWS Signer / Notation secondary signature (ECR-native)
+        if: ${{ inputs.signer-profile-arn != '' }}
+        env:
+          DEST_REF: ${{ steps.compute.outputs.dest-ref }}
+          DEST_REPO: ${{ inputs.dest-repo }}
+          PROFILE_ARN: ${{ inputs.signer-profile-arn }}
+          AWS_DEFAULT_REGION: ${{ inputs.aws-region }}
+        run: |
+          set -euo pipefail
+          tmp="$(mktemp -d)"
+          # AWS-published installer (HTTPS from the AWS Signer distribution endpoint):
+          # Notation client + com.amazonaws.signer.notation.plugin
+          curl -fsSL -o "${tmp}/aws-signer-notation-cli_amd64.deb" \
+            https://d2hvyiie56hcat.cloudfront.net/linux/amd64/installer/deb/latest/aws-signer-notation-cli_amd64.deb
+          sudo dpkg -i -E "${tmp}/aws-signer-notation-cli_amd64.deb"
+          notation version
+          notation plugin ls
+          # Authenticate Notation to the destination ECR registry
+          REGISTRY="${DEST_REPO%%/*}"
+          aws ecr get-login-password --region "${AWS_DEFAULT_REGION}" \
+            | notation login --username AWS --password-stdin "${REGISTRY}"
+          # Sign the promoted digest with the AWS Signer profile
+          notation sign "${DEST_REF}" \
+            --plugin "com.amazonaws.signer.notation.plugin" \
+            --id "${PROFILE_ARN}"
+
+  verify:
+    needs: copy
+    permissions:
+      id-token: write
+      contents: read
+      packages: read
+      attestations: read
+    uses: ./.github/workflows/verify-attestation.yml
+    with:
+      image-ref: ${{ needs.copy.outputs.dest-ref }}
+      attestation-repo: ${{ github.repository }}
+      aws-role-arn: ${{ inputs.aws-role-arn }}
+      aws-region: ${{ inputs.aws-region }}

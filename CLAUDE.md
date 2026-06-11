@@ -116,6 +116,37 @@ Instructions and patterns...
 | `reusable-security.yml` | Security scanning | `scan-secrets`, `scan-dependencies` |
 | `reusable-docs.yml` | Documentation deployment | `framework`, `deploy-to-pages` |
 
+## Attested Delivery (Supply-Chain) Workflows
+
+Centralized reusable workflows implementing the attested release architecture:
+signed, SLSA-attested, fail-closed-verified releases. Constituted from
+`HMH-ProdOps/.github@8f3b4d41a9aeedb430bd575020170ce0641dbd95` and
+parameterized for zircote. Signing runs in `sign-and-attest.yml` — the SLSA
+Build L3 boundary the calling repo cannot modify; the Fulcio certificate SAN is
+this central workflow, while the caller is recorded as the source repository.
+
+| Workflow | Role | Key Inputs |
+|----------|------|------------|
+| `build-attest.yml` | Build → push by digest → sign/attest → self-verify (single entry point) | `image-name`, `context`, `dockerfile` |
+| `sign-and-attest.yml` | The L3 signing boundary: SLSA provenance + cosign keyless signature + CycloneDX SBOM + vuln report as OCI referrers, then self-verify | `image-name`, `image-digest` |
+| `verify-attestation.yml` | Fail-closed verification gate before any publish/deploy | `image-ref`, `attestation-repo` |
+| `promote.yml` | Referrer-carrying `cosign copy` between registries + post-copy re-verify | `source-ref`, `dest-repo`, `target-env` |
+| `promote-prod.yml` | `promote.yml` behind the change-record gate | + `jira-issue-key`, `jira-digest-field` |
+| `sbom-and-scan.yml` | Standalone SBOM (CycloneDX + SPDX) + Grype scan | `image-ref` |
+| `dora-emit.yml` | DORA deployment events (call with `if: always()`) | `image-digest` |
+| `pin-check.yml` | Fails on the first `uses:` not pinned to a full 40-char SHA | `scan-dir` |
+| `mirror-images.yml` | Controlled ingress: mirror pinned upstream images into `ghcr.io/zircote/mirror/*` | dispatch/weekly |
+
+Caller rules:
+
+- Pin every `uses:` of these workflows to the full 40-char commit SHA of this
+  repo; Dependabot's `github-actions` ecosystem keeps pins current.
+- Publication/promotion jobs must `needs:` the verify job — fail closed.
+- Verification commands for consumers live in `SECURITY.md` ("Verifying
+  Release Artifacts"). `gh attestation verify` requires **both** `--repo` and
+  `--signer-workflow zircote/.github/.github/workflows/sign-and-attest.yml`
+  (`--repo` alone fails under SLSA L3 — the SAN is the central signer).
+
 ## Available Composite Actions
 
 | Action | Purpose |
