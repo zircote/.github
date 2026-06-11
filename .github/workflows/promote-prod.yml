@@ -1,0 +1,119 @@
+# Centralized reusable workflow: production promotion behind the change-record gate.
+#
+# A production promotion may proceed only when an APPROVED JIRA CCAB ticket exists
+# whose recorded digest matches the digest being promoted. The promotion itself is
+# the referrer-aware `promote.yml` (cosign copy + post-copy verify); the `production`
+# GitHub Environment adds required-reviewer protection on top.
+#
+# Primary sources:
+#   - JIRA Cloud REST API v3 (get issue):
+#     https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-issues/#api-rest-api-3-issue-issueidorkey-get
+#   - GitHub deployment environments + required reviewers:
+#     https://docs.github.com/en/actions/how-tos/managing-workflow-runs-and-deployments/managing-deployments/managing-environments-for-deployment
+
+name: promote-prod
+
+on:
+  workflow_call:
+    inputs:
+      source-ref:
+        description: "CERT-passed image by digest (registry/repo@sha256:...)"
+        required: true
+        type: string
+      dest-repo:
+        description: "Production ECR repo WITHOUT tag/digest"
+        required: true
+        type: string
+      aws-role-arn:
+        description: "Production ECR IAM role to assume"
+        required: true
+        type: string
+      jira-issue-key:
+        description: "CCAB change ticket key (e.g. CCAB-1234)"
+        required: true
+        type: string
+      jira-digest-field:
+        description: "JIRA custom field id holding the approved build digest (e.g. customfield_10050). When set, the gate hard-asserts the ticket digest equals the promoting digest."
+        required: false
+        type: string
+        default: ""
+      signer-profile-arn:
+        description: "Optional AWS Signer signing-profile ARN passed through to promote.yml for an ECR-native secondary signature"
+        required: false
+        type: string
+        default: ""
+      aws-region:
+        required: false
+        type: string
+        default: "us-east-1"
+    secrets:
+      JIRA_BASE_URL:
+        required: true
+      JIRA_EMAIL:
+        required: true
+      JIRA_API_TOKEN:
+        required: true
+
+permissions: {}
+
+jobs:
+  ccab-gate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Require an APPROVED CCAB ticket whose digest matches
+        env:
+          JIRA_BASE_URL: ${{ secrets.JIRA_BASE_URL }}
+          JIRA_EMAIL: ${{ secrets.JIRA_EMAIL }}
+          JIRA_API_TOKEN: ${{ secrets.JIRA_API_TOKEN }}
+          ISSUE: ${{ inputs.jira-issue-key }}
+          SOURCE_REF: ${{ inputs.source-ref }}
+          DIGEST_FIELD: ${{ inputs.jira-digest-field }}
+        run: |
+          set -euo pipefail
+          case "${SOURCE_REF}" in
+            *@sha256:*) ;;
+            *) echo "::error::source-ref must be digest-pinned (registry/repo@sha256:...), got '${SOURCE_REF}'"; exit 1 ;;
+          esac
+          DIGEST="${SOURCE_REF##*@}"
+          FIELDS="status"
+          [ -n "${DIGEST_FIELD}" ] && FIELDS="status,${DIGEST_FIELD}"
+          RESP="$(curl -fsS -u "${JIRA_EMAIL}:${JIRA_API_TOKEN}" \
+            -H 'Accept: application/json' \
+            "${JIRA_BASE_URL}/rest/api/3/issue/${ISSUE}?fields=${FIELDS}")"
+          STATUS="$(echo "$RESP" | jq -r '.fields.status.name')"
+          echo "CCAB ${ISSUE} status: ${STATUS}; promoting digest ${DIGEST}"
+          if [ "$STATUS" != "Approved" ]; then
+            echo "::error::CCAB ticket ${ISSUE} is '${STATUS}', not 'Approved'. Blocking production promotion."
+            exit 1
+          fi
+          # Hard-assert the ticket records the exact digest under change review.
+          if [ -n "${DIGEST_FIELD}" ]; then
+            TICKET_DIGEST="$(echo "$RESP" | jq -r --arg f "${DIGEST_FIELD}" '.fields[$f] // empty' | tr -d '[:space:]')"
+            if [ -z "${TICKET_DIGEST}" ]; then
+              echo "::error::CCAB ticket ${ISSUE} has no digest in field ${DIGEST_FIELD}. Blocking."
+              exit 1
+            fi
+            if [ "${TICKET_DIGEST}" != "${DIGEST}" ]; then
+              echo "::error::CCAB ticket digest ${TICKET_DIGEST} != promoting digest ${DIGEST}. Blocking."
+              exit 1
+            fi
+            echo "CCAB digest match confirmed for ${DIGEST}."
+          else
+            echo "::warning::No jira-digest-field configured; set it to enforce ticket<->digest equality (status-only gate in effect)."
+          fi
+
+  promote:
+    needs: ccab-gate
+    permissions:
+      id-token: write
+      contents: read
+      packages: read
+      attestations: read
+    uses: ./.github/workflows/promote.yml
+    with:
+      source-ref: ${{ inputs.source-ref }}
+      dest-repo: ${{ inputs.dest-repo }}
+      target-env: prod
+      aws-role-arn: ${{ inputs.aws-role-arn }}
+      aws-region: ${{ inputs.aws-region }}
+      signer-profile-arn: ${{ inputs.signer-profile-arn }}

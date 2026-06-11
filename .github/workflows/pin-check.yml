@@ -1,0 +1,64 @@
+# Centralized reusable workflow: assert every GitHub Actions `uses:` reference in
+# the caller is pinned to a full 40-character commit SHA.
+#
+# Mutable tags (@v4, @main) and floating refs (@master) are a supply-chain risk
+# (e.g. the trivy-action ecosystem compromise). Local reusable-workflow calls
+# (`uses: ./...`) and digest-pinned container actions (`uses: docker://...@sha256`)
+# are exempt. Fails the run on the first unpinned reference.
+#
+# Caller MUST pin this workflow by full commit SHA.
+#
+# Primary source:
+#   - Security hardening for GitHub Actions (pin actions to a full-length SHA):
+#     https://docs.github.com/en/actions/security-for-github-actions/security-guides/security-hardening-for-github-actions#using-third-party-actions
+
+name: pin-check
+
+on:
+  workflow_call:
+    inputs:
+      scan-dir:
+        description: "Directory to scan for workflow/action files"
+        required: false
+        type: string
+        default: ".github"
+
+permissions: {}
+
+jobs:
+  pin-check:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10  # v6.0.3
+      - name: Assert every `uses:` is pinned to a 40-char commit SHA
+        env:
+          SCAN_DIR: ${{ inputs.scan-dir }}
+        run: |
+          set -euo pipefail
+          rc=0
+          # Lines of the form `uses: owner/repo...@ref` (external actions only).
+          while IFS= read -r hit; do
+            file="${hit%%:*}"; rest="${hit#*:}"
+            lineno="${rest%%:*}"; content="${rest#*:}"
+            # Isolate the `uses:` value: drop up to `uses:`, ltrim, keep the first
+            # token only — so inline comments cannot influence the check.
+            value="${content#*uses:}"
+            value="${value#"${value%%[![:space:]]*}"}"
+            value="${value%%[[:space:]]*}"
+            case "$value" in
+              ./*) continue ;;                  # local reusable workflow
+              docker://*@sha256:*) continue ;;  # digest-pinned container action
+            esac
+            ref="${value##*@}"
+            if ! printf '%s' "$ref" | grep -Eq '^[0-9a-f]{40}$'; then
+              echo "::error file=${file},line=${lineno}::unpinned action reference: ${value}"
+              rc=1
+            fi
+          done < <(grep -rnE '^[[:space:]]*-?[[:space:]]*uses:[[:space:]]*[^[:space:]]+@' "$SCAN_DIR" || true)
+          if [ "$rc" -eq 0 ]; then
+            echo "All action references under ${SCAN_DIR} are pinned to a 40-char SHA."
+          fi
+          exit "$rc"
