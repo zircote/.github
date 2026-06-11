@@ -158,7 +158,7 @@ jobs:
 
       - name: Upload pip-audit artifact
         if: always() && steps.find-deps.outputs.deps_found == 'true'
-        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v6.0.1
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v6.0.1
         with:
           name: pip-audit-results
           path: pip-audit-results.sarif
@@ -219,7 +219,7 @@ jobs:
 
       - name: Upload npm audit artifact
         if: always() && steps.check-package.outputs.has_package == 'true'
-        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v6.0.1
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v6.0.1
         with:
           name: npm-audit-results
           path: npm-audit-results.json
@@ -270,7 +270,7 @@ jobs:
 
       - name: Upload govulncheck artifact
         if: always() && steps.check-gomod.outputs.has_gomod == 'true'
-        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v6.0.1
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v6.0.1
         with:
           name: govulncheck-results
           path: govulncheck-results.sarif
