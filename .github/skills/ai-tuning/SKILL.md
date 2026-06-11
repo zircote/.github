@@ -38,7 +38,7 @@ Provide your existing AI configuration files or describe your project, and this 
 
 ## CLAUDE.md Structure
 
-```markdown
+````markdown
 # CLAUDE.md
 
 ## Project Overview
@@ -69,11 +69,11 @@ Provide your existing AI configuration files or describe your project, and this 
 
 ## Important Patterns
 [Code examples]
-```
+````
 
 ## copilot-instructions.md Structure
 
-```markdown
+````markdown
 # GitHub Copilot Instructions
 
 ## Project Context
@@ -98,7 +98,7 @@ Provide your existing AI configuration files or describe your project, and this 
 
 ## Commands
 [Quick reference]
-```
+````
 
 ## MCP Configuration
 

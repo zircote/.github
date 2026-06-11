@@ -96,7 +96,7 @@ permissions:
   contents: read
 
 steps:
-  - uses: aws-actions/configure-aws-credentials@...
+  - uses: aws-actions/configure-aws-credentials@e7f100cf4c008499ea8adda475de1042d6975c7b # v6.2.0
     with:
       role-to-assume: arn:aws:iam::123456789:role/github-actions
       aws-region: us-east-1

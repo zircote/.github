@@ -1,6 +1,6 @@
 ---
 name: presentation-generation
-description: Generate slide deck presentations from prompts. Triggers on "create presentation", "generate slides", "build deck", "presentation about"
+description: Generate slide deck presentations from prompts. USE THIS SKILL when user says "create presentation", "generate slides", "build deck", or "presentation about"
 allowed-tools:
   - Bash
   - Read
@@ -34,7 +34,7 @@ Describe your presentation topic, audience, and desired style. The skill will re
 
 ## Workflow Overview
 
-```
+```text
 ┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
 │   1. RESEARCH   │────▶│   2. OUTLINE    │────▶│   3. CONTENT    │
 │   (Optional)    │     │   Generation    │     │   Expansion     │
@@ -48,7 +48,7 @@ Describe your presentation topic, audience, and desired style. The skill will re
 
 ## Directory Structure
 
-```
+```text
 docs/presentations/
 ├── templates/
 │   ├── systematic-velocity.py      # Dark, data-focused style
@@ -71,7 +71,7 @@ docs/presentations/
 
 ## Presentation Markdown Format
 
-```markdown
+````markdown
 ---
 title: "Presentation Title"
 subtitle: "Optional Subtitle"
@@ -142,7 +142,7 @@ Right column content
 # Thank You
 
 <!-- cta: text="Get Started" url="https://github.com/zircote/github" -->
-```
+````
 
 ## Research Phase
 

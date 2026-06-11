@@ -32,7 +32,7 @@ Use this skill to create new project templates from scratch or customize existin
 
 Every template MUST include:
 
-```
+```text
 templates/[name]-template/
 ├── README.md                  # Project documentation
 ├── CLAUDE.md                  # Claude Code instructions

@@ -64,7 +64,7 @@ echo "=== AI Integration ==="
 
 **Workflow Overview:**
 
-```
+```text
 ┌─────────────┐     ┌─────────────┐     ┌─────────────┐     ┌─────────────┐
 │ Assess      │────▶│ Plan        │────▶│ Migrate     │────▶│ Validate    │
 │ Repository  │     │ Strategy    │     │ Components  │     │ & Rollback  │
@@ -103,7 +103,8 @@ on: [push, pull_request]
 
 jobs:
   ci:
-    uses: zircote/.github/.github/workflows/reusable-ci-python.yml@main
+    # Always pin to a full commit SHA — never @main (enforced by pin-check)
+    uses: zircote/.github/.github/workflows/reusable-ci-python.yml@2192c47863886d7a867b5042fb08de414f948f49 # main
     with:
       python-version: '3.12'
       coverage-threshold: 80
@@ -137,7 +138,7 @@ Best for: Large projects requiring careful migration
 
 ### Adding CLAUDE.md
 
-```bash
+````bash
 # Generate CLAUDE.md based on project analysis
 cat > CLAUDE.md << 'EOF'
 # CLAUDE.md
@@ -162,7 +163,7 @@ This file provides guidance to Claude Code when working with this repository.
 
 [Document key patterns and decisions]
 EOF
-```
+````
 
 ### Adding Copilot Instructions
 
@@ -197,8 +198,8 @@ jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
         with:
           python-version: '3.12'
       - run: pip install ruff
@@ -207,8 +208,8 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
         with:
           python-version: '3.12'
       - run: pip install pytest
@@ -222,7 +223,7 @@ on: [push, pull_request]
 
 jobs:
   ci:
-    uses: zircote/.github/.github/workflows/reusable-ci-python.yml@main
+    uses: zircote/.github/.github/workflows/reusable-ci-python.yml@2192c47863886d7a867b5042fb08de414f948f49 # main
     with:
       python-version: '3.12'
 ```
@@ -253,8 +254,9 @@ for f in CLAUDE.md .github/copilot-instructions.md .github/workflows/ci.yml; do
 done
 
 # Validate workflows
-./scripts/validate-sha-pinning.sh .github/workflows/
-./scripts/validate-workflows.sh .github/workflows/
+actionlint .github/workflows/*.yml
+# Assert every action reference is pinned to a full 40-char SHA
+grep -rnE 'uses:.*@(main|master|v[0-9])' .github/workflows/ && echo "UNPINNED REFS FOUND" || echo "all pinned"
 
 # Run CI locally (if possible)
 # act push --job lint

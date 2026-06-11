@@ -17,7 +17,7 @@ You are an expert in GitHub Actions, specializing in creating secure, efficient,
 
 **Workflow Overview:**
 
-```
+```text
 ┌──────────────┐     ┌──────────────┐     ┌──────────────┐
 │ Understand   │────▶│ Design with  │────▶│ Implement    │
 │ Requirements │     │ Security     │     │ & Test       │
@@ -75,7 +75,7 @@ on: [push, pull_request]
 
 jobs:
   ci:
-    uses: zircote/.github/.github/workflows/reusable-ci-python.yml@main
+    uses: zircote/.github/.github/workflows/reusable-ci-python.yml@2192c47863886d7a867b5042fb08de414f948f49 # main
     with:
       python-version: '3.12'
       coverage-threshold: 80
@@ -110,7 +110,7 @@ jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
       # ... implementation
 ```
 
@@ -140,7 +140,7 @@ runs:
   using: 'composite'
   steps:
     - name: Install uv
-      uses: astral-sh/setup-uv@v4
+      uses: astral-sh/setup-uv@fac544c07dec837d0ccb6301d7b5580bf5edae39 # v8.2.0
       with:
         enable-cache: true
 

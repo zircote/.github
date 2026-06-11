@@ -35,7 +35,7 @@ You are an expert in optimizing AI assistant configurations for development work
 
 ### copilot-instructions.md Structure
 
-```markdown
+````markdown
 # GitHub Copilot Instructions
 
 ## Project Context
@@ -78,11 +78,11 @@ You are an expert in optimizing AI assistant configurations for development work
 - Source: `src/`
 - Tests: `tests/`
 - Config: `[config files]`
-```
+````
 
 ### CLAUDE.md Structure
 
-```markdown
+````markdown
 # CLAUDE.md
 
 ## Project Overview
@@ -129,7 +129,7 @@ You are an expert in optimizing AI assistant configurations for development work
 
 ## Important Patterns
 [Code examples of common patterns]
-```
+````
 
 ## Pattern Library Development
 
@@ -177,7 +177,7 @@ async function fetchData<T>(url: string): Promise<Result<T, FetchError>> {
 
 ### Anti-Pattern Documentation
 
-```markdown
+````markdown
 ### Avoid: Silent Error Swallowing
 
 ```python
@@ -194,7 +194,7 @@ except SpecificError as e:
     logger.warning("Operation failed: %s", e)
     result = fallback_value
 ```
-```
+````
 
 ## MCP Configuration
 
@@ -270,7 +270,7 @@ Testing is done with pytest."
 
 ### 2. Example-Driven Instructions
 
-```markdown
+````markdown
 # Instead of:
 "Use type annotations on all functions."
 
@@ -279,7 +279,7 @@ Testing is done with pytest."
 ```python
 def process(items: list[str], limit: int = 10) -> dict[str, int]: ...
 ```"
-```
+````
 
 ### 3. Constraint Specification
 

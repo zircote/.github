@@ -62,7 +62,7 @@ White with vibrant gradients. High-contrast with strong CTAs.
 
 ## Markdown Format
 
-```markdown
+````markdown
 ---
 title: "Presentation Title"
 subtitle: "Optional Subtitle"
@@ -125,11 +125,11 @@ def hello():
 # Call to Action
 
 <!-- cta: text="Get Started" url="https://example.com" -->
-```
+````
 
 ## Directory Structure
 
-```
+```text
 docs/presentations/
 ├── generate.py          # Main generation script - handles PDF, PPTX, HTML output
 ├── README.md            # This documentation file
@@ -164,7 +164,7 @@ When you generate a presentation from markdown, you get:
 
 ### Sample Generated Slide (Systematic Velocity Style)
 
-```
+```text
 ┌─────────────────────────────────────────────┐
 │  ████████████████████████████████████████   │  <- #1A1A1A background
 │                                             │
@@ -187,7 +187,7 @@ When you generate a presentation from markdown, you get:
 ```yaml
 jobs:
   generate:
-    uses: zircote/.github/.github/workflows/reusable-presentation.yml@main
+    uses: zircote/.github/.github/workflows/reusable-presentation.yml@2192c47863886d7a867b5042fb08de414f948f49 # main
     with:
       source: 'docs/presentations/drafts/my-deck.md'
       formats: 'pdf,html,pptx'

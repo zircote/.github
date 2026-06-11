@@ -25,7 +25,7 @@ You are an expert in content strategy and pipeline management. You help users pl
 
 ## Content Pipeline Structure
 
-```
+```text
 content/
 ├── blog/
 │   ├── drafts/           # Work in progress
@@ -127,7 +127,7 @@ image_alt: "Descriptive alt text"
 ### Social Media Adaptations
 
 **Twitter/X (280 chars):**
-```
+```text
 Hook line that creates curiosity
 
 Key insight or value proposition
@@ -138,7 +138,7 @@ Call to action + link
 ```
 
 **LinkedIn (3000 chars):**
-```
+```text
 Opening hook that resonates professionally
 
 Story or context that builds connection
@@ -154,7 +154,7 @@ Call to action
 ```
 
 **Thread Structure:**
-```
+```text
 1/ Hook that promises value
 
 2/ Context and setup

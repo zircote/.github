@@ -50,7 +50,7 @@ MIF solves vendor lock-in, data ownership, and future-proofing for AI memory. Ke
 - **W3C PROV provenance** and **JSON Schema validation**
 - **Migration guides** from Mem0, Zep, Letta, Subcog, and Basic Memory
 
-**Status:** v0.1.0-draft &bull; [Specification](https://mif-spec.dev/SPECIFICATION) &bull; [GitHub](https://github.com/zircote/MIF)
+**Status:** v0.1.0-draft &bull; [Specification](https://mif-spec.dev/specification/overview/) &bull; [GitHub](https://github.com/zircote/MIF)
 
 ### [ccpkg](https://ccpkg.dev) — Portable Packaging for AI Coding Extensions
 
@@ -67,7 +67,7 @@ One file, one install, zero post-install steps. Key features:
 - **Decentralized registries** — JSON files hostable on GitHub Pages, S3, or any static server
 - **Built on open standards** — Agent Skills, MCP, LSP, SemVer, JSON Schema
 
-**Status:** Draft (2026-02-14) &bull; [Specification](https://ccpkg.dev/spec/specification.html) &bull; [GitHub](https://github.com/zircote/plugin-packaging)
+**Status:** Draft (2026-02-14) &bull; [Specification](https://ccpkg.dev/specification/overview/) &bull; [GitHub](https://github.com/zircote/ccpkg)
 
 ---
 

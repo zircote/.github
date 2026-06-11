@@ -15,10 +15,11 @@ This repository provides shared infrastructure across all `zircote/*` repos:
 | Label Definitions      | Standardized issue/PR labels               | `labels.yml`         |
 | Copilot Skills         | AI-assisted development capabilities       | `.github/skills/`    |
 | Autonomous Agents      | Multi-step AI workflow automation          | `agents/`            |
+| Attested Delivery      | Signed, SLSA-attested, verified releases   | `.github/workflows/` |
 
 ## Repository Structure
 
-```
+```text
 .github/
 ├── .github/
 │   ├── workflows/               # Reusable workflows
@@ -28,14 +29,25 @@ This repository provides shared infrastructure across all `zircote/*` repos:
 │   │   ├── reusable-release.yml
 │   │   ├── reusable-security.yml
 │   │   ├── reusable-docs.yml
-│   │   └── sync-labels.yml
+│   │   ├── reusable-presentation.yml
+│   │   ├── reusable-content.yml
+│   │   ├── reusable-dependabot-automerge.yml
+│   │   ├── sync-labels.yml
+│   │   ├── build-attest.yml         # Attested delivery (see CLAUDE.md)
+│   │   ├── sign-and-attest.yml
+│   │   ├── verify-attestation.yml
+│   │   ├── promote.yml / promote-prod.yml
+│   │   ├── sbom-and-scan.yml / pin-check.yml
+│   │   └── mirror-images.yml / dora-emit.yml
 │   ├── skills/                  # Copilot Skills
 │   │   ├── template-creation/
 │   │   ├── workflow-development/
 │   │   ├── security-baseline/
 │   │   ├── content-pipeline/
 │   │   ├── ecosystem-migration/
-│   │   └── ai-tuning/
+│   │   ├── ai-tuning/
+│   │   ├── presentation-generation/
+│   │   └── attested-delivery/
 │   └── copilot-instructions.md
 ├── actions/                     # Composite Actions
 │   ├── setup-python-uv/
@@ -48,7 +60,10 @@ This repository provides shared infrastructure across all `zircote/*` repos:
 │   ├── security-auditor.md
 │   ├── content-strategist.md
 │   ├── ecosystem-migrator.md
-│   └── copilot-tuner.md
+│   ├── copilot-tuner.md
+│   └── profile-maintainer.md
+├── docs/                        # Presentations and assets
+├── scripts/                     # Automation scripts
 ├── profile/
 │   └── README.md
 ├── labels.yml
@@ -61,15 +76,18 @@ This repository provides shared infrastructure across all `zircote/*` repos:
 
 ## Reusable Workflows
 
+All `uses:` references must be pinned to a full 40-char commit SHA (enforced by
+the `pin-check` required check) — never `@main` or version tags. Dependabot's
+`github-actions` ecosystem keeps pins current.
+
 ### Python CI
 
 ```yaml
 jobs:
   ci:
-    uses: zircote/.github/.github/workflows/reusable-ci-python.yml@main
+    uses: zircote/.github/.github/workflows/reusable-ci-python.yml@2192c47863886d7a867b5042fb08de414f948f49 # main
     with:
       python-version: "3.12"
-      run-tests: true
       coverage-threshold: 80
 ```
 
@@ -78,10 +96,10 @@ jobs:
 ```yaml
 jobs:
   ci:
-    uses: zircote/.github/.github/workflows/reusable-ci-typescript.yml@main
+    uses: zircote/.github/.github/workflows/reusable-ci-typescript.yml@2192c47863886d7a867b5042fb08de414f948f49 # main
     with:
       node-version: "22"
-      run-tests: true
+      coverage-threshold: 80
 ```
 
 ### Go CI
@@ -89,10 +107,10 @@ jobs:
 ```yaml
 jobs:
   ci:
-    uses: zircote/.github/.github/workflows/reusable-ci-go.yml@main
+    uses: zircote/.github/.github/workflows/reusable-ci-go.yml@2192c47863886d7a867b5042fb08de414f948f49 # main
     with:
       go-version: "1.23"
-      run-race-detector: true
+      enable-build: true
 ```
 
 ### Security Scanning
@@ -100,10 +118,10 @@ jobs:
 ```yaml
 jobs:
   security:
-    uses: zircote/.github/.github/workflows/reusable-security.yml@main
+    uses: zircote/.github/.github/workflows/reusable-security.yml@2192c47863886d7a867b5042fb08de414f948f49 # main
     with:
-      scan-secrets: true
-      scan-dependencies: true
+      python-audit: true
+      fail-on-vulnerabilities: true
 ```
 
 ### Release Automation
@@ -111,9 +129,10 @@ jobs:
 ```yaml
 jobs:
   release:
-    uses: zircote/.github/.github/workflows/reusable-release.yml@main
+    uses: zircote/.github/.github/workflows/reusable-release.yml@2192c47863886d7a867b5042fb08de414f948f49 # main
     with:
-      generate-changelog: true
+      release-type: auto  # or patch, minor, major
+      generate-notes: true
 ```
 
 ### Documentation Deployment
@@ -121,11 +140,20 @@ jobs:
 ```yaml
 jobs:
   docs:
-    uses: zircote/.github/.github/workflows/reusable-docs.yml@main
+    uses: zircote/.github/.github/workflows/reusable-docs.yml@2192c47863886d7a867b5042fb08de414f948f49 # main
     with:
       framework: astro  # or mkdocs, sphinx, docusaurus
       deploy-to-pages: true
 ```
+
+### Attested Delivery
+
+Centralized supply-chain workflows for signed, SLSA-attested, fail-closed-verified
+releases: `build-attest.yml`, `sign-and-attest.yml`, `verify-attestation.yml`,
+`promote.yml`, `promote-prod.yml`, `sbom-and-scan.yml`, `pin-check.yml`,
+`mirror-images.yml`, `dora-emit.yml`. Caller recipes live in
+[CLAUDE.md](CLAUDE.md); consumer verification commands live in
+[SECURITY.md](SECURITY.md#verifying-release-artifacts).
 
 ---
 
@@ -134,25 +162,25 @@ jobs:
 ### setup-python-uv
 
 ```yaml
-- uses: zircote/.github/actions/setup-python-uv@main
+- uses: zircote/.github/actions/setup-python-uv@2192c47863886d7a867b5042fb08de414f948f49 # main
   with:
     python-version: "3.12"
-    cache: true
+    install-dependencies: true
 ```
 
 ### setup-node-pnpm
 
 ```yaml
-- uses: zircote/.github/actions/setup-node-pnpm@main
+- uses: zircote/.github/actions/setup-node-pnpm@2192c47863886d7a867b5042fb08de414f948f49 # main
   with:
     node-version: "22"
-    cache: true
+    install-dependencies: true
 ```
 
 ### security-scan
 
 ```yaml
-- uses: zircote/.github/actions/security-scan@main
+- uses: zircote/.github/actions/security-scan@2192c47863886d7a867b5042fb08de414f948f49 # main
   with:
     scan-secrets: true
     scan-dependencies: true
@@ -162,10 +190,10 @@ jobs:
 ### release-notes
 
 ```yaml
-- uses: zircote/.github/actions/release-notes@main
+- uses: zircote/.github/actions/release-notes@2192c47863886d7a867b5042fb08de414f948f49 # main
   with:
-    version: ${{ github.ref_name }}
-    output-file: CHANGELOG.md
+    from-tag: v1.0.0
+    include-contributors: true
 ```
 
 ---
@@ -221,14 +249,14 @@ gh workflow run sync-labels.yml -f repo=zircote/my-repo
 
 ### Project Templates
 
-| Template                                                           | Stack                           |
-| ------------------------------------------------------------------ | ------------------------------- |
-| [python-template](https://github.com/zircote/python-template)      | Python 3.12+, uv, ruff, pyright |
-| [typescript-template](https://github.com/zircote/typescript-template) | Node 22, pnpm, ESLint 9, Vitest |
-| [go-template](https://github.com/zircote/go-template)              | Go 1.23+, golangci-lint         |
-| [rust-template](https://github.com/zircote/rust-template)          | Stable, clippy, cargo-deny      |
-| [java-template](https://github.com/zircote/java-template)          | Java 21, Gradle, JUnit 5        |
-| [docs-site-template](https://github.com/zircote/docs-site-template)| Astro, Starlight, MDX           |
+| Template                                                   | Stack                           |
+| ----------------------------------------------------------- | ------------------------------- |
+| `python-template` (private)                                 | Python 3.12+, uv, ruff, pyright |
+| `typescript-template` (private)                             | Node 22, pnpm, ESLint 9, Vitest |
+| `go-template` (private)                                     | Go 1.23+, golangci-lint         |
+| [rust-template](https://github.com/zircote/rust-template)   | Stable, clippy, cargo-deny      |
+| `java-template` (private)                                   | Java 21, Gradle, JUnit 5        |
+| `docs-site-template` (private)                              | Astro, Starlight, MDX           |
 
 ### Tools & Plugins
 
@@ -256,12 +284,13 @@ Recent updates to this organization configuration:
 
 | Date | Change | Impact |
 |------|--------|--------|
+| 2026-06 | Attested delivery architecture | Signed, SLSA-attested, fail-closed-verified releases + pin-check CI gate |
 | 2026-01 | Added presentation-generation skill | New slide deck generation from markdown |
 | 2026-01 | Added profile-maintainer agent | Automated profile README updates |
 | 2025-12 | Initial ecosystem setup | Reusable workflows, templates, AI integration |
 
-For detailed history, see [commit log](https://github.com/zircote/.github/commits/main).
+For detailed history, see the [CHANGELOG](CHANGELOG.md) and [commit log](https://github.com/zircote/.github/commits/main).
 
 ## License
 
-MIT License - See individual files for specific licensing.
+[MIT License](LICENSE).

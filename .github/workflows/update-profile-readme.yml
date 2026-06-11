@@ -120,11 +120,13 @@ jobs:
           NEW_REPOS: ${{ needs.analyze-activity.outputs.new-repos-json }}
           DRY_RUN: ${{ inputs.dry-run || 'false' }}
         run: |
+          ARGS=()
+          [[ "$DRY_RUN" == "true" ]] && ARGS+=(--dry-run)
           python scripts/update-profile-readme.py \
             --readme-path profile/README.md \
             --top-repos "$TOP_REPOS" \
             --new-repos "$NEW_REPOS" \
-            $([[ "$DRY_RUN" == "true" ]] && echo "--dry-run")
+            "${ARGS[@]}"
 
       - name: Check for changes
         id: changes
@@ -137,19 +139,37 @@ jobs:
             echo "Changes detected in README"
           fi
 
-      - name: Commit and push changes
+      # Branch protection requires changes to land via pull request — a direct
+      # push to main is rejected (GH006). The App token (not GITHUB_TOKEN) must
+      # create the PR so the pin-check required checks still trigger on it.
+      - name: Generate App token
+        id: app-token
         if: steps.changes.outputs.changed == 'true' && inputs.dry-run != true
+        uses: actions/create-github-app-token@bf559f85448f9380bcfa2899dbdc01eb5b37be3a # v3.0.0
+        with:
+          app-id: ${{ vars.GH_APP_ID }}
+          private-key: ${{ secrets.GH_APP_PRIVATE_KEY }}
+          owner: zircote
+          repositories: .github
+
+      - name: Open auto-merge PR with changes
+        if: steps.changes.outputs.changed == 'true' && inputs.dry-run != true
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
         run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
+          set -euo pipefail
+          BRANCH="profile-update/${{ github.run_id }}"
+          git config user.name "zircote-org-monitor[bot]"
+          git config user.email "zircote-org-monitor[bot]@users.noreply.github.com"
+          git checkout -b "$BRANCH"
           git add profile/README.md
-          git commit -m "docs(profile): update activity highlights [skip ci]"
-          # Pull with rebase to handle concurrent updates, then push with retry
-          for i in 1 2 3; do
-            git pull --rebase origin main && git push && break
-            echo "Push attempt $i failed, retrying..."
-            sleep 2
-          done
+          git commit -m "docs(profile): update activity highlights"
+          git remote set-url origin "https://x-access-token:${GH_TOKEN}@github.com/${{ github.repository }}"
+          git push -u origin "$BRANCH"
+          gh pr create --title "docs(profile): update activity highlights" \
+            --body "Automated weekly profile README refresh from \`update-profile-readme.yml\`." \
+            --base main --head "$BRANCH"
+          gh pr merge "$BRANCH" --squash --auto
 
       - name: Generate summary
         if: always()

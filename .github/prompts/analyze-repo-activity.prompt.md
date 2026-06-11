@@ -76,7 +76,7 @@ Generate a ranked list with:
 
 ## Usage Example
 
-```
+```text
 Analyze zircote's repositories and identify the top 8 most significant active projects,
 excluding forks and archived repositories. Output should be suitable for profile README.
 ```

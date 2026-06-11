@@ -1,7 +1,7 @@
 ---
 title: "Personal GitHub Ecosystem"
 subtitle: "Enterprise-Grade DevOps for Personal Projects"
-author: "Allen Robel"
+author: "Robert Allen"
 date: 2025-12-29
 style: systematic-velocity
 format:

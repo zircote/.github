@@ -18,6 +18,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Three new automation labels: `stale-health`, `dep-ecosystem`, `agent-health`
 
 ### Fixed
+- **Profile README automation silently broken**: `update-profile-readme.yml` pushed directly to the protected `main` branch, was rejected (GH006), and the retry loop swallowed the failure — runs reported success while the profile went stale since 2026-03. Now opens an auto-merge PR via the GitHub App token and fails loudly
+- **README examples called nonexistent workflow inputs** (`run-tests`, `run-race-detector`, `scan-secrets`/`scan-dependencies` on reusable-security, `generate-changelog`, composite-action `cache`/`version`/`output-file`) — all examples regenerated from the actual `workflow_call`/action inputs
+- **Documentation taught unpinned `@main`/`@v4` action refs** contradicting the org SHA-pinning policy — all positive examples in README, skills, agents, and presentation docs now pin to full commit SHAs
+- **Broken markdown fence nesting** (3-backtick templates containing 3-backtick code blocks) in copilot-tuner, ecosystem-migrator, ai-tuning, ecosystem-migration, presentation-generation, and presentations README — outer fences now use 4 backticks; this also fixes the phantom broken `assets/diagram.png` image link
+- `.github/copilot-instructions.md` referenced nonexistent `reusable-ci-rust.yml`; agents/skills referenced nonexistent `scripts/validate-sha-pinning.sh`/`validate-workflows.sh` (replaced with actionlint + pin grep)
+- profile/README.md ccpkg link pointed at renamed `zircote/plugin-packaging` (now `zircote/ccpkg`); example presentation author corrected to Robert Allen
+- CONTRIBUTING.md development setup replaced generic boilerplate with this repo's real toolchain (actionlint, compile-gh-aw.sh, pin-check)
+- README links to private template repos now marked private instead of 404ing for visitors; added LICENSE file (MIT) to back the README license claim; ~40 unlabeled code fences given language tags
+- `attested-delivery` skill brought into skill-doc compliance (Purpose/Triggers/Usage sections, allowed-tools frontmatter, trigger-phrase description); profile-maintainer agent aligned to the shared agent structure
 - `dependabot-automerge.yml` called the reusable auto-merge workflow at the mutable `@main` ref; now uses the local-path form (same-commit, exempt from pin-check)
 - attested-delivery skill templates: `dora-emit.yml` left `hmh.dora.*` metric names unparameterized (now `__org__.dora.*`); `build-attest.yml`/`sign-and-attest.yml` example image carried a `dqo/app` path (now `ghcr.io/__org__/app`)
 - `promote-prod.yml` and `mirror-images.yml` regenerated from the generic templates — removes HMH-specific "CCAB" terminology (now "change-record") and repo-specific comments
