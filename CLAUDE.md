@@ -137,13 +137,6 @@ this central workflow, while the caller is recorded as the source repository.
 | `pin-check.yml` | Fails on the first `uses:` not pinned to a full 40-char SHA | `scan-dir` |
 | `mirror-images.yml` | Controlled ingress: mirror pinned upstream images into `ghcr.io/zircote/mirror/*` | dispatch/weekly |
 
-Full documentation lives in `docs/` (Diátaxis): tutorial
-(`docs/tutorials/first-attested-release.md`), onboarding how-to
-(`docs/how-to/onboard-a-repo-to-attested-delivery.md`), workflow reference
-(`docs/reference/workflows.md`), design rationale
-(`docs/explanation/attested-delivery.md`), and rollout status
-(`docs/attested-delivery/rollout-status.md`).
-
 Caller rules:
 
 - Pin every `uses:` of these workflows to the full 40-char commit SHA of this

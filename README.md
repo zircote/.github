@@ -62,7 +62,7 @@ This repository provides shared infrastructure across all `zircote/*` repos:
 │   ├── ecosystem-migrator.md
 │   ├── copilot-tuner.md
 │   └── profile-maintainer.md
-├── docs/                        # Platform docs (Diátaxis) + presentations
+├── docs/                        # Presentations and assets
 ├── scripts/                     # Automation scripts
 ├── profile/
 │   └── README.md
@@ -148,34 +148,12 @@ jobs:
 
 ### Attested Delivery
 
-Containers are delivered through a single, caller-immutable
-signing/verify/promote authority: a digest reaches consumers only if it is
-**byte-identical** to what was validated, carries **attestations** (SLSA
-provenance, keyless signature, CycloneDX SBOM, vulnerability report) that
-re-verify at every hop as OCI referrers, and publication is gated on
-**fail-closed verification**. Signing runs in `sign-and-attest.yml` — the
-SLSA Build L3 isolation boundary the calling repo cannot modify.
-
-| Workflow | Role |
-| --- | --- |
-| `build-attest.yml` | Build → push by digest → sign/attest → self-verify (single entry point) |
-| `sign-and-attest.yml` | The L3 signing boundary: provenance + signature + SBOM + vuln report |
-| `verify-attestation.yml` | Fail-closed verification gate before any publish or deploy |
-| `promote.yml` / `promote-prod.yml` | Referrer-carrying digest promotion (+ change-record gate) |
-| `sbom-and-scan.yml` | Standalone CycloneDX/SPDX SBOM + Grype scan |
-| `pin-check.yml` | Full-SHA action pin enforcement (required check on this repo) |
-| `dora-emit.yml` / `mirror-images.yml` | DORA deployment events / controlled upstream image ingress |
-
-Documentation, organized by [Diátaxis](https://diataxis.fr/) in [`docs/`](docs/README.md):
-
-| Need | Start here |
-| --- | --- |
-| Learn it hands-on | [Tutorial: your first attested release](docs/tutorials/first-attested-release.md) |
-| Onboard a repo | [How-to: onboard a repo to attested delivery](docs/how-to/onboard-a-repo-to-attested-delivery.md) |
-| Look up inputs/outputs | [Reference: attested-delivery workflows](docs/reference/workflows.md) |
-| Understand the design | [Explanation: why attested delivery](docs/explanation/attested-delivery.md) |
-| Verify a release | [SECURITY.md — Verifying Release Artifacts](SECURITY.md#verifying-release-artifacts) |
-| Automate onboarding with an agent | [attested-delivery skill](.github/skills/attested-delivery/SKILL.md) |
+Centralized supply-chain workflows for signed, SLSA-attested, fail-closed-verified
+releases: `build-attest.yml`, `sign-and-attest.yml`, `verify-attestation.yml`,
+`promote.yml`, `promote-prod.yml`, `sbom-and-scan.yml`, `pin-check.yml`,
+`mirror-images.yml`, `dora-emit.yml`. Caller recipes live in
+[CLAUDE.md](CLAUDE.md); consumer verification commands live in
+[SECURITY.md](SECURITY.md#verifying-release-artifacts).
 
 ---
 
