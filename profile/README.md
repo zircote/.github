@@ -13,12 +13,12 @@
 
 ## About
 
-**Robert Allen** is a systems/platform engineer, open source maintainer, and sheep and poultry farmer in Farmville, Virginia. By day, he drives infrastructure automation at [HMH](https://www.hmhco.com/). By evening, he builds developer tools that solve real problems in technology and agriculture — and somehow also runs a [regenerative pasture farm](https://epicpastures.com/).
+**Robert Allen** is a systems/platform engineer, open source maintainer, and sheep and poultry farmer in Farmville, Virginia. By day, he drives infrastructure automation for a major education technology company. By evening, he builds developer tools that solve real problems in technology and agriculture — and somehow also runs a [regenerative pasture farm](https://epicpastures.com/).
 
 ### Focus Areas
 
-- **AI Memory Systems** — Building **Atlatl**, a structured memory server for AI agents implementing the MIF specification
-- **Open Standards for AI Tooling** — Authoring specifications ([MIF](https://mif-spec.dev), [ccpkg](https://ccpkg.dev)) that make AI development portable and interoperable
+- **AI Memory Systems** — Building structured, persistent memory for AI agents: [subcog](https://github.com/zircote/subcog) and [mnemonic](https://github.com/zircote/mnemonic)
+- **Open Standards for AI Tooling** — Authoring the [MIF](https://mif-spec.dev) specification to make AI memory portable and interoperable
 - **Agentic Workflows** — GitHub Agentic Workflows (`gh-aw`) for autonomous, event-driven repository operations at scale
 - **Supply-Chain Security** — Signed, SLSA-attested, fail-closed-verified release pipelines (cosign, SBOM, provenance) as reusable org workflows
 - **AI-Assisted Development** — Claude Code plugins, agents, and multi-agent orchestration
@@ -28,19 +28,11 @@
 
 ## Open Specifications
 
-Two open specifications occupy the center of my development attention — both aimed at solving fragmentation in the AI coding assistant ecosystem.
-
 ### [Memory Interchange Format (MIF)](https://mif-spec.dev) — Portable AI Memory
 
 The AI memory ecosystem is fragmented — Mem0, Zep, Letta, and others all use proprietary schemas with no interoperability. MIF defines a common data model with dual representations: human-readable **Markdown** (Obsidian-compatible) and machine-processable **JSON-LD**, with lossless conversion between them. Three conformance levels scale from a 4-field core to full bi-temporal provenance, decay, and embeddings, with migration guides from the major memory systems.
 
 **Status:** v0.1.0-draft &bull; [Specification](https://mif-spec.dev/specification/overview/) &bull; [GitHub](https://github.com/zircote/MIF)
-
-### [ccpkg](https://ccpkg.dev) — Portable Packaging for AI Coding Extensions
-
-Sharing AI assistant extensions is fragile — Git-based installs break silently, startup latency scales with plugin count, and there are no trust signals or version pinning. ccpkg defines a self-contained archive format for distributing skills, agents, commands, hooks, MCP servers, and LSP servers as one portable unit: one file, one install, zero post-install steps. Lazy metadata loading, deterministic lockfiles, and decentralized static-file registries — portable across Claude Code, Gemini CLI, Codex, Copilot, and other compatible tools.
-
-**Status:** Draft &bull; [Specification](https://ccpkg.dev/specification/overview/) &bull; [GitHub](https://github.com/zircote/ccpkg)
 
 ---
 
@@ -50,23 +42,19 @@ The intersection of cognitive science and AI systems presents a compelling quest
 
 ![The Recursive Loop: How Memory and Ontology Shape Our Reality](https://raw.githubusercontent.com/zircote/.github/main/docs/_assets/memory-ontology-recursion.jpg)
 
-MIF grew directly from this research, and **Atlatl** is where it comes to life — my 5th+ iteration of a memory system, now bringing the MIF specification to its full vision. Alongside it, I'm writing an academic paper measuring memory system impact across LLM models; one early finding is how much variance exists in structured recall between models in ways general benchmarks don't predict.
+MIF grew directly from this research, the product of five-plus iterations on memory systems — [subcog](https://github.com/zircote/subcog) and [mnemonic](https://github.com/zircote/mnemonic) are its public expressions. Alongside them, I'm writing an academic paper measuring memory system impact across LLM models; one early finding is how much variance exists in structured recall between models in ways general benchmarks don't predict.
 
 ---
 
 ## Featured Projects
 
-### Atlatl — Structured Memory Server for AI Agents
+### [subcog](https://github.com/zircote/subcog) — Persistent Memory for AI Coding Assistants
 
-A Rust MCP server implementing the [MIF specification](https://mif-spec.dev) — persistent, structured memory that compounds knowledge across sessions. Hybrid BM25 + vector search via Reciprocal Rank Fusion, **custom ontologies** for domain-specific memory organization, **Large Result Offloading** to keep agent context windows lean, and **agentic custodial activities** — autonomous confidence decay, garbage collection, and reindexing that keep the store healthy without human intervention.
+A Rust memory system that captures decisions, learnings, and context from coding sessions. Hybrid search (semantic + BM25), MCP server integration, SQLite persistence with a knowledge graph, and proactive memory surfacing. Its filesystem-native sibling, [mnemonic](https://github.com/zircote/mnemonic), is a pure MIF Level 3 implementation — no dependencies, just markdown files and git.
 
 ### [rlm-rs](https://github.com/zircote/rlm-rs) — Recursive Language Model CLI
 
 A Rust CLI implementing the RLM pattern ([arXiv:2512.24601](https://arxiv.org/abs/2512.24601)) for Claude Code — process documents 100x larger than the context window through intelligent chunking, SQLite persistence, and recursive sub-LLM orchestration. Ships with a [companion plugin](https://github.com/zircote/rlm-rs-plugin).
-
-### [claude-team-orchestration](https://github.com/zircote/claude-team-orchestration) — Multi-Agent Orchestration
-
-A production-grade framework for coordinating teams of Claude Code agents: team management, shared task lists, inter-agent messaging, and seven proven orchestration patterns — from parallel specialists to self-organizing swarms — plus a content-aware RLM implementation for analyzing files and directories that exceed context limits.
 
 ### [nsip](https://github.com/zircote/nsip) — Sheep Genetic Evaluation CLI & MCP Server
 
@@ -118,7 +106,7 @@ Languages        Rust | Python | TypeScript | Go
 Infrastructure   AWS | Docker | Kubernetes | Terraform | GitHub Actions
 AI Integration   Claude Code | GitHub Copilot | MCP Protocol
 Supply Chain     cosign | SLSA | CycloneDX | OCI referrers
-Specifications   MIF (mif-spec.dev) | ccpkg (ccpkg.dev)
+Specifications   MIF (mif-spec.dev)
 Platforms        Linux | macOS | AWS (Solutions Architect certified)
 ```
 
