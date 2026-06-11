@@ -33,7 +33,7 @@ on:
         required: true
         type: string
       jira-digest-field:
-        description: "JIRA custom field id holding the approved build digest (e.g. customfield_10050). When set, the gate hard-asserts the ticket digest equals the promoting digest."
+        description: "JIRA custom field id holding the approved build digest (e.g. customfield_NNNNN). When set, the gate hard-asserts the ticket digest equals the promoting digest."
         required: false
         type: string
         default: ""
