@@ -180,7 +180,11 @@ class GitHubActivityAnalyzer:
         return events
 
     def analyze_repos(
-        self, username: str, top_count: int = 8, new_days: int = 90
+        self,
+        username: str,
+        top_count: int = 8,
+        new_days: int = 90,
+        exclude: list[str] | None = None,
     ) -> tuple[list[RepoScore], list[RepoScore]]:
         """
         Analyze repositories and return top active and new repos.
@@ -206,6 +210,10 @@ class GitHubActivityAnalyzer:
 
             # Skip archived repos
             if repo_data.get("archived"):
+                continue
+
+            # Skip explicitly excluded repos
+            if exclude and repo_data["name"] in exclude:
                 continue
 
             created = parse_date(repo_data["created_at"])
@@ -279,6 +287,12 @@ def main() -> int:
         "--new-days", type=int, default=90, help="Days to consider for new repos"
     )
     parser.add_argument(
+        "--exclude",
+        action="append",
+        default=[],
+        help="Repository name to exclude from results (repeatable)",
+    )
+    parser.add_argument(
         "--output-format",
         choices=["json", "github-output"],
         default="json",
@@ -291,7 +305,7 @@ def main() -> int:
     try:
         analyzer = GitHubActivityAnalyzer(token)
         top_repos, new_repos = analyzer.analyze_repos(
-            args.user, args.top_count, args.new_days
+            args.user, args.top_count, args.new_days, exclude=args.exclude
         )
 
         top_repos_data = [r.to_dict() for r in top_repos]

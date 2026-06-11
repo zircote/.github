@@ -66,6 +66,7 @@ jobs:
           python scripts/analyze-github-activity.py \
             --user "$GITHUB_USER" \
             --top-count "$TOP_COUNT" \
+            --exclude swagger-php \
             --output-format github-output
 
   # ===========================================================================
