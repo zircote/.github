@@ -1,0 +1,111 @@
+# Centralized reusable workflow: build a container, push it to GHCR by digest, then
+# sign + attest it via the isolated sign-and-attest workflow.
+#
+# This is the single entry point application repos call to produce an attested
+# image. The build runs in the caller's context (its Dockerfile/context); signing
+# and attestation happen inside the isolated sign-and-attest reusable workflow,
+# which the caller cannot modify (the SLSA Build L3 boundary). The image digest is
+# canonical; the commit-SHA tag is informational only.
+#
+# Caller MUST pin this workflow by full commit SHA:
+#   uses: zircote/.github/.github/workflows/build-attest.yml@<SHA>
+#
+# Primary sources:
+#   - docker/build-push-action (digest output): https://github.com/docker/build-push-action
+#   - GHCR (push by digest):                     https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-container-registry
+
+name: build-attest
+
+on:
+  workflow_call:
+    inputs:
+      image-name:
+        description: "Image repository without tag/digest (e.g. ghcr.io/zircote/app)"
+        required: true
+        type: string
+      context:
+        description: "Docker build context path"
+        required: false
+        type: string
+        default: "."
+      dockerfile:
+        description: "Path to the Dockerfile"
+        required: false
+        type: string
+        default: "Dockerfile"
+      build-args:
+        description: "Newline-delimited build args passed to the build"
+        required: false
+        type: string
+        default: ""
+      sbom:
+        description: "Generate + attest a CycloneDX SBOM (via sign-and-attest)"
+        required: false
+        type: boolean
+        default: true
+      vuln-scan:
+        description: "Generate + attest a Grype vulnerability report (via sign-and-attest)"
+        required: false
+        type: boolean
+        default: true
+      cosign-version:
+        required: false
+        type: string
+        default: "v3.0.6"
+    outputs:
+      image-digest:
+        description: "The immutable sha256 digest of the pushed image"
+        value: ${{ jobs.build.outputs.image-digest }}
+      provenance-verified:
+        description: "true when sign-and-attest verified SLSA L3 in this run"
+        value: ${{ jobs.attest.outputs.provenance-verified }}
+
+permissions: {}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    outputs:
+      image-digest: ${{ steps.build.outputs.digest }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10  # v6.0.3
+      - name: Set up Buildx
+        uses: docker/setup-buildx-action@d7f5e7f509e45cec5c76c4d5afdd7de93d0b3df5  # v4.1.0
+      - name: Login to GHCR
+        uses: docker/login-action@650006c6eb7dba73a995cc03b0b2d7f5ca915bee  # v4.2.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ github.token }}
+      - name: Build and push (digest canonical, sha tag informational)
+        id: build
+        uses: docker/build-push-action@f9f3042f7e2789586610d6e8b85c8f03e5195baf  # v7.2.0
+        with:
+          context: ${{ inputs.context }}
+          file: ${{ inputs.dockerfile }}
+          build-args: ${{ inputs.build-args }}
+          push: true
+          tags: ${{ inputs.image-name }}:${{ github.sha }}
+          # SLSA L3 provenance + SBOM come from the isolated sign-and-attest
+          # workflow, NOT the caller-controlled build step.
+          provenance: false
+          sbom: false
+
+  attest:
+    needs: build
+    permissions:
+      id-token: write
+      attestations: write
+      packages: write
+      contents: read
+    uses: ./.github/workflows/sign-and-attest.yml
+    with:
+      image-name: ${{ inputs.image-name }}
+      image-digest: ${{ needs.build.outputs.image-digest }}
+      sbom: ${{ inputs.sbom }}
+      vuln-scan: ${{ inputs.vuln-scan }}
+      cosign-version: ${{ inputs.cosign-version }}
