@@ -1,0 +1,35 @@
+# CI gate: every GitHub Actions `uses:` reference in this repo must be pinned
+# to a full 40-char commit SHA (see CLAUDE.md "Workflow Security Requirements").
+#
+# Calls the central pin-check reusable workflow by full repository path pinned
+# to a commit SHA — the same resolution path consumer repos use, so this run
+# also proves the central workflows resolve cross-repo. Dependabot's
+# github-actions ecosystem keeps the pin current.
+#
+# scan-dir is scoped to the two directories holding real action references;
+# the default (.github) would also match documentation examples inside
+# .github/skills/**/*.md, which are illustrative, not executable.
+
+name: ci
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  pin-check:
+    permissions:
+      contents: read
+    uses: zircote/.github/.github/workflows/pin-check.yml@68927d3c0db9484f33e78f7f76d2d1917df9b439
+    with:
+      scan-dir: .github/workflows
+
+  pin-check-actions:
+    permissions:
+      contents: read
+    uses: zircote/.github/.github/workflows/pin-check.yml@68927d3c0db9484f33e78f7f76d2d1917df9b439
+    with:
+      scan-dir: actions

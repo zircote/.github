@@ -22,7 +22,7 @@ on:
   workflow_call:
     inputs:
       image-name:
-        description: "Image repository without tag/digest (e.g. ghcr.io/__org__/dqo/app)"
+        description: "Image repository without tag/digest (e.g. ghcr.io/__org__/app)"
         required: true
         type: string
       image-digest:

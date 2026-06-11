@@ -1,6 +1,6 @@
 # Centralized reusable workflow: production promotion behind the change-record gate.
 #
-# A production promotion may proceed only when an APPROVED JIRA CCAB ticket exists
+# A production promotion may proceed only when an APPROVED JIRA change-record ticket exists
 # whose recorded digest matches the digest being promoted. The promotion itself is
 # the referrer-aware `promote.yml` (cosign copy + post-copy verify); the `production`
 # GitHub Environment adds required-reviewer protection on top.
@@ -29,7 +29,7 @@ on:
         required: true
         type: string
       jira-issue-key:
-        description: "CCAB change ticket key (e.g. CCAB-1234)"
+        description: "Change-record ticket key (e.g. CHG-1234)"
         required: true
         type: string
       jira-digest-field:
@@ -57,10 +57,10 @@ on:
 permissions: {}
 
 jobs:
-  ccab-gate:
+  change-record-gate:
     runs-on: ubuntu-latest
     steps:
-      - name: Require an APPROVED CCAB ticket whose digest matches
+      - name: Require an APPROVED change-record ticket whose digest matches
         env:
           JIRA_BASE_URL: ${{ secrets.JIRA_BASE_URL }}
           JIRA_EMAIL: ${{ secrets.JIRA_EMAIL }}
@@ -81,29 +81,29 @@ jobs:
             -H 'Accept: application/json' \
             "${JIRA_BASE_URL}/rest/api/3/issue/${ISSUE}?fields=${FIELDS}")"
           STATUS="$(echo "$RESP" | jq -r '.fields.status.name')"
-          echo "CCAB ${ISSUE} status: ${STATUS}; promoting digest ${DIGEST}"
+          echo "Change record ${ISSUE} status: ${STATUS}; promoting digest ${DIGEST}"
           if [ "$STATUS" != "Approved" ]; then
-            echo "::error::CCAB ticket ${ISSUE} is '${STATUS}', not 'Approved'. Blocking production promotion."
+            echo "::error::Change-record ticket ${ISSUE} is '${STATUS}', not 'Approved'. Blocking production promotion."
             exit 1
           fi
           # Hard-assert the ticket records the exact digest under change review.
           if [ -n "${DIGEST_FIELD}" ]; then
             TICKET_DIGEST="$(echo "$RESP" | jq -r --arg f "${DIGEST_FIELD}" '.fields[$f] // empty' | tr -d '[:space:]')"
             if [ -z "${TICKET_DIGEST}" ]; then
-              echo "::error::CCAB ticket ${ISSUE} has no digest in field ${DIGEST_FIELD}. Blocking."
+              echo "::error::Change-record ticket ${ISSUE} has no digest in field ${DIGEST_FIELD}. Blocking."
               exit 1
             fi
             if [ "${TICKET_DIGEST}" != "${DIGEST}" ]; then
-              echo "::error::CCAB ticket digest ${TICKET_DIGEST} != promoting digest ${DIGEST}. Blocking."
+              echo "::error::Change-record ticket digest ${TICKET_DIGEST} != promoting digest ${DIGEST}. Blocking."
               exit 1
             fi
-            echo "CCAB digest match confirmed for ${DIGEST}."
+            echo "Change-record digest match confirmed for ${DIGEST}."
           else
             echo "::warning::No jira-digest-field configured; set it to enforce ticket<->digest equality (status-only gate in effect)."
           fi
 
   promote:
-    needs: ccab-gate
+    needs: change-record-gate
     permissions:
       id-token: write
       contents: read
