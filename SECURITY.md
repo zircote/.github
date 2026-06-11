@@ -36,3 +36,41 @@ We follow coordinated disclosure. We ask that you:
 ## Recognition
 
 We appreciate the efforts of security researchers. Contributors who report valid vulnerabilities will be acknowledged (with permission) in our release notes.
+
+## Verifying Release Artifacts
+
+Repositories onboarded to the attested release architecture sign container images
+through the centralized signer workflow in this repository
+(`zircote/.github/.github/workflows/sign-and-attest.yml`). Each release digest
+carries SLSA provenance, a keyless signature, a CycloneDX SBOM, and a
+vulnerability report as OCI referrers. Verify from any workstation with `gh`
+(authenticated) and `cosign`:
+
+```sh
+# 0. Resolve the digest for a tag
+DIGEST=$(gh api 'users/zircote/packages/container/<name>/versions?per_page=20' \
+  --jq '[.[] | select((.metadata.container.tags // []) | index("<tag>"))][0].name')
+
+# 1. SLSA provenance — --repo asserts where the build ran,
+#    --signer-workflow asserts the central signer (both required)
+gh attestation verify "oci://ghcr.io/zircote/<repo>@${DIGEST}" \
+  --repo zircote/<repo> \
+  --signer-workflow zircote/.github/.github/workflows/sign-and-attest.yml \
+  --predicate-type https://slsa.dev/provenance/v1
+
+# 2. Keyless signature
+cosign verify "ghcr.io/zircote/<repo>@${DIGEST}" \
+  --certificate-identity-regexp '^https://github.com/zircote/\.github/\.github/workflows/sign-and-attest\.yml@.*$' \
+  --certificate-oidc-issuer https://token.actions.githubusercontent.com
+
+# 3. SBOM attestation (vuln report: same command with
+#    --type "https://in-toto.io/attestation/vulns/v0.1")
+cosign verify-attestation "ghcr.io/zircote/<repo>@${DIGEST}" \
+  --type cyclonedx \
+  --certificate-identity-regexp '^https://github.com/zircote/\.github/\.github/workflows/sign-and-attest\.yml@.*$' \
+  --certificate-oidc-issuer https://token.actions.githubusercontent.com
+
+# 4. Release binaries (attested by the repo's own workflow — no --signer-workflow)
+gh release download <tag> --repo zircote/<repo>
+gh attestation verify <binary> --repo zircote/<repo>
+```
