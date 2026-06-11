@@ -96,7 +96,24 @@ jobs:
           esac
           DIGEST="${SOURCE_REF##*@}"
 
+          # Fail-closed input validation: both identifiers are numeric, and
+          # project-number is interpolated into a jq filter below.
+          if ! printf '%s' "${ISSUE}" | grep -Eq '^[0-9]+$'; then
+            echo "::error::change-issue must be a numeric GitHub issue number, got '${ISSUE}'"; exit 1
+          fi
+          if [ -n "${PROJECT_NUMBER}" ] && ! printf '%s' "${PROJECT_NUMBER}" | grep -Eq '^[0-9]+$'; then
+            echo "::error::project-number must be a numeric Projects v2 number, got '${PROJECT_NUMBER}'"; exit 1
+          fi
+
           RESP="$(gh api "repos/${CHANGE_REPO}/issues/${ISSUE}")"
+
+          # The Issues API also returns pull requests. A change record must be
+          # an issue — reject PRs so a labeled PR cannot satisfy the gate.
+          if jq -e '.pull_request' <<<"$RESP" >/dev/null; then
+            echo "::error::${CHANGE_REPO}#${ISSUE} is a pull request, not an issue. The change record must be a GitHub issue. Blocking."
+            exit 1
+          fi
+
           STATE="$(jq -r '.state' <<<"$RESP")"
           TITLE="$(jq -r '.title' <<<"$RESP")"
           echo "Change record ${CHANGE_REPO}#${ISSUE} ('${TITLE}') state: ${STATE}; promoting digest ${DIGEST}"

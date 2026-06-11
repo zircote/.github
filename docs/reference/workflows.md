@@ -179,7 +179,8 @@ additionally asserts the issue's GitHub Projects v2 `Status` field equals
 | `CHANGE_RECORD_TOKEN` | No | Token with `issues: read` on the change repo and, when `project-number` is set, Projects v2 read access (the default `GITHUB_TOKEN` cannot read Projects v2). Falls back to `GITHUB_TOKEN` when omitted. |
 
 **Caller permissions:** `id-token: write`, `contents: read`, `packages: read`,
-`attestations: read`.
+`attestations: read`, `issues: read` (the change-record gate reads the issue
+with the workflow `GITHUB_TOKEN` unless `CHANGE_RECORD_TOKEN` is provided).
 
 ## `sbom-and-scan.yml`
 

@@ -131,7 +131,7 @@ this central workflow, while the caller is recorded as the source repository.
 | `sign-and-attest.yml` | The L3 signing boundary: SLSA provenance + cosign keyless signature + CycloneDX SBOM + vuln report as OCI referrers, then self-verify | `image-name`, `image-digest` |
 | `verify-attestation.yml` | Fail-closed verification gate before any publish/deploy | `image-ref`, `attestation-repo` |
 | `promote.yml` | Referrer-carrying `cosign copy` between registries + post-copy re-verify | `source-ref`, `dest-repo`, `target-env` |
-| `promote-prod.yml` | `promote.yml` behind the change-record gate (GitHub issue + label, optional Projects v2 status) | + `change-issue`, `approval-label`, `project-number` |
+| `promote-prod.yml` | `promote.yml` behind the change-record gate (GitHub issue + label, optional Projects v2 status) | + `change-issue`, `change-repo`, `approval-label`, `project-number`, `approved-status` |
 | `sbom-and-scan.yml` | Standalone SBOM (CycloneDX + SPDX) + Grype scan | `image-ref` |
 | `dora-emit.yml` | DORA deployment events (call with `if: always()`) | `image-digest` |
 | `pin-check.yml` | Fails on the first `uses:` not pinned to a full 40-char SHA | `scan-dir` |
