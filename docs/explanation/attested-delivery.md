@@ -97,13 +97,14 @@ The practical steps are in
 ## Why production promotion is gated on a change record
 
 The first two legs of the invariant are cryptographic; the third is
-organizational. An approved change-record ticket that records the digest binds
-the technical promotion to a human-authorized change. `promote-prod.yml`
-queries the ticket and blocks unless its status is `Approved` — and, when the
-digest custom field is configured, unless the ticket's recorded digest equals
-the digest being promoted. This is automated evidence checking, not a convened
-change board: the gate is a fail-closed API call in the pipeline, which keeps
-delivery flowing while preserving an auditable authorization trail.
+organizational. An approved change-record **GitHub issue** that records the
+digest binds the technical promotion to a human-authorized change.
+`promote-prod.yml` queries the issue and blocks unless it is open, carries the
+approval label, and its body records the exact digest being promoted —
+optionally also requiring a GitHub Projects v2 `Status` of `Approved`. This is
+automated evidence checking, not a convened change board: the gate is a
+fail-closed API call in the pipeline, which keeps delivery flowing while
+preserving an auditable authorization trail.
 
 ## Why a deployment is "a production digest promotion"
 

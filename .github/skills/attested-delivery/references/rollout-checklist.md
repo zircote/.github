@@ -30,8 +30,9 @@ discovery decides).
 ## Phase 2 — Promotion and governance (deploying targets only)
 
 - [ ] `promote.yml` between environments; post-copy re-verify (AT-02).
-- [ ] `promote-prod.yml` behind the change-record gate with
-      `jira-digest-field` set (ticket↔digest equality, AT-07).
+- [ ] `promote-prod.yml` behind the change-record gate: an approved GitHub
+      change-record issue recording the promoting digest (issue↔digest
+      equality, AT-07).
 - [ ] DORA emission live (deployment = prod digest promotion, AT-08).
 - [ ] **Exit gate:** AT-01/AT-02/AT-07 pass; a promotion without an
       approved change record is blocked before any copy.

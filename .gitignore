@@ -2,3 +2,6 @@
 .memory/
 .fastembed_cache/
 ~/
+
+# subcog tool-generated audit logs (anywhere in the tree)
+**/.subcog/

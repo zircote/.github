@@ -151,11 +151,11 @@ Environment named by `target-env`.
 ## `promote-prod.yml`
 
 `promote.yml` behind the change-record gate and the `production` GitHub
-Environment. The promotion proceeds only when the change-record ticket's
-status is `Approved` — and, when `jira-digest-field` is set, only when the
-ticket's recorded digest equals the digest being promoted. Without
-`jira-digest-field` a status-only gate is in effect and the run emits a
-warning.
+Environment. The change record is a **GitHub issue**: the promotion proceeds
+only when the issue is open, carries the approval label, and its body records
+the exact digest being promoted. When `project-number` is set, the gate
+additionally asserts the issue's GitHub Projects v2 `Status` field equals
+`approved-status`.
 
 **Inputs:**
 
@@ -164,8 +164,11 @@ warning.
 | `source-ref` | string | Yes | — | Pre-production-verified image by digest |
 | `dest-repo` | string | Yes | — | Production repository without tag/digest |
 | `aws-role-arn` | string | Yes | — | Production registry IAM role to assume (ECR) |
-| `jira-issue-key` | string | Yes | — | Change-record ticket key (e.g. `CHG-1234`) |
-| `jira-digest-field` | string | No | `""` | JIRA custom field id holding the approved digest (e.g. `customfield_NNNNN`); enables the ticket↔digest equality assertion |
+| `change-issue` | string | Yes | — | GitHub issue number of the change record authorizing this promotion |
+| `change-repo` | string | No | `""` (caller repo) | `owner/repo` containing the change-record issue |
+| `approval-label` | string | No | `change-approved` | Label that marks the change record approved |
+| `project-number` | string | No | `""` | GitHub Projects v2 number; when set, also asserts the issue's `Status` field |
+| `approved-status` | string | No | `Approved` | Projects v2 Status value required when `project-number` is set |
 | `signer-profile-arn` | string | No | `""` | Passed through to `promote.yml` |
 | `aws-region` | string | No | `us-east-1` | AWS region |
 
@@ -173,12 +176,11 @@ warning.
 
 | Name | Required | Description |
 | --- | --- | --- |
-| `JIRA_BASE_URL` | Yes | JIRA Cloud base URL |
-| `JIRA_EMAIL` | Yes | API user email |
-| `JIRA_API_TOKEN` | Yes | API token |
+| `CHANGE_RECORD_TOKEN` | No | Token with `issues: read` on the change repo and, when `project-number` is set, Projects v2 read access (the default `GITHUB_TOKEN` cannot read Projects v2). Falls back to `GITHUB_TOKEN` when omitted. |
 
 **Caller permissions:** `id-token: write`, `contents: read`, `packages: read`,
-`attestations: read`.
+`attestations: read`, `issues: read` (the change-record gate reads the issue
+with the workflow `GITHUB_TOKEN` unless `CHANGE_RECORD_TOKEN` is provided).
 
 ## `sbom-and-scan.yml`
 

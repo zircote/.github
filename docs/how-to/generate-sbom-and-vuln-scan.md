@@ -36,6 +36,11 @@ jobs:
       image-ref: ghcr.io/zircote/<your-repo>@sha256:<digest>
 ```
 
+`packages: write` is required even for a read-only scan: the called workflow's
+job requests it (to push the SBOM attestation referrer when `attest: true`),
+and a reusable-workflow caller must grant at least what the called job
+requests or the call fails at startup.
+
 For an image in ECR, add the role so the job can authenticate:
 
 ```yaml
