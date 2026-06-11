@@ -31,7 +31,7 @@ Request content creation by specifying the type (blog, social, video) and topic.
 
 ## Content Directory Structure
 
-```
+```text
 content/
 ├── blog/
 │   ├── drafts/           # Work in progress
@@ -76,7 +76,7 @@ draft: true
 ## Social Media Formats
 
 ### Twitter/X (280 chars)
-```
+```text
 Hook line creating curiosity
 
 Key insight or value prop
@@ -87,7 +87,7 @@ Call to action + link
 ```
 
 ### LinkedIn (3000 chars)
-```
+```text
 Opening hook
 
 Story or context
@@ -102,7 +102,7 @@ Call to action
 ```
 
 ### Thread Structure
-```
+```text
 1/ Hook promising value
 2/ Context setup
 3-8/ Main points (one per tweet)
@@ -133,7 +133,7 @@ Call to action
 
 ## Content Repurposing Flow
 
-```
+```text
 Blog Post (1500+ words)
     ↓
 Twitter Thread (8-12 tweets)

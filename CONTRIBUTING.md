@@ -25,13 +25,25 @@ Thank you for your interest in contributing to .github! This document provides g
 
 ## Development Setup
 
+This repository holds GitHub configuration (workflows, composite actions, skills,
+agents) — there is no application build or test suite. The development loop is:
+
 1. Clone your fork:
    ```bash
    git clone https://github.com/<your-username>/.github.git
    cd .github
    ```
-2. Install dependencies (see README for project-specific instructions).
-3. Run the test suite to verify your setup.
+2. Validate workflow changes with [actionlint](https://github.com/rhysd/actionlint):
+   ```bash
+   actionlint .github/workflows/<changed-file>.yml
+   ```
+3. For gh-aw agentic workflows (`.github/workflows/*.md`), compile and patch with:
+   ```bash
+   bash scripts/compile-gh-aw.sh <workflow-name>
+   ```
+   The generated `.lock.yml` files are build artifacts — never edit them directly.
+4. Every `uses:` reference must be pinned to a full 40-char commit SHA; the
+   `pin-check` required CI check enforces this on every pull request.
 
 ## Code Style
 
@@ -43,7 +55,7 @@ Thank you for your interest in contributing to .github! This document provides g
 
 Use clear, descriptive commit messages:
 
-```
+```text
 <type>: <short summary>
 
 <optional body with more detail>

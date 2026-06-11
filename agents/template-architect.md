@@ -107,7 +107,7 @@ jobs:
 
 **Workflow Overview:**
 
-```
+```text
 ┌─────────────┐     ┌──────────────┐     ┌─────────────┐
 │ Identify    │────▶│ Copy &       │────▶│ Customize   │
 │ Base        │     │ Rename       │     │ Tooling     │

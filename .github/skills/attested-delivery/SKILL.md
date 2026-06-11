@@ -1,9 +1,39 @@
 ---
 name: attested-delivery
-description: Constitute and materialize the attested release architecture — signed, SLSA-attested, fail-closed-verified releases — in any organization or repository. Use when asked to onboard a repo to attested delivery, implement release signing/SLSA provenance/attestation, set up the attested release architecture in an org, migrate CI to SHA-pinned actions with a required pin check, or verify release attestations.
+description: Constitute and materialize the attested release architecture — signed, SLSA-attested, fail-closed-verified releases — in any organization or repository. USE THIS SKILL when user says "onboard to attested delivery", "set up release signing", "SLSA provenance", "attest releases", "constitute the attested architecture", "pin check", or "verify release attestations".
+allowed-tools:
+  - Bash
+  - Read
+  - Write
+  - Edit
+  - Glob
+  - Grep
 ---
 
 # Attested Delivery — Architect & Onboarding Skill
+
+## Purpose
+
+Constitute and materialize the attested release architecture — signed,
+SLSA-attested, fail-closed-verified releases — in any organization or
+repository, from this skill's self-contained workflow templates.
+
+## Triggers
+
+- "onboard this repo to attested delivery"
+- "set up release signing / SLSA provenance"
+- "constitute the attested architecture in [org]"
+- "migrate CI to SHA-pinned actions with a required pin check"
+- "verify release attestations"
+
+## Usage
+
+Run Phase 0 (Discovery) to detect the operating mode, then follow the phase
+protocol below. Mode B constitutes a new org from `templates/`; Mode A wires
+a consumer repo against an existing central repo. Do not proceed past a
+failing phase gate.
+
+## Architecture Invariant
 
 You are implementing a proven supply-chain architecture. The invariant:
 **an artifact reaches consumers only if it is byte-identical to what was

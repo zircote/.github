@@ -62,7 +62,7 @@ on: [push, pull_request]
 
 jobs:
   ci:
-    uses: zircote/.github/.github/workflows/reusable-ci-python.yml@main
+    uses: zircote/.github/.github/workflows/reusable-ci-python.yml@2192c47863886d7a867b5042fb08de414f948f49 # main
     with:
       python-version: '3.12'
       coverage-threshold: 80
@@ -93,8 +93,8 @@ jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
-      - uses: zircote/.github/actions/setup-python-uv@main
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: zircote/.github/actions/setup-python-uv@2192c47863886d7a867b5042fb08de414f948f49 # main
         with:
           python-version: ${{ inputs.python-version }}
       - run: uv run ruff check .
@@ -127,7 +127,7 @@ inputs:
 runs:
   using: 'composite'
   steps:
-    - uses: astral-sh/setup-uv@v4
+    - uses: astral-sh/setup-uv@fac544c07dec837d0ccb6301d7b5580bf5edae39 # v8.2.0
       with:
         enable-cache: true
     - shell: bash
@@ -158,14 +158,11 @@ runs:
 ## Validation
 
 ```bash
-# Validate SHA pinning
-./scripts/validate-sha-pinning.sh .github/workflows/
-
-# Check for unpinned actions
-grep -rn "uses:.*@v[0-9]" .github/workflows/
-
 # Validate workflow structure
-./scripts/validate-workflows.sh .github/workflows/
+actionlint .github/workflows/*.yml
+
+# Check for unpinned actions (the pin-check required CI check enforces this)
+grep -rnE "uses:.*@(main|master|v[0-9])" .github/workflows/
 ```
 
 ## Performance Optimization
@@ -173,7 +170,7 @@ grep -rn "uses:.*@v[0-9]" .github/workflows/
 ### Caching
 
 ```yaml
-- uses: actions/cache@0c907a75c2c80ebcb7f088228285e798b750cf8f
+- uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.4
   with:
     path: ~/.cache/uv
     key: ${{ runner.os }}-uv-${{ hashFiles('uv.lock') }}

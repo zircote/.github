@@ -181,7 +181,7 @@ public class ResourceService {
 ### Standard Layouts
 
 **Python:**
-```
+```text
 src/package_name/
 tests/
   unit/
@@ -190,7 +190,7 @@ pyproject.toml
 ```
 
 **TypeScript:**
-```
+```text
 src/
 tests/
 package.json
@@ -198,7 +198,7 @@ tsconfig.json
 ```
 
 **Go:**
-```
+```text
 cmd/app/
 internal/
 pkg/
@@ -253,9 +253,9 @@ For language-specific workflows, use the reusable workflows in `.github/workflow
 - `reusable-ci-python.yml`
 - `reusable-ci-typescript.yml`
 - `reusable-ci-go.yml`
-- `reusable-ci-rust.yml`
 - `reusable-release.yml`
 - `reusable-security.yml`
+- `reusable-docs.yml`
 
 ## Common Patterns
 

@@ -75,7 +75,7 @@ on: [push, pull_request]
 
 jobs:
   ci:
-    uses: zircote/.github/.github/workflows/reusable-ci-python.yml@main
+    uses: zircote/.github/.github/workflows/reusable-ci-python.yml@2192c47863886d7a867b5042fb08de414f948f49 # main
     with:
       python-version: '3.12'
     secrets: inherit
@@ -105,7 +105,7 @@ Best for: Large projects requiring careful migration
 
 ## Adding AI Integration
 
-```bash
+````bash
 # Create CLAUDE.md
 cat > CLAUDE.md << 'EOF'
 # CLAUDE.md
@@ -133,7 +133,7 @@ cat > .github/copilot-instructions.md << 'EOF'
 ## Code Guidelines
 [Language patterns]
 EOF
-```
+````
 
 ## Converting to Reusable Workflows
 
@@ -145,7 +145,7 @@ jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       - run: pip install ruff && ruff check .
 ```
 
@@ -155,7 +155,7 @@ name: CI
 on: [push]
 jobs:
   ci:
-    uses: zircote/.github/.github/workflows/reusable-ci-python.yml@main
+    uses: zircote/.github/.github/workflows/reusable-ci-python.yml@2192c47863886d7a867b5042fb08de414f948f49 # main
 ```
 
 ## Validation After Migration
@@ -167,7 +167,8 @@ for f in CLAUDE.md .github/copilot-instructions.md; do
 done
 
 # Validate workflows
-./scripts/validate-sha-pinning.sh .github/workflows/
+actionlint .github/workflows/*.yml
+grep -rnE "uses:.*@(main|master|v[0-9])" .github/workflows/ || echo "all pinned"
 
 # Test CI (if possible)
 # Run linting, tests locally
