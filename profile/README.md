@@ -5,135 +5,64 @@
 <p align="center">
   <a href="https://github.com/zircote"><img src="https://img.shields.io/github/followers/zircote?style=for-the-badge&logo=github&logoColor=white&label=Followers&color=181717" alt="GitHub Followers"></a>
   <a href="https://github.com/zircote?tab=repositories"><img src="https://img.shields.io/badge/dynamic/json?style=for-the-badge&logo=github&logoColor=white&label=Public%20Repos&query=public_repos&url=https://api.github.com/users/zircote&color=238636" alt="Public Repos"></a>
-  <a href="https://github.com/zircote/swagger-php"><img src="https://img.shields.io/github/stars/zircote/swagger-php?style=for-the-badge&logo=github&logoColor=white&label=swagger-php&color=e3b341" alt="swagger-php Stars"></a>
-</p>
-
-<p align="center">
   <a href="https://www.linkedin.com/in/zircote/"><img src="https://img.shields.io/badge/LinkedIn-zircote-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white" alt="LinkedIn"></a>
   <a href="https://zircote.github.io/"><img src="https://img.shields.io/badge/Blog-zircote.com-FF5722?style=for-the-badge&logo=hashnode&logoColor=white" alt="Blog"></a>
-
 </p>
 
 ---
 
 ## About
 
-**Robert Allen** is a Systems/Platform engineer, technologist, open source maintainer and sheep and poultry farmer based in Farmville, Virginia. By day, he drives infrastructure automation at [HMH](https://www.hmhco.com/). By evening, he builds developer tools that solve real problems in technology and agriculture. And somehow also runs a [regenerative pasture farm](https://epicpastures.com/).
-
-Creator of **[swagger-php](https://github.com/zircote/swagger-php)**, the PHP library for generating OpenAPI documentation from annotations. Much appreciation to the community of contributors and users who have made it a success over the years.
+**Robert Allen** is a systems/platform engineer, open source maintainer, and sheep and poultry farmer in Farmville, Virginia. By day, he drives infrastructure automation for a major education technology company. By evening, he builds developer tools that solve real problems in technology and agriculture — and somehow also runs a [regenerative pasture farm](https://epicpastures.com/).
 
 ### Focus Areas
 
-- **AI Memory Systems** - Building **Atlatl**, a structured memory server for AI agents implementing the MIF specification
-- **Open Standards for AI Tooling** - Authoring specifications (MIF, ccpkg) that make AI development portable and interoperable
-- **Agentic Workflows** - GitHub Agentic Workflows (`gh-aw`) for autonomous, event-driven repository operations at scale
-- **AI-Assisted Development** - Claude Code plugins, agents, and multi-agent orchestration
-- **DevOps & Platform Engineering** - Infrastructure automation, CI/CD, AWS architecture
+- **AI Memory Systems** — Building structured, persistent memory for AI agents: [subcog](https://github.com/zircote/subcog) and [mnemonic](https://github.com/zircote/mnemonic)
+- **Open Standards for AI Tooling** — Authoring the [MIF](https://mif-spec.dev) specification to make AI memory portable and interoperable
+- **Agentic Workflows** — GitHub Agentic Workflows (`gh-aw`) for autonomous, event-driven repository operations at scale
+- **Supply-Chain Security** — Signed, SLSA-attested, fail-closed-verified release pipelines (cosign, SBOM, provenance) as reusable org workflows
+- **AI-Assisted Development** — Claude Code plugins, agents, and multi-agent orchestration
+- **DevOps & Platform Engineering** — Infrastructure automation, CI/CD, AWS architecture
 
 ---
 
 ## Open Specifications
 
-Two open specifications currently occupy the center of my development attention — both aimed at solving fragmentation in the AI coding assistant ecosystem.
-
 ### [Memory Interchange Format (MIF)](https://mif-spec.dev) — Portable AI Memory
 
-<a href="https://mif-spec.dev"><img src="https://img.shields.io/badge/spec-mif--spec.dev-blue?style=for-the-badge" alt="mif-spec.dev"></a>
-
-The AI memory ecosystem is fragmented — Mem0, Zep, Letta, LangMem, and others all use proprietary schemas with no interoperability. MIF defines a common data model with dual representations: human-readable **Markdown** files (Obsidian-compatible) and machine-processable **JSON-LD** documents.
-
-MIF solves vendor lock-in, data ownership, and future-proofing for AI memory. Key features:
-
-- **Dual format** — Lossless conversion between `.memory.md` and `.memory.json`
-- **Three conformance levels** — Core (4 fields), Standard (+ namespaces, entities, relationships), Full (+ bi-temporal, decay, provenance, embeddings, citations)
-- **Ontology system** — Semantic/episodic/procedural memory types with domain-extensible entity discovery
-- **W3C PROV provenance** and **JSON Schema validation**
-- **Migration guides** from Mem0, Zep, Letta, Subcog, and Basic Memory
+The AI memory ecosystem is fragmented — Mem0, Zep, Letta, and others all use proprietary schemas with no interoperability. MIF defines a common data model with dual representations: human-readable **Markdown** (Obsidian-compatible) and machine-processable **JSON-LD**, with lossless conversion between them. Three conformance levels scale from a 4-field core to full bi-temporal provenance, decay, and embeddings, with migration guides from the major memory systems.
 
 **Status:** v0.1.0-draft &bull; [Specification](https://mif-spec.dev/specification/overview/) &bull; [GitHub](https://github.com/zircote/MIF)
-
-### [ccpkg](https://ccpkg.dev) — Portable Packaging for AI Coding Extensions
-
-<a href="https://ccpkg.dev"><img src="https://img.shields.io/badge/spec-ccpkg.dev-blue?style=for-the-badge" alt="ccpkg.dev"></a>
-
-AI coding assistants are increasingly extensible, but sharing extensions is fragmented and fragile — Git-based installs break silently, startup latency scales with plugin count, and there are no trust signals or version pinning. ccpkg defines a self-contained archive format (`.ccpkg`) for packaging and distributing skills, agents, commands, hooks, MCP servers, and LSP servers as a single portable unit.
-
-One file, one install, zero post-install steps. Key features:
-
-- **Cross-tool portability** — Works across Claude Code, Gemini CLI, Codex, Copilot, and other compatible tools
-- **Self-contained archives** — All dependencies vendored, no runtime network fetches
-- **Lazy loading** — Only metadata loaded at startup; twenty packages have the same startup time as zero
-- **Deterministic lockfiles** — `ccpkg-lock.json` pins exact versions with checksums for reproducible team environments
-- **Decentralized registries** — JSON files hostable on GitHub Pages, S3, or any static server
-- **Built on open standards** — Agent Skills, MCP, LSP, SemVer, JSON Schema
-
-**Status:** Draft (2026-02-14) &bull; [Specification](https://ccpkg.dev/specification/overview/) &bull; [GitHub](https://github.com/zircote/ccpkg)
 
 ---
 
 ## Memory, Ontology & AI
 
-The intersection of cognitive science and AI systems presents a compelling question: **how do we build AI that remembers meaningfully?**
-
-Human memory isn't a tape recorder—it's a constructive process where our mental models (ontology) shape what we encode, and our memories reshape how we understand the world. This recursive loop is central to how we learn, adapt, and make sense of novel situations.
+The intersection of cognitive science and AI systems presents a compelling question: **how do we build AI that remembers meaningfully?** Human memory isn't a tape recorder — it's a constructive process where our mental models (ontology) shape what we encode, and our memories reshape how we understand the world.
 
 ![The Recursive Loop: How Memory and Ontology Shape Our Reality](https://raw.githubusercontent.com/zircote/.github/main/docs/_assets/memory-ontology-recursion.jpg)
 
-MIF grew directly from this research, and **Atlatl** is where it comes to life — my 5th+ iteration of a memory system, now focused on bringing the MIF specification into its full vision. Current capabilities include **custom ontologies** (user-definable taxonomies for domain-specific memory organization), a **Large Result Offloading (LRO)** pattern for managing result sets that exceed context limits, and **agentic custodial activities** — autonomous housekeeping, confidence decay, garbage collection, and reindexing that keep the memory store healthy without human intervention.
-
-I'm also writing an academic paper with experiments measuring memory system impact across different LLM models. One of the more interesting findings so far is how much variance there is in model performance — some models handle structured recall significantly better than others in ways that aren't obvious from general benchmarks.
-
-I hadn't planned to become this deep in the space. It turned out to be far more complex and fascinating than I expected, and I'm constantly reminded of how much there is still to learn. Between the farm and the day job, time is scarce — but I'm finding genuine, enjoyable success with Atlatl and hoping to have a preview ready for sharing soon.
-
-On the automation front, **GitHub Agentic Workflows (`gh-aw`)** have been equally captivating — both professionally and personally. The ability to define autonomous, event-driven agent workflows as markdown that compile to GitHub Actions has changed how I think about repository operations at scale. This repo alone runs 17 agentic workflows for everything from daily triage and standup to dependency housekeeping and retrospectives across the organization.
+MIF grew directly from this research, the product of five-plus iterations on memory systems — [subcog](https://github.com/zircote/subcog) and [mnemonic](https://github.com/zircote/mnemonic) are its public expressions. Alongside them, I'm writing an academic paper measuring memory system impact across LLM models; one early finding is how much variance exists in structured recall between models in ways general benchmarks don't predict.
 
 ---
 
 ## Featured Projects
 
-### Atlatl — Structured Memory Server for AI Agents
+### [subcog](https://github.com/zircote/subcog) — Persistent Memory for AI Coding Assistants
 
-A Rust MCP server implementing the [MIF specification](https://mif-spec.dev) — providing AI agents with persistent, structured memory that compounds knowledge across sessions. Built around hybrid search combining BM25 text relevance and vector similarity via Reciprocal Rank Fusion:
+A Rust memory system that captures decisions, learnings, and context from coding sessions. Hybrid search (semantic + BM25), MCP server integration, SQLite persistence with a knowledge graph, and proactive memory surfacing. Its filesystem-native sibling, [mnemonic](https://github.com/zircote/mnemonic), is a pure MIF Level 3 implementation — no dependencies, just markdown files and git.
 
-- **Custom ontologies** — user-definable namespace taxonomies for domain-specific memory organization (semantic, episodic, procedural, and beyond)
-- **Large Result Offloading (LRO)** — transparently writes large result sets to JSONL files with schema descriptors and jq recipes, keeping agent context windows lean
-- **Agentic custodial activities** — autonomous confidence decay, garbage collection, text reindexing, and stale offload cleanup on configurable schedules
-- **Blackboard system** — ephemeral key-value scratchpads with TTL and an alert subsystem for cross-agent coordination within tasks
+### [rlm-rs](https://github.com/zircote/rlm-rs) — Recursive Language Model CLI
 
-### [claude-team-orchestration](https://github.com/zircote/claude-team-orchestration) — Multi-Agent Orchestration & RLM
-
-A production-grade framework for coordinating teams of Claude Code agents. Built on Claude Code's agent teams API, it provides team management, shared task lists, inter-agent messaging, and seven proven orchestration patterns — from parallel specialists to self-organizing swarms.
-
-The standout capability is its **content-aware RLM (Recursive Language Model)** implementation based on [arXiv:2512.24601](https://arxiv.org/abs/2512.24601), which processes files and directories that exceed context limits:
-
-- **Automatic content-type detection** — source code, CSV/TSV, JSON/JSONL, logs, prose
-- **Semantic chunking** — respects function boundaries, preserves CSV headers, maintains valid JSON per partition
-- **Specialized analyst agents** — code-aware, data-aware, JSON-aware, and general-purpose analyzers run on Haiku for cost efficiency
-- **Multi-file directory analysis** — routes mixed content types to the right analysts, synthesizes findings across file types in two phases
-- **Context protection** — findings written to task descriptions (pass-by-reference), keeping the leader's context under 2K characters even with 30 active analysts
-
-Ships as a Claude Code plugin with 8 modular skills and 5 custom agent definitions.
+A Rust CLI implementing the RLM pattern ([arXiv:2512.24601](https://arxiv.org/abs/2512.24601)) for Claude Code — process documents 100x larger than the context window through intelligent chunking, SQLite persistence, and recursive sub-LLM orchestration. Ships with a [companion plugin](https://github.com/zircote/rlm-rs-plugin).
 
 ### [nsip](https://github.com/zircote/nsip) — Sheep Genetic Evaluation CLI & MCP Server
 
-A Rust CLI and Model Context Protocol server for the National Sheep Improvement Program database — 400,000+ animals with Estimated Breeding Values (EBVs), pedigrees, and performance data.
+A Rust CLI and MCP server for the National Sheep Improvement Program database — 400,000+ animals with EBVs, pedigrees, and performance data. Provides breeding intelligence: Wright's inbreeding coefficients, weighted trait ranking, mating recommendations, and flock summaries. [nsip-example](https://github.com/zircote/nsip-example) demonstrates **GitHub4Farms** — GitHub Issues as a farm record-keeping system with Copilot-powered genetic enrichment, accessible to farmers with no technical background.
 
-Beyond basic search and lookup, nsip provides breeding intelligence:
+### Attested Delivery — Supply-Chain Security as Reusable Workflows
 
-- **Inbreeding analysis** — Wright's coefficient of inbreeding with traffic-light risk classification
-- **Weighted trait ranking** — custom breeding objective scoring with accuracy weighting
-- **Mating recommendations** — optimal sire pairings ranked by trait complementarity and inbreeding risk
-- **Flock summary** — aggregate genetics across a flock
-
-The MCP server exposes 13 tools, 5 resources, 4 resource templates, and 7 guided prompts — enabling AI assistants to provide expert breeding advice through natural conversation. Published as a Docker image at `ghcr.io/zircote/nsip`.
-
-### [nsip-example](https://github.com/zircote/nsip-example) — GitHub as a Farm Management System
-
-A working demonstration of **GitHub4Farms** — using GitHub Issues as the record-keeping interface for a sheep operation, with automated genetic enrichment powered by the nsip MCP server and GitHub Copilot.
-
-Farmers create issues for breeding events (mating, lambing, health, weaning, sales) using structured templates. A Copilot agent automatically enriches each record with genetic data: inbreeding risk assessment, EBV comparisons, predicted offspring traits, and breeding recommendations. Flock-wide analyses — ranking, mating optimization, inbreeding matrices — are generated as markdown reports via issue-triggered workflows.
-
-Seven issue templates, eleven runbooks, and comprehensive user documentation make it accessible to farmers with no technical background.
+This organization's [.github repo](https://github.com/zircote/.github) centralizes signed, SLSA Build L3-attested, fail-closed-verified container delivery: keyless cosign signatures, CycloneDX SBOMs, provenance attestations as OCI referrers, verification gates before any publish or deploy, and change-record-gated production promotion — all consumable by any repo as reusable workflows. It also runs 17 `gh-aw` agentic workflows for daily triage, standup, dependency housekeeping, and retrospectives across the org.
 
 ---
 
@@ -150,13 +79,13 @@ Ranked by recent contributions, community engagement, and development activity.
 <!-- ACTIVE_REPOS_START -->
 | Repository | Description | Tech | Activity |
 |------------|-------------|------|----------|
-| [swagger-php](https://github.com/zircote/swagger-php) | A php swagger annotation and parsing library | PHP | ✨ Active |
-| [nsip](https://github.com/zircote/nsip) | Sheep genetic evaluation CLI & MCP server -- search animals,... | Rust | ✨ Active |
 | [.github](https://github.com/zircote/.github) | Organization shared workflows, policies, and community healt... | Shell | ✨ Active |
+| [nsip](https://github.com/zircote/nsip) | Sheep genetic evaluation CLI & MCP server -- search animals,... | Rust | ✨ Active |
 | [rlm-rs](https://github.com/zircote/rlm-rs) | Rust CLI implementing the Recursive Language Model (RLM) pat... | Rust | 📈 Growing |
 | [adr](https://github.com/zircote/adr) | Claude Code plugin for complete ADR lifecycle management wit... | MDX | 📈 Growing |
 | [subcog](https://github.com/zircote/subcog) | Persistent memory system for AI coding assistants. Captures ... | Rust | 📈 Growing |
 | [Rhubarb](https://github.com/zircote/Rhubarb) | A PHP Celery Client Implementation | PHP | 📈 Growing |
+| [structured-madr](https://github.com/zircote/structured-madr) | Machine-readable Architectural Decision Records with YAML fr... | MDX | 📈 Growing |
 | [mnemonic](https://github.com/zircote/mnemonic) | Persistent filesystem-based memory system for Claude Code. P... | Python | 📈 Growing |
 <!-- ACTIVE_REPOS_END -->
 
@@ -168,7 +97,6 @@ Ranked by recent contributions, community engagement, and development activity.
 - **[autoresearch](https://github.com/zircote/autoresearch)** (Python) - Autonomous skill improvement loop for Claude Code plugins — inspired by Karpathy...
 <!-- NEW_REPOS_END -->
 
-
 ---
 
 ## Technology Stack
@@ -177,7 +105,8 @@ Ranked by recent contributions, community engagement, and development activity.
 Languages        Rust | Python | TypeScript | Go
 Infrastructure   AWS | Docker | Kubernetes | Terraform | GitHub Actions
 AI Integration   Claude Code | GitHub Copilot | MCP Protocol
-Specifications   MIF (mif-spec.dev) | ccpkg (ccpkg.dev)
+Supply Chain     cosign | SLSA | CycloneDX | OCI referrers
+Specifications   MIF (mif-spec.dev)
 Platforms        Linux | macOS | AWS (Solutions Architect certified)
 ```
 
