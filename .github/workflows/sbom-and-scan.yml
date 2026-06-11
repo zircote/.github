@@ -1,0 +1,115 @@
+# Centralized reusable workflow: standardized SBOM (CycloneDX primary + SPDX export)
+# and Grype vulnerability scan for an image by digest.
+#
+# Produces sbom.cdx.json, sbom.spdx.json, and grype.json as build artifacts. The
+# isolated sign-and-attest workflow already attaches the CycloneDX SBOM + Grype
+# report to the digest as OCI referrers, so `attest` defaults to false here and is
+# only for standalone callers that want the attestations without a full build.
+#
+# Caller MUST pin this workflow by full commit SHA.
+#
+# Primary sources:
+#   - Syft / CycloneDX + SPDX: https://github.com/anchore/syft
+#   - Grype:                   https://github.com/anchore/grype
+#   - cosign attest:           https://docs.sigstore.dev/cosign/signing/other_types/
+
+name: sbom-and-scan
+
+on:
+  workflow_call:
+    inputs:
+      image-ref:
+        description: "Fully-qualified image ref by digest (registry/repo@sha256:...)"
+        required: true
+        type: string
+      attest:
+        description: "Also cosign-attest the CycloneDX SBOM to the digest"
+        required: false
+        type: boolean
+        default: false
+      aws-role-arn:
+        description: "If set, assume this role and log into ECR before reading the image"
+        required: false
+        type: string
+        default: ""
+      aws-region:
+        required: false
+        type: string
+        default: "us-east-1"
+      cosign-version:
+        required: false
+        type: string
+        default: "v3.0.6"
+    outputs:
+      artifact-name:
+        description: "Name of the uploaded artifact holding the CycloneDX + SPDX SBOMs and Grype report"
+        value: "sbom-and-scan"
+
+permissions: {}
+
+jobs:
+  sbom-and-scan:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write       # cosign keyless when attest=true
+      contents: read
+      packages: write       # pull image + push the SBOM attestation referrer to GHCR when attest=true
+    env:
+      IMAGE_REF: ${{ inputs.image-ref }}
+    steps:
+      - name: Configure AWS credentials
+        if: ${{ inputs.aws-role-arn != '' }}
+        uses: aws-actions/configure-aws-credentials@e7f100cf4c008499ea8adda475de1042d6975c7b  # v6.2.0
+        with:
+          role-to-assume: ${{ inputs.aws-role-arn }}
+          aws-region: ${{ inputs.aws-region }}
+      - name: Login to ECR
+        if: ${{ inputs.aws-role-arn != '' }}
+        uses: aws-actions/amazon-ecr-login@fa648b43de3d4d023bcb3f89ed6940096949c419  # v2.1.5
+
+      - name: Generate CycloneDX SBOM (primary)
+        uses: anchore/sbom-action@e22c389904149dbc22b58101806040fa8d37a610  # v0.24.0
+        with:
+          image: ${{ env.IMAGE_REF }}
+          format: cyclonedx-json
+          output-file: sbom.cdx.json
+      - name: Generate SPDX SBOM (export)
+        uses: anchore/sbom-action@e22c389904149dbc22b58101806040fa8d37a610  # v0.24.0
+        with:
+          image: ${{ env.IMAGE_REF }}
+          format: spdx-json
+          output-file: sbom.spdx.json
+
+      - name: Grype vulnerability scan
+        id: grype
+        uses: anchore/scan-action@e1165082ffb1fe366ebaf02d8526e7c4989ea9d2  # v7.4.0
+        with:
+          image: ${{ env.IMAGE_REF }}
+          output-format: json
+          fail-build: false   # report only; gating happens at promotion/admission
+      - name: Collect Grype report
+        run: cp "${{ steps.grype.outputs.json }}" grype.json
+
+      - name: Upload SBOM + scan artifacts
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
+        with:
+          name: sbom-and-scan
+          path: |
+            sbom.cdx.json
+            sbom.spdx.json
+            grype.json
+          if-no-files-found: error
+
+      - name: Install cosign
+        if: ${{ inputs.attest }}
+        uses: sigstore/cosign-installer@6f9f17788090df1f26f669e9d70d6ae9567deba6  # v4.1.2
+        with:
+          cosign-release: ${{ inputs.cosign-version }}
+      - name: Attest CycloneDX SBOM (cosign)
+        if: ${{ inputs.attest }}
+        run: |
+          set -euo pipefail
+          cosign attest --yes \
+            --predicate sbom.cdx.json \
+            --type cyclonedx \
+            "${IMAGE_REF}"

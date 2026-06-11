@@ -16,5 +16,5 @@ permissions:
 
 jobs:
   automerge:
-    uses: zircote/.github/.github/workflows/reusable-dependabot-automerge.yml@main
+    uses: ./.github/workflows/reusable-dependabot-automerge.yml
     secrets: inherit
