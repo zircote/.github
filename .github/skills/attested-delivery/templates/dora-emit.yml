@@ -1,0 +1,116 @@
+# Centralized reusable workflow: emit a DORA deployment event + metric to Datadog.
+#
+# A deployment is defined as a production digest promotion. This workflow emits the
+# pipeline-side DORA signals (deployment event + deployment-frequency count, plus an
+# optional lead-time gauge), tagged by environment, service, status and authoring
+# cohort. The remaining signals of the five-event model (ArgoCD sync, PagerDuty
+# incident open/resolved for CFR/FDRT) are emitted by their own integrations.
+#
+# Caller MUST pin this workflow by full commit SHA.
+#
+# Primary sources:
+#   - Datadog Events API v1:  https://docs.datadoghq.com/api/latest/events/#post-an-event
+#   - Datadog Metrics API v1: https://docs.datadoghq.com/api/latest/metrics/#submit-metrics
+#   - DORA metrics in Datadog: https://docs.datadoghq.com/dora_metrics/
+
+name: dora-emit
+
+on:
+  workflow_call:
+    inputs:
+      environment:
+        description: "Deployment environment (DORA counts prod by default)"
+        required: true
+        type: string
+      service:
+        description: "Service name (Datadog service tag)"
+        required: true
+        type: string
+      status:
+        description: "Deployment outcome: success | failure"
+        required: true
+        type: string
+      git-sha:
+        description: "Commit SHA deployed"
+        required: true
+        type: string
+      image-digest:
+        description: "The promoted image digest (sha256:...)"
+        required: true
+        type: string
+      lead-time-seconds:
+        description: "PR-created to deploy lead time in seconds (0 if unknown)"
+        required: false
+        type: number
+        default: 0
+      authoring-cohort:
+        description: "AI-authoring cohort for DORA segmentation (optional)"
+        required: false
+        type: string
+        default: ""
+      dd-site:
+        description: "Datadog site (datadoghq.com, datadoghq.eu, us5.datadoghq.com, ...)"
+        required: false
+        type: string
+        default: "datadoghq.com"
+    secrets:
+      DD_API_KEY:
+        required: true
+
+permissions: {}
+
+jobs:
+  emit:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Emit DORA deployment event + metric to Datadog
+        env:
+          DD_API_KEY: ${{ secrets.DD_API_KEY }}
+          DD_SITE: ${{ inputs.dd-site }}
+          ENVIRONMENT: ${{ inputs.environment }}
+          SERVICE: ${{ inputs.service }}
+          STATUS: ${{ inputs.status }}
+          GIT_SHA: ${{ inputs.git-sha }}
+          IMAGE_DIGEST: ${{ inputs.image-digest }}
+          LEAD_TIME: ${{ inputs.lead-time-seconds }}
+          COHORT: ${{ inputs.authoring-cohort }}
+          REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          case "${DD_SITE}" in
+            datadoghq.com|us3.datadoghq.com|us5.datadoghq.com|datadoghq.eu|ap1.datadoghq.com|ddog-gov.com) ;;
+            *) echo "::error::dd-site '${DD_SITE}' is not an allowed Datadog domain"; exit 1 ;;
+          esac
+          now="$(date +%s)"
+          alert_type="info"; [ "$STATUS" = "failure" ] && alert_type="error"
+
+          # Tag set (jq-built to avoid injection)
+          tags="$(jq -cn --arg env "$ENVIRONMENT" --arg svc "$SERVICE" \
+            --arg st "$STATUS" --arg co "$COHORT" '
+            ["env:\($env)","service:\($svc)","status:\($st)"]
+            + (if $co == "" then [] else ["ai_authoring_mode:\($co)"] end)')"
+
+          # 1) Deployment event
+          jq -cn --arg title "Deployment: $SERVICE -> $ENVIRONMENT ($STATUS)" \
+            --arg text "sha=$GIT_SHA digest=$IMAGE_DIGEST repo=$REPO" \
+            --arg at "$alert_type" --argjson tags "$tags" \
+            '{title:$title, text:$text, alert_type:$at, tags:$tags, source_type_name:"github_actions"}' \
+            | curl -fsS -X POST "https://api.${DD_SITE}/api/v1/events" \
+                -H "DD-API-KEY: ${DD_API_KEY}" -H 'Content-Type: application/json' -d @- >/dev/null
+
+          # 2) Deployment-frequency count metric
+          jq -cn --argjson now "$now" --argjson tags "$tags" \
+            '{series:[{metric:"hmh.dora.deployment", points:[[$now,1]], type:"count", tags:$tags}]}' \
+            | curl -fsS -X POST "https://api.${DD_SITE}/api/v1/series" \
+                -H "DD-API-KEY: ${DD_API_KEY}" -H 'Content-Type: application/json' -d @- >/dev/null
+
+          # 3) Lead-time gauge (only when known)
+          if [ "${LEAD_TIME}" != "0" ]; then
+            jq -cn --argjson now "$now" --argjson lt "${LEAD_TIME}" --argjson tags "$tags" \
+              '{series:[{metric:"hmh.dora.lead_time_seconds", points:[[$now,$lt]], type:"gauge", tags:$tags}]}' \
+              | curl -fsS -X POST "https://api.${DD_SITE}/api/v1/series" \
+                  -H "DD-API-KEY: ${DD_API_KEY}" -H 'Content-Type: application/json' -d @- >/dev/null
+          fi
+          echo "Emitted DORA deployment signals for ${SERVICE} -> ${ENVIRONMENT} (${STATUS})."

@@ -1,0 +1,141 @@
+# Centralized reusable workflow: sign + attest a built container image by digest.
+#
+# This workflow is the SLSA Build L3 isolation boundary. Application repos call it
+# via `uses:` and CANNOT modify the signing/attestation steps, so the provenance
+# subject identity is this workflow's `job_workflow_ref`, not the caller's.
+#
+# Primary sources:
+#   - SLSA build provenance / GitHub artifact attestations:
+#     https://docs.github.com/en/actions/security-for-github-actions/using-artifact-attestations/using-artifact-attestations-to-establish-provenance-for-builds
+#   - SLSA Build L3 (isolation requirement):  https://slsa.dev/spec/v1.0/levels#build-l3
+#   - cosign keyless signing (Fulcio + Rekor): https://docs.sigstore.dev/cosign/signing/overview/
+#   - cosign attest (SBOM / vuln predicates):  https://docs.sigstore.dev/cosign/signing/other_types/
+#   - Syft / CycloneDX:                        https://github.com/anchore/syft
+#   - Grype:                                   https://github.com/anchore/grype
+#
+# Caller MUST pin this workflow by full commit SHA, e.g.:
+#   uses: __ORG__/.github/.github/workflows/sign-and-attest.yml@<SHA>
+
+name: sign-and-attest
+
+on:
+  workflow_call:
+    inputs:
+      image-name:
+        description: "Image repository without tag/digest (e.g. ghcr.io/__org__/dqo/app)"
+        required: true
+        type: string
+      image-digest:
+        description: "Immutable image digest pushed by the caller's build (sha256:...)"
+        required: true
+        type: string
+      sbom:
+        description: "Generate + attest a CycloneDX SBOM"
+        required: false
+        type: boolean
+        default: true
+      vuln-scan:
+        description: "Generate + attest a Grype vulnerability report"
+        required: false
+        type: boolean
+        default: true
+      cosign-version:
+        description: "cosign release to install (current stable: v3.0.6)"
+        required: false
+        type: string
+        default: "v3.0.6"
+    outputs:
+      provenance-verified:
+        description: "true when `gh attestation verify` (SLSA provenance) passed in this run"
+        value: ${{ jobs.attest.outputs.provenance-verified }}
+
+permissions: {}
+
+jobs:
+  attest:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write       # mint the OIDC token for Sigstore (keyless)
+      attestations: write   # persist GitHub artifact attestation (SLSA provenance)
+      packages: write       # push referrers (sig/att/sbom) to GHCR
+      contents: read
+    outputs:
+      provenance-verified: ${{ steps.verify-prov.outputs.verified }}
+    env:
+      IMAGE_REF: "${{ inputs.image-name }}@${{ inputs.image-digest }}"
+    steps:
+      - name: Install cosign
+        uses: sigstore/cosign-installer@6f9f17788090df1f26f669e9d70d6ae9567deba6  # v4.1.2
+        with:
+          cosign-release: ${{ inputs.cosign-version }}
+
+      # GHCR's data plane accepts only the workflow's own GITHUB_TOKEN or a
+      # PAT — GitHub App installation tokens are rejected (resource-hiding
+      # 404s; see actions/attest-build-provenance#73 and the container
+      # registry auth docs). One GITHUB_TOKEN login covers the provenance
+      # referrer push and every cosign push below.
+      - name: Log in to GHCR
+        uses: docker/login-action@650006c6eb7dba73a995cc03b0b2d7f5ca915bee  # v4.2.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # --- SLSA Build L3 provenance (GitHub artifact attestation, pushed as OCI referrer) ---
+      - name: Generate SLSA build provenance
+        uses: actions/attest-build-provenance@a2bbfa25375fe432b6a289bc6b6cd05ecd0c4c32  # v4.1.0
+        with:
+          subject-name: ${{ inputs.image-name }}
+          subject-digest: ${{ inputs.image-digest }}
+          push-to-registry: true
+
+      # --- Keyless signature over the image digest ---
+      - name: cosign sign (keyless)
+        run: cosign sign --yes "${IMAGE_REF}"
+
+      # --- CycloneDX SBOM, attested as an OCI referrer ---
+      - name: Generate CycloneDX SBOM
+        if: ${{ inputs.sbom }}
+        uses: anchore/sbom-action@e22c389904149dbc22b58101806040fa8d37a610  # v0.24.0
+        with:
+          image: ${{ env.IMAGE_REF }}
+          format: cyclonedx-json
+          output-file: sbom.cdx.json
+      - name: Attest SBOM (cosign)
+        if: ${{ inputs.sbom }}
+        run: |
+          cosign attest --yes \
+            --predicate sbom.cdx.json \
+            --type cyclonedx \
+            "${IMAGE_REF}"
+
+      # --- Grype vulnerability scan, attested as an OCI referrer ---
+      - name: Grype vulnerability scan
+        if: ${{ inputs.vuln-scan }}
+        uses: anchore/scan-action@e1165082ffb1fe366ebaf02d8526e7c4989ea9d2  # v7.4.0
+        id: grype
+        with:
+          image: ${{ env.IMAGE_REF }}
+          output-format: json
+          fail-build: false   # attest the result; gating happens at promotion/admission
+      - name: Attest vulnerability report (cosign)
+        if: ${{ inputs.vuln-scan }}
+        run: |
+          cosign attest --yes \
+            --predicate "${{ steps.grype.outputs.json }}" \
+            --type "https://in-toto.io/attestation/vulns/v0.1" \
+            "${IMAGE_REF}"
+
+      # --- Self-verify L3 provenance so the loop is closed before any promotion ---
+      - name: Verify SLSA L3 provenance
+        id: verify-prov
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          # --repo asserts the source repository (the caller run); the cert
+          # SAN under SLSA L3 is THIS central workflow, asserted separately.
+          gh attestation verify "oci://${IMAGE_REF}" \
+            --repo "${{ github.repository }}" \
+            --signer-workflow "__ORG__/.github/.github/workflows/sign-and-attest.yml" \
+            --predicate-type "https://slsa.dev/provenance/v1"
+          echo "verified=true" >> "$GITHUB_OUTPUT"
