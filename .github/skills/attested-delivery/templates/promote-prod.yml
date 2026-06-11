@@ -1,13 +1,17 @@
 # Centralized reusable workflow: production promotion behind the change-record gate.
 #
-# A production promotion may proceed only when an APPROVED JIRA change-record ticket exists
-# whose recorded digest matches the digest being promoted. The promotion itself is
-# the referrer-aware `promote.yml` (cosign copy + post-copy verify); the `production`
-# GitHub Environment adds required-reviewer protection on top.
+# A production promotion may proceed only when an APPROVED GitHub change-record issue
+# exists whose body records the digest being promoted. Approval is asserted via a
+# label (default: change-approved) and, optionally, a GitHub Projects v2 Status field
+# value. The promotion itself is the referrer-aware `promote.yml` (cosign copy +
+# post-copy verify); the `production` GitHub Environment adds required-reviewer
+# protection on top.
 #
 # Primary sources:
-#   - JIRA Cloud REST API v3 (get issue):
-#     https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-issues/#api-rest-api-3-issue-issueidorkey-get
+#   - GitHub REST API (get an issue):
+#     https://docs.github.com/en/rest/issues/issues#get-an-issue
+#   - GitHub Projects v2 GraphQL API:
+#     https://docs.github.com/en/issues/planning-and-tracking-with-projects/automating-your-project/using-the-api-to-manage-projects
 #   - GitHub deployment environments + required reviewers:
 #     https://docs.github.com/en/actions/how-tos/managing-workflow-runs-and-deployments/managing-deployments/managing-environments-for-deployment
 
@@ -17,26 +21,41 @@ on:
   workflow_call:
     inputs:
       source-ref:
-        description: "CERT-passed image by digest (registry/repo@sha256:...)"
+        description: "Pre-production-verified image by digest (registry/repo@sha256:...)"
         required: true
         type: string
       dest-repo:
-        description: "Production ECR repo WITHOUT tag/digest"
+        description: "Production repository WITHOUT tag/digest"
         required: true
         type: string
       aws-role-arn:
-        description: "Production ECR IAM role to assume"
+        description: "Production registry IAM role to assume (ECR destinations)"
         required: true
         type: string
-      jira-issue-key:
-        description: "Change-record ticket key (e.g. CHG-1234)"
+      change-issue:
+        description: "GitHub issue number of the change record authorizing this promotion"
         required: true
         type: string
-      jira-digest-field:
-        description: "JIRA custom field id holding the approved build digest (e.g. customfield_NNNNN). When set, the gate hard-asserts the ticket digest equals the promoting digest."
+      change-repo:
+        description: "owner/repo containing the change-record issue. Defaults to the calling repository."
         required: false
         type: string
         default: ""
+      approval-label:
+        description: "Label that marks the change record approved. The gate blocks unless the issue is open and carries this label."
+        required: false
+        type: string
+        default: "change-approved"
+      project-number:
+        description: "Optional GitHub Projects v2 number. When set, the gate also asserts the issue's Status field equals approved-status (requires CHANGE_RECORD_TOKEN with Projects read access — the default GITHUB_TOKEN cannot read Projects v2)."
+        required: false
+        type: string
+        default: ""
+      approved-status:
+        description: "Projects v2 Status value required when project-number is set"
+        required: false
+        type: string
+        default: "Approved"
       signer-profile-arn:
         description: "Optional AWS Signer signing-profile ARN passed through to promote.yml for an ECR-native secondary signature"
         required: false
@@ -47,27 +66,28 @@ on:
         type: string
         default: "us-east-1"
     secrets:
-      JIRA_BASE_URL:
-        required: true
-      JIRA_EMAIL:
-        required: true
-      JIRA_API_TOKEN:
-        required: true
+      CHANGE_RECORD_TOKEN:
+        description: "Token with issues:read on the change repo and, when project-number is set, Projects v2 read access. Falls back to the workflow GITHUB_TOKEN when omitted."
+        required: false
 
 permissions: {}
 
 jobs:
   change-record-gate:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: read
     steps:
-      - name: Require an APPROVED change-record ticket whose digest matches
+      - name: Require an approved change-record issue recording this digest
         env:
-          JIRA_BASE_URL: ${{ secrets.JIRA_BASE_URL }}
-          JIRA_EMAIL: ${{ secrets.JIRA_EMAIL }}
-          JIRA_API_TOKEN: ${{ secrets.JIRA_API_TOKEN }}
-          ISSUE: ${{ inputs.jira-issue-key }}
+          GH_TOKEN: ${{ secrets.CHANGE_RECORD_TOKEN || github.token }}
+          CHANGE_REPO: ${{ inputs.change-repo || github.repository }}
+          ISSUE: ${{ inputs.change-issue }}
           SOURCE_REF: ${{ inputs.source-ref }}
-          DIGEST_FIELD: ${{ inputs.jira-digest-field }}
+          APPROVAL_LABEL: ${{ inputs.approval-label }}
+          PROJECT_NUMBER: ${{ inputs.project-number }}
+          APPROVED_STATUS: ${{ inputs.approved-status }}
         run: |
           set -euo pipefail
           case "${SOURCE_REF}" in
@@ -75,31 +95,67 @@ jobs:
             *) echo "::error::source-ref must be digest-pinned (registry/repo@sha256:...), got '${SOURCE_REF}'"; exit 1 ;;
           esac
           DIGEST="${SOURCE_REF##*@}"
-          FIELDS="status"
-          [ -n "${DIGEST_FIELD}" ] && FIELDS="status,${DIGEST_FIELD}"
-          RESP="$(curl -fsS -u "${JIRA_EMAIL}:${JIRA_API_TOKEN}" \
-            -H 'Accept: application/json' \
-            "${JIRA_BASE_URL}/rest/api/3/issue/${ISSUE}?fields=${FIELDS}")"
-          STATUS="$(echo "$RESP" | jq -r '.fields.status.name')"
-          echo "Change record ${ISSUE} status: ${STATUS}; promoting digest ${DIGEST}"
-          if [ "$STATUS" != "Approved" ]; then
-            echo "::error::Change-record ticket ${ISSUE} is '${STATUS}', not 'Approved'. Blocking production promotion."
+
+          RESP="$(gh api "repos/${CHANGE_REPO}/issues/${ISSUE}")"
+          STATE="$(jq -r '.state' <<<"$RESP")"
+          TITLE="$(jq -r '.title' <<<"$RESP")"
+          echo "Change record ${CHANGE_REPO}#${ISSUE} ('${TITLE}') state: ${STATE}; promoting digest ${DIGEST}"
+
+          # The change record must be open: a closed issue is a spent or
+          # abandoned record and cannot authorize a new promotion.
+          if [ "${STATE}" != "open" ]; then
+            echo "::error::Change-record issue ${CHANGE_REPO}#${ISSUE} is '${STATE}', not open. Blocking production promotion."
             exit 1
           fi
-          # Hard-assert the ticket records the exact digest under change review.
-          if [ -n "${DIGEST_FIELD}" ]; then
-            TICKET_DIGEST="$(echo "$RESP" | jq -r --arg f "${DIGEST_FIELD}" '.fields[$f] // empty' | tr -d '[:space:]')"
-            if [ -z "${TICKET_DIGEST}" ]; then
-              echo "::error::Change-record ticket ${ISSUE} has no digest in field ${DIGEST_FIELD}. Blocking."
+
+          if ! jq -e --arg l "${APPROVAL_LABEL}" '[.labels[].name] | index($l)' <<<"$RESP" >/dev/null; then
+            echo "::error::Change-record issue ${CHANGE_REPO}#${ISSUE} does not carry the '${APPROVAL_LABEL}' label. Blocking production promotion."
+            exit 1
+          fi
+
+          # Hard-assert the issue body records the exact digest under change review.
+          BODY="$(jq -r '.body // ""' <<<"$RESP")"
+          if ! grep -qF "${DIGEST}" <<<"${BODY}"; then
+            if grep -qE 'sha256:[0-9a-f]{64}' <<<"${BODY}"; then
+              echo "::error::Change-record issue ${CHANGE_REPO}#${ISSUE} records a different digest than the one being promoted (${DIGEST}). Blocking."
+            else
+              echo "::error::Change-record issue ${CHANGE_REPO}#${ISSUE} records no digest; its body must contain the approved digest ${DIGEST}. Blocking."
+            fi
+            exit 1
+          fi
+          echo "Change-record digest match confirmed for ${DIGEST}."
+
+          # Optional Projects v2 status assertion.
+          if [ -n "${PROJECT_NUMBER}" ]; then
+            OWNER="${CHANGE_REPO%%/*}"
+            NAME="${CHANGE_REPO##*/}"
+            # shellcheck disable=SC2016  # $owner/$name/$number are GraphQL variables, not shell
+            STATUS="$(gh api graphql \
+              -f query='query($owner:String!,$name:String!,$number:Int!){
+                repository(owner:$owner,name:$name){
+                  issue(number:$number){
+                    projectItems(first:50){
+                      nodes{
+                        project{ number }
+                        status: fieldValueByName(name:"Status"){
+                          ... on ProjectV2ItemFieldSingleSelectValue{ name }
+                        }
+                      }
+                    }
+                  }
+                }
+              }' \
+              -f owner="${OWNER}" -f name="${NAME}" -F number="${ISSUE}" \
+              --jq ".data.repository.issue.projectItems.nodes[] | select(.project.number == ${PROJECT_NUMBER}) | .status.name // empty")"
+            if [ -z "${STATUS}" ]; then
+              echo "::error::Change-record issue ${CHANGE_REPO}#${ISSUE} is not on project ${PROJECT_NUMBER} (or its Status is unset, or the token cannot read the project). Blocking."
               exit 1
             fi
-            if [ "${TICKET_DIGEST}" != "${DIGEST}" ]; then
-              echo "::error::Change-record ticket digest ${TICKET_DIGEST} != promoting digest ${DIGEST}. Blocking."
+            if [ "${STATUS}" != "${APPROVED_STATUS}" ]; then
+              echo "::error::Change-record issue ${CHANGE_REPO}#${ISSUE} project Status is '${STATUS}', not '${APPROVED_STATUS}'. Blocking production promotion."
               exit 1
             fi
-            echo "Change-record digest match confirmed for ${DIGEST}."
-          else
-            echo "::warning::No jira-digest-field configured; set it to enforce ticket<->digest equality (status-only gate in effect)."
+            echo "Project ${PROJECT_NUMBER} Status '${STATUS}' confirmed."
           fi
 
   promote:

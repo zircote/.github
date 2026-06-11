@@ -47,8 +47,9 @@ workstation.
 ### Later — Promotion, measurement, admission (when a deploy target exists)
 
 - [ ] `promote.yml` between environments; post-copy re-verify (AT-02).
-- [ ] `promote-prod.yml` behind the change-record gate with
-  `jira-digest-field` set (ticket↔digest equality, AT-07).
+- [ ] `promote-prod.yml` behind the change-record gate: approved GitHub issue
+  whose body records the promoting digest (issue↔digest equality, AT-07),
+  optionally with a Projects v2 `Status` assertion.
 - [ ] DORA emission (deployment = production digest promotion, AT-08), with
   `if: always()` so failures emit.
 - [ ] Admission enforcement per the

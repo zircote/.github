@@ -19,8 +19,9 @@ for every workflow are in the
   [attested-delivery skill](../../.github/skills/attested-delivery/SKILL.md)
   caller recipes).
 - Only if you use registry promotion and the production change gate:
-  per-environment registry variables, promotion role ARNs, and
-  `JIRA_BASE_URL` / `JIRA_EMAIL` / `JIRA_API_TOKEN` as inherited secrets.
+  per-environment registry variables, promotion role ARNs, and a
+  change-record issue convention (an approval label; optionally a GitHub
+  Projects v2 board with a `Status` field).
 
 ## 1. Build and attest in one call
 
@@ -64,11 +65,12 @@ Pin `@<SHA>` to a full commit SHA, never a moving tag. Dependabot's
 ## 2. Gate publication on fail-closed verification
 
 Add a verify job between signing and anything that publishes, and make every
-publish job `needs:` it — a tag publishes nothing unsigned:
+publish job `needs:` it — a tag publishes nothing unsigned. With the Step 1
+`build-attest` job (which signs internally and outputs the digest):
 
 ```yaml
   verify:
-    needs: [build, sign]
+    needs: [build-attest]
     permissions:
       id-token: write
       contents: read
@@ -76,7 +78,7 @@ publish job `needs:` it — a tag publishes nothing unsigned:
       attestations: read
     uses: zircote/.github/.github/workflows/verify-attestation.yml@<SHA>
     with:
-      image-ref: ghcr.io/zircote/<your-repo>@${{ needs.build.outputs.image-digest }}
+      image-ref: ghcr.io/zircote/<your-repo>@${{ needs.build-attest.outputs.image-digest }}
       attestation-repo: zircote/<your-repo>
 
   publish:
@@ -84,6 +86,10 @@ publish job `needs:` it — a tag publishes nothing unsigned:
     if: startsWith(github.ref, 'refs/tags/')
     # create the GitHub Release, push tags, etc.
 ```
+
+(For the own-build + `sign-and-attest.yml` variant, the verify job is
+`needs: [build, sign]` and the digest comes from
+`${{ needs.build.outputs.image-digest }}`.)
 
 Add `workflow_dispatch` to the release workflow and tag-gate the publish jobs
 (as above) so the build → sign → verify chain is exercisable as a dry run
@@ -112,10 +118,10 @@ attestations and re-verifies them at the destination:
 
 ## 4. (When you have change governance) Gate production on a change record
 
-Production promotion goes through `promote-prod.yml`, which blocks until an
-approved change-record ticket records the same digest. Set `jira-digest-field`
-to the custom field holding the approved digest — without it only the ticket's
-status is checked and the run emits a warning:
+Production promotion goes through `promote-prod.yml`, which blocks unless a
+GitHub change-record issue is open, carries the approval label
+(`change-approved` by default), and records the exact digest being promoted in
+its body. Optionally assert a GitHub Projects v2 `Status` as well:
 
 ```yaml
   promote-prod:
@@ -124,14 +130,16 @@ status is checked and the run emits a warning:
       contents: read
       packages: read
       attestations: read
+      issues: read
     uses: zircote/.github/.github/workflows/promote-prod.yml@<SHA>
     with:
       source-ref: ${{ vars.STAGING_REGISTRY_REPO }}@${{ inputs.image-digest }}
       dest-repo: ${{ vars.PROD_REGISTRY_REPO }}
       aws-role-arn: ${{ vars.PROD_PROMOTE_ROLE_ARN }}
-      jira-issue-key: ${{ inputs.change_ticket }}
-      jira-digest-field: customfield_NNNNN
-    secrets: inherit
+      change-issue: ${{ inputs.change_issue }}
+      project-number: "3"          # optional: also require Projects v2 Status == Approved
+    secrets:
+      CHANGE_RECORD_TOKEN: ${{ secrets.CHANGE_RECORD_TOKEN }}  # only needed for project-number / cross-repo issues
 ```
 
 ## 5. Add the pin-check gate and document verification
@@ -167,7 +175,7 @@ necessary, but independent verification is the acceptance test.
 - [ ] `pin-check` runs in CI and is a required status check.
 - [ ] Release workflow has a `workflow_dispatch` dry-run path with tag-gated publish jobs.
 - [ ] (Promotion only) registry variables and role ARNs configured.
-- [ ] (Production gate only) JIRA secrets present and `jira-digest-field` set so the gate asserts ticket↔digest equality.
+- [ ] (Production gate only) change-record issue convention in place: approval label, digest recorded in the issue body, and — for the Projects v2 status assertion — `CHANGE_RECORD_TOKEN` with project read access.
 
 ## Related
 

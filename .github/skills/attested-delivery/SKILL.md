@@ -113,8 +113,10 @@ Gate: a written discovery summary naming mode, wiring row, in-scope phases.
 3. If registry policy is ghcr-only: materialize `mirror-images.yml`,
    dispatch it once, confirm the mirror packages exist with **internal** (or
    public) visibility so org repos' `GITHUB_TOKEN` can pull (constraint 7).
-4. Only if promotion is in scope: org secrets for the change-record gate
-   (`JIRA_BASE_URL`, `JIRA_EMAIL`, `JIRA_API_TOKEN`).
+4. Only if promotion is in scope: a change-record issue convention for the
+   gate (approval label, digest recorded in the issue body; optionally a
+   Projects v2 board and a `CHANGE_RECORD_TOKEN` secret with project read
+   access — `GITHUB_TOKEN` cannot read Projects v2).
 
 Gate: a scratch caller workflow (or the pilot's first PR) resolves the
 reusable workflow without startup failure.
@@ -184,8 +186,9 @@ Gate: `actionlint` clean; PR opens; pipeline green including
 
 - `promote.yml` between environments (referrer-carrying `cosign copy` +
   post-copy re-verify); `promote-prod.yml` behind the change-record gate —
-  set `jira-digest-field` so the gate asserts ticket↔digest equality, not
-  just ticket status.
+  an approved GitHub issue whose body records the promoting digest
+  (issue↔digest equality is always asserted; add `project-number` for a
+  Projects v2 `Status` assertion).
 - `dora-emit.yml` (deployment = production digest promotion), with
   `if: always()` so failures emit too.
 - Admission enforcement (Kyverno/Gatekeeper for k8s, pre-deploy verify for

@@ -33,6 +33,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `promote-prod.yml` and `mirror-images.yml` regenerated from the generic templates — removes HMH-specific "CCAB" terminology (now "change-record") and repo-specific comments
 
 ### Changed
+- **`promote-prod.yml` change-record gate reframed to GitHub-native**: the gate now requires an open GitHub issue carrying an approval label (default `change-approved`) whose body records the exact digest being promoted (always asserted), with an optional GitHub Projects v2 `Status` assertion via `project-number`/`approved-status`. Replaces the JIRA inputs (`jira-issue-key`, `jira-digest-field`) and `JIRA_*` secrets with `change-issue`/`change-repo`/`approval-label`/`project-number`/`approved-status` and an optional `CHANGE_RECORD_TOKEN`. Skill template, docs, and references updated to match
+- Addressed Copilot review feedback from #442 that was bypassed: fixed the onboarding guide's verify-job example to match the `build-attest` path, documented why `sbom-and-scan.yml` callers must grant `packages: write`, and removed the accidentally committed `docs/presentations/.subcog/audit.log` (now gitignored via `**/.subcog/`)
 - `scripts/compile-org-monitor.sh` is now a thin wrapper delegating to `compile-gh-aw.sh`
 - CLAUDE.md updated with workflow table (names, tracker IDs, schedules), generic compile instructions, and compile-all loop command
 - Removed invalid `discussions: false` frontmatter rule from CLAUDE.md (not a valid gh-aw compiler property)
