@@ -61,6 +61,36 @@ Use these placeholders (replaced by new-project.sh):
 | `{{package_name}}` | Underscore name | `my_api` |
 | `{{ProjectName}}` | PascalCase name | `MyApi` |
 
+## Var-Driven Workflows (release automation has NO placeholders)
+
+Placeholders are for docs and source files. Release/publish/packaging
+workflows must instead resolve ALL project specificity at runtime so they
+are correct the moment the template is instantiated — nothing to rename,
+nothing that can be missed:
+
+- crate/package/binary name, version, description, license → from the
+  language manifest at runtime (e.g. `cargo metadata --no-deps`,
+  `node -p "require('./package.json').name"`)
+- owner/repo → `${{ github.repository }}` / `${{ github.repository_owner }}`
+- anything not derivable → a repository variable with a sane default
+  (e.g. `${{ vars.HOMEBREW_TAP_REPO || 'homebrew-tap' }}`)
+
+Reference implementation: `zircote/rust-template`
+(`release.yml`, `publish.yml`, `package-homebrew.yml`).
+
+## Publication Channels: created but disabled
+
+Template repos publish nothing, but must ship working publication
+workflows. Gate them on a single deterministic switch in the manifest the
+user already edits — for Rust, `publish = false` in Cargo.toml:
+
+- each publication job reads the flag via the manifest AT THE PACKAGED REF
+  and skips (GitHub Release creation, registry publish, Homebrew/tap)
+- the build → attest → verify chain still runs as CI validation
+- the language tooling enforces it too (`cargo publish` refuses while set)
+- instantiation deletes the one line to arm every channel — wire this into
+  the template's init flow
+
 ## Workflow Standards
 
 All CI workflows must:
@@ -164,6 +194,9 @@ cd /tmp/test-project
 - Latest stable Rust
 - `clippy` (pedantic), `cargo-deny`
 - Documentation tests
+- Attested releases per the attested-delivery skill (recipe D); var-driven
+  release workflows; `publish = false` channel gate (see
+  `zircote/rust-template`)
 
 ### Java Templates
 - Java 21 LTS, Spring Boot 3.3+
