@@ -12,12 +12,13 @@ gh auth token | docker login ghcr.io -u <username> --password-stdin
 ## 0. Resolve the digest for a tag
 
 ```sh
-DIGEST=$(gh api 'orgs/<org>/packages/container/<name>/versions?per_page=20' \
+DIGEST=$(gh api 'orgs/<org>/packages/container/<name>/versions?per_page=100' \
   --jq '[.[] | select((.metadata.container.tags // []) | index("<tag>"))][0].name')
 ```
 
 For a personal (user) account, the packages endpoints use
-`users/<owner>/...` instead of `orgs/<org>/...`.
+`users/<owner>/...` instead of `orgs/<org>/...`. Use `per_page=100` —
+20 misses older tags and returns `null`, which reads as a false failure.
 
 ## 1. SLSA provenance (AT-05)
 
@@ -54,9 +55,24 @@ cosign verify-attestation "ghcr.io/<org>/<repo>@${DIGEST}" \
 
 ```sh
 gh release download <tag> --repo <org>/<repo>
-gh attestation verify <binary> --repo <org>/<repo>
+gh attestation verify <binary> --repo <org>/<repo>                  # provenance
+gh attestation verify <binary> --repo <org>/<repo> \
+  --predicate-type https://cyclonedx.org/bom                        # SBOM binding
+shasum -a 256 -c <bin>-<version>-checksums.txt
 ```
 (No `--signer-workflow` for artifacts attested by the repo's own workflow.)
+
+## 5. Published crates
+
+```sh
+# static.crates.io rejects UA-less requests — always set -A
+curl -fsSL -A 'release-check' \
+  -O https://static.crates.io/crates/<name>/<name>-<version>.crate
+gh attestation verify <name>-<version>.crate --repo <org>/<repo>
+```
+
+Check **exit codes**, not grepped output — a filtered pipe that matches
+nothing looks identical to success. Silence is not success.
 
 ## Expected outcomes
 

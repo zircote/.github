@@ -49,6 +49,11 @@ nine complete, parameterized workflows (`build-attest`, `sign-and-attest`,
 `dora-emit`, `pin-check`, `mirror-images`), validated end-to-end in a
 production rollout before being baked in. The skill is fully
 self-contained: no external repository access is required to apply it.
+For the **binaries/bundles flow** (no container), the reference
+implementations are `zircote/rlm-rs` and `zircote/rust-template`
+(`release.yml`, `publish.yml`, `package-homebrew.yml`) — proven via
+released versions and dispatch dry-runs; the full recipe is in
+`references/integration-recipes.md` (recipe D).
 
 **Before doing anything else**, read `references/platform-constraints.md` in
 this skill. Every entry was paid for with a failed release; violating any of
@@ -130,7 +135,7 @@ Wiring decision table:
 | No container build yet | Single `build-attest.yml` call — builds, pushes to GHCR by digest, signs/attests, self-verifies |
 | Build already pushes by digest | Call `sign-and-attest.yml` directly with `image-name` + `image-digest`, then `verify-attestation.yml` |
 | Multi-arch matrix build | Keep the matrix; add a manifest-digest capture step after the manifest merge; then sign/verify as above. Exact recipe in `references/integration-recipes.md` |
-| Binaries/bundles only (no image) | `actions/attest-build-provenance` per artifact; document `gh attestation verify <file> --repo <o>/<r>` |
+| Binaries/bundles only (no image) | Full recipe D: meta (var-driven via `cargo metadata`) → build matrix with build-time `attest-build-provenance` and `{bin}-{version}-{platform}` names → test/audit gates → SBOM attest → fail-closed verify BEFORE the tag-gated release; crates.io via Trusted Publishing + registry byte-compare + attest; templates ship `publish = false` as the channel gate |
 
 Required elements, all shapes:
 1. **Digest capture** (matrix shape): after `docker buildx imagetools create`,

@@ -144,3 +144,95 @@ gh api 'orgs/<org>/packages/container/<name>/versions?per_page=20' \
 **Fix:** read the context name off an actual run before adding it to
 branch protection; update protection in the same motion as renaming any
 job that is a required check.
+
+## 13. `secrets` context in `if:` kills the whole caller graph
+
+**Symptom:** every run of an orchestrator workflow startup-fails with zero
+jobs ("This run likely failed because of a workflow file issue") on every
+event — PRs and pushes alike — and branch pushes emit orphan failure runs
+attributed to a *called* workflow file that has no matching trigger.
+**Cause:** the `secrets` context is not available in `if:` expressions
+(e.g. `if: secrets.SOME_TOKEN != ''`). The expression makes the called
+file a compile error; one broken local reusable workflow invalidates the
+entire caller graph. The error never names the offending line, and the
+push-event failure runs are attributed to the called file, not the caller.
+(rust-template shipped this for six weeks — every Pipeline run dead.)
+**Fix:** expose the secret via job-level `env:` and gate on
+`env.SOME_TOKEN != ''`. Audit with:
+```sh
+grep -rn 'if:.*secrets\.' .github/workflows/
+```
+
+## 14. `cargo publish` ships the manifest version, not the tag
+
+**Symptom:** tag `v1.4.0` is pushed but crates.io receives `1.3.1`; the
+post-publish download/attest step then fails looking for a `1.4.0` crate.
+**Cause:** `cargo publish` reads the version from Cargo.toml and ignores
+the git tag entirely. crates.io versions are immutable — a wrong publish
+cannot be undone.
+**Fix:** a tag-gated guard before publish:
+```sh
+TAG_VERSION="${GITHUB_REF#refs/tags/v}"
+CARGO_VERSION=$(cargo metadata --no-deps --format-version 1 | jq -r '.packages[0].version')
+[ "$TAG_VERSION" = "$CARGO_VERSION" ] || exit 1
+```
+Also run pre-publish `clippy`/`test`/`doc` with `--locked` so the release
+run cannot silently rewrite Cargo.lock.
+
+## 15. static.crates.io rejects UA-less requests
+
+**Symptom:** registry `.crate` downloads fail or hang intermittently in CI
+and on workstations, while the publish itself succeeded.
+**Cause:** crates.io's CDN can reject requests without a User-Agent,
+silently.
+**Fix:** always `curl -fsSL -A '<name>-release-check' …` when fetching
+from static.crates.io or the crates.io API.
+
+## 16. `curl -sL | shasum` hashes error pages
+
+**Symptom:** a Homebrew formula (or any checksum manifest) carries a
+syntactically valid SHA256 that matches nothing — installs fail with
+checksum mismatch.
+**Cause:** `curl` without `-f` emits HTML error bodies on HTTP failures,
+and without `pipefail` the pipeline exits with `shasum`'s success.
+**Fix:** `set -euo pipefail` and `curl -fsSL` in every download-then-hash
+pipeline. A failed download must kill the step, loudly.
+
+## 17. Bot-authored releases don't trigger `release` workflows
+
+**Symptom:** the Homebrew/packaging workflow never fires after a release
+created by a workflow, even with `release: types: [published]`.
+**Cause:** events authored by `github-actions[bot]` (the release-creating
+workflow's token) do not trigger workflows — by design, to prevent loops.
+**Fix:** trigger packaging via `workflow_run` on the Release workflow's
+completion. In that payload, `head_branch` IS the tag name for
+tag-triggered runs (and there is no `ref` field). Optionally also create
+the release with a PAT so the `release` event fires as a secondary path.
+
+## 18. Actions REST replicas serve stale run/job views
+
+**Symptom:** `runs/{id}` flips between `in_progress` and
+`completed/success`; `runs/{id}/jobs` omits jobs another query just
+returned; a freshly reported run 404s.
+**Cause:** API replica lag — different replicas answer successive calls
+for minutes after state changes.
+**Fix:** before acting on a run's completion, double-confirm (two
+consecutive consistent reads, ≥60s apart). For PR merge gates, never use
+"zero pending checks" alone — right after a push only 1–2 checks are
+registered and the window reads as falsely green; require the aggregate
+gate check (e.g. `All Checks Pass`) to have *reported* a conclusion.
+
+## 19. User-account rulesets: no Integration bypass, and bots can't push
+
+**Symptom:** creating a ruleset with a GitHub Actions app bypass actor
+fails with "Actor GitHub Actions integration must be part of the ruleset
+source or owner organization"; with required status checks active, any
+workflow step that commits directly to the protected branch (e.g. a
+CHANGELOG auto-commit via the contents API) is rejected.
+**Cause:** personal-account repo rulesets support only
+RepositoryRole/DeployKey bypass actors, and `github-actions[bot]` is not
+an admin — required checks block its direct pushes.
+**Fix:** design release flows to never push to protected branches
+(maintain changelogs in the release-prep PR; carry release notes in the
+release body). If an automated push is unavoidable, use a deploy key
+with a DeployKey bypass actor.

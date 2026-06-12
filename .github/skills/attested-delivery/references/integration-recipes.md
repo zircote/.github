@@ -89,16 +89,66 @@ B's `sign`/`verify` consuming `needs.container-merge.outputs.image-digest`:
           echo "image-digest=$DIGEST" >> "$GITHUB_OUTPUT"
 ```
 
-## Caller recipe D — binaries/bundles only
+## Caller recipe D — binaries/bundles (the proven full release shape)
 
-```yaml
-      - uses: actions/attest-build-provenance@<full-sha>  # vX.Y.Z
-        with:
-          subject-path: target/release/<binary>
+Reference implementations: `zircote/rlm-rs` and `zircote/rust-template`
+(`release.yml`, `publish.yml`, `package-homebrew.yml`). The shape:
+
+```text
+[meta] -> [build xN + attest] -> [sbom + attest] -> [verify]** -> [release]*
+          [test] [audit] ---------------------------^
+(* tag-gated; ** fail-closed BEFORE the release exists)
 ```
+
+Required elements:
+
+1. **meta job** — resolve ALL project specificity at runtime so nothing
+   is renamed when a template is instantiated (var-driven):
+   ```sh
+   META=$(cargo metadata --no-deps --format-version 1)
+   BIN=$(jq -r '[.packages[0].targets[] | select(.kind | index("bin"))][0].name' <<< "$META")
+   # tag pushes: VERSION="${GITHUB_REF#refs/tags/v}"; dispatch dry-runs:
+   # VERSION="$(jq -r '.packages[0].version' <<< "$META")-dev"
+   ```
+2. **Build matrix** with versioned artifact names
+   `{bin}-{version}-{platform}` and `cargo build --release --locked`;
+   `actions/attest-build-provenance` per leg AT BUILD TIME (before any
+   release exists), then upload-artifact.
+3. **test + audit gates inside the release workflow** — tags are not
+   guaranteed to point at CI-green commits; the release tests itself.
+4. **SBOM**: anchore/sbom-action (CycloneDX) + `actions/attest-sbom` with
+   `subject-path: dist/*` — binds every binary to the SBOM.
+5. **Fail-closed verify job** before the release: assert the artifact
+   COUNT (a partial set must never publish), then per binary:
+   `gh attestation verify "$f" --repo "$GITHUB_REPOSITORY"` and the same
+   with `--predicate-type https://cyclonedx.org/bom`.
+6. **Tag-gated release job** (`needs: [meta, verify, audit, test]`) with a
+   single `{bin}-{version}-checksums.txt`; `tag_name: ${{ github.ref_name }}`.
+
+**crates.io** (separate `publish.yml`): pre-publish gauntlet with
+`--locked`, then Trusted Publishing (OIDC, `rust-lang/crates-io-auth-action`,
+no long-lived token; one-time crates.io setup names the workflow file and
+environment). After publish: download the registry-served `.crate`
+(`curl -fsSL -A '<name>-release-check'` — constraint 15), byte-compare to
+`target/package/`, attest the registry bytes. Guard BEFORE publish:
+tag version must equal the manifest version (constraint 14).
+
+**Homebrew** (separate `package-homebrew.yml`): `workflow_run` on the
+Release workflow (constraint 17); formula SHA via
+`set -euo pipefail` + `curl -fsSL` (constraint 16); generate the formula
+into the workspace so dry-runs need neither the tap nor its token.
+
+**Template gate**: template repos ship `publish = false` in Cargo.toml.
+Each publication job reads it via `cargo metadata` AT THE PACKAGED REF
+(`if .packages[0].publish == [] then "false" else "true" end`) and skips
+release creation / crates.io / Homebrew while the attest→verify chain
+still runs as CI validation. Downstream projects delete the one line to
+arm all channels; cargo itself refuses `cargo publish` as a second lock.
+
 Verification for consumers: `gh attestation verify <file> --repo <org>/<repo>`
 (no `--signer-workflow` here — the SAN *is* the repo's own workflow when
-attestation happens outside the central signer).
+attestation happens outside the central signer); SBOM binding via
+`--predicate-type https://cyclonedx.org/bom`.
 
 ## Release gating and dry-run (all shapes)
 

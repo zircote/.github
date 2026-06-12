@@ -48,7 +48,7 @@ vulnerability report as OCI referrers. Verify from any workstation with `gh`
 
 ```sh
 # 0. Resolve the digest for a tag
-DIGEST=$(gh api 'users/zircote/packages/container/<name>/versions?per_page=20' \
+DIGEST=$(gh api 'users/zircote/packages/container/<name>/versions?per_page=100' \
   --jq '[.[] | select((.metadata.container.tags // []) | index("<tag>"))][0].name')
 
 # 1. SLSA provenance — --repo asserts where the build ran,
