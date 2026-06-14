@@ -69,7 +69,7 @@ This organization's [.github repo](https://github.com/zircote/.github) centraliz
 ## Active Projects
 
 <!-- LAST_UPDATED_START -->
- __Last updated: 2026-06-11__
+ __Last updated: 2026-06-14__
 <!-- LAST_UPDATED_END -->
 
 ### Most Active Repositories
@@ -79,14 +79,14 @@ Ranked by recent contributions, community engagement, and development activity.
 <!-- ACTIVE_REPOS_START -->
 | Repository | Description | Tech | Activity |
 |------------|-------------|------|----------|
-| [.github](https://github.com/zircote/.github) | Organization shared workflows, policies, and community healt... | Shell | ✨ Active |
-| [nsip](https://github.com/zircote/nsip) | Sheep genetic evaluation CLI & MCP server -- search animals,... | Rust | ✨ Active |
-| [rlm-rs](https://github.com/zircote/rlm-rs) | Rust CLI implementing the Recursive Language Model (RLM) pat... | Rust | 📈 Growing |
-| [adr](https://github.com/zircote/adr) | Claude Code plugin for complete ADR lifecycle management wit... | MDX | 📈 Growing |
-| [subcog](https://github.com/zircote/subcog) | Persistent memory system for AI coding assistants. Captures ... | Rust | 📈 Growing |
-| [Rhubarb](https://github.com/zircote/Rhubarb) | A PHP Celery Client Implementation | PHP | 📈 Growing |
-| [structured-madr](https://github.com/zircote/structured-madr) | Machine-readable Architectural Decision Records with YAML fr... | MDX | 📈 Growing |
-| [mnemonic](https://github.com/zircote/mnemonic) | Persistent filesystem-based memory system for Claude Code. P... | Python | 📈 Growing |
+| [rlm-rs](https://github.com/zircote/rlm-rs) | Rust CLI implementing the Recursive Language Model (RLM) pat... | Rust | ✨ Active |
+| [rust-template](https://github.com/zircote/rust-template) | Template for rust projects | MDX | ✨ Active |
+| [adrscope](https://github.com/zircote/adrscope) | Rust CLI and GitHub Action for Architecture Decision Records... | Rust | 📈 Growing |
+| [nsip](https://github.com/zircote/nsip) | Sheep genetic evaluation CLI & MCP server -- search animals,... | Rust | 📈 Growing |
+| [homebrew-tap](https://github.com/zircote/homebrew-tap) | Homebrew tap for various projects | Ruby | 📈 Growing |
+| [.github](https://github.com/zircote/.github) | Organization shared workflows, policies, and community healt... | Shell | 📈 Growing |
+| [git-adr](https://github.com/zircote/git-adr) | 🏛️ Architecture Decision Records in git notes - no files, no... | Rust | 📈 Growing |
+| [maker-rs](https://github.com/zircote/maker-rs) | Zero-error LLM execution via SPRT voting. Rust library and M... | Rust | 📈 Growing |
 <!-- ACTIVE_REPOS_END -->
 
 ### Recently Created
