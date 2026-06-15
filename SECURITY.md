@@ -80,21 +80,22 @@ gh attestation verify <binary> --repo zircote/<repo>
 Repositories wired to the attested **quality gates** (the `gh-attested` skill)
 additionally record a signed, digest-bound attestation for each CI gate — SAST,
 SCA, container/IaC/license scan, supply-chain posture, and vulnerability
-disposition. Signing runs in the central seam workflow
-(`zircote/.github/.github/workflows/reusable-attest-scan.yml`), so the signer
-identity (SLSA L3) is that workflow, not the source repo — `--signer-workflow`
-is required.
+disposition. Each predicate is pinned to **the workflow that actually signed
+it** (SLSA L3 cert identity): the seam (`reusable-attest-scan.yml`) signs the
+SARIF gates, while OpenVEX self-signs in `reusable-vex.yml` — so
+`--signer-workflow` differs per predicate.
 
 ```sh
 SUBJECT=oci://ghcr.io/zircote/<repo>@${DIGEST}   # or a release-artifact ref
-SIGNER=zircote/.github/.github/workflows/reusable-attest-scan.yml
+SEAM=zircote/.github/.github/workflows/reusable-attest-scan.yml
 
-# SAST gate (other gates: swap the predicate-type)
-gh attestation verify "$SUBJECT" --owner zircote --signer-workflow "$SIGNER" \
+# Seam-signed gate (SAST shown; other SARIF gates: swap the predicate-type)
+gh attestation verify "$SUBJECT" --owner zircote --signer-workflow "$SEAM" \
   --predicate-type https://zircote.github.io/attestations/sast/v1
 
-# Vulnerability disposition (OpenVEX — standard predicate type)
-gh attestation verify "$SUBJECT" --owner zircote --signer-workflow "$SIGNER" \
+# Vulnerability disposition (OpenVEX — self-signed by reusable-vex.yml)
+gh attestation verify "$SUBJECT" --owner zircote \
+  --signer-workflow zircote/.github/.github/workflows/reusable-vex.yml \
   --predicate-type https://openvex.dev/ns/v0.2.0
 ```
 

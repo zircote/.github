@@ -29,13 +29,17 @@ before it runs or reads the environment's secrets.
 
 The cryptographic gate slots into the same deploy job: `reusable-verify-gates.yml`
 runs `gh attestation verify` for each required predicate and exits non-zero on
-any failure. Put it in the deploy job's `needs:` so an unverified or
-improperly-signed artifact never ships:
+any failure. **It verifies one signer per invocation** — pin `signer-workflow`
+to the workflow that actually produced those predicates (the "Signed by" column
+in `docs/reference/attestation-predicates/`). The seam
+(`reusable-attest-scan.yml`) signs the SARIF gates; OpenVEX self-signs in
+`reusable-vex.yml`; k6 in `reusable-k6.yml`. Mixing predicates from different
+signers into one call fails closed on a *valid* artifact, so call it once per
+signer group and have the deploy job `needs:` them all:
 
 ```yaml
-verify:
+verify-seam:
   permissions:
-    id-token: write
     contents: read
     attestations: read
     packages: read
@@ -47,9 +51,19 @@ verify:
     predicate-types: |-
       https://zircote.github.io/attestations/sast/v1
       https://zircote.github.io/attestations/sca/v1
-      https://openvex.dev/ns/v0.2.0
+verify-vex:
+  permissions:
+    contents: read
+    attestations: read
+    packages: read
+  uses: zircote/.github/.github/workflows/reusable-verify-gates.yml@<sha>
+  with:
+    subject-ref: oci://ghcr.io/zircote/app@${{ needs.build.outputs.digest }}
+    owner: zircote
+    signer-workflow: zircote/.github/.github/workflows/reusable-vex.yml
+    predicate-types: https://openvex.dev/ns/v0.2.0
 deploy:
-  needs: [verify]
+  needs: [verify-seam, verify-vex]
   environment: production
   ...
 ```

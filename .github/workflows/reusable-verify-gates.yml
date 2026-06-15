@@ -3,13 +3,20 @@
 # Runs `gh attestation verify` against a subject for each required predicate
 # type. Any verification failure exits non-zero, so placing this job in a
 # deploy job's `needs:` halts an unverified or improperly-signed artifact
-# before it ships. Under SLSA L3 the signer identity is the central signing
-# workflow (the Fulcio SAN), so --signer-workflow is mandatory; --owner alone
-# is insufficient.
+# before it ships. Under SLSA L3 the signer identity is the workflow that ran
+# `actions/attest` (the Fulcio SAN), so --signer-workflow is mandatory; --owner
+# alone is insufficient.
+#
+# IMPORTANT: this workflow verifies ONE signer per invocation. Different
+# predicates are signed by different workflows — the seam
+# (reusable-attest-scan.yml) signs the SARIF gates, while OpenVEX self-signs in
+# reusable-vex.yml and k6 in reusable-k6.yml. Call this workflow once per signer
+# group; mixing predicates from different signers fails closed on a VALID
+# artifact. See docs/reference/attestation-predicates/ ("Signed by").
 #
 # Usage:
 #   jobs:
-#     verify:
+#     verify-seam:
 #       permissions:
 #         contents: read
 #         attestations: read
@@ -21,9 +28,20 @@
 #         signer-workflow: zircote/.github/.github/workflows/reusable-attest-scan.yml
 #         predicate-types: |-
 #           https://zircote.github.io/attestations/sast/v1
-#           https://openvex.dev/ns/v0.2.0
+#           https://zircote.github.io/attestations/sca/v1
+#     verify-vex:                          # OpenVEX is signed by reusable-vex.yml
+#       permissions:
+#         contents: read
+#         attestations: read
+#         packages: read
+#       uses: zircote/.github/.github/workflows/reusable-verify-gates.yml@<sha>
+#       with:
+#         subject-ref: oci://ghcr.io/zircote/app@sha256:...
+#         owner: zircote
+#         signer-workflow: zircote/.github/.github/workflows/reusable-vex.yml
+#         predicate-types: https://openvex.dev/ns/v0.2.0
 #     deploy:
-#       needs: [verify]
+#       needs: [verify-seam, verify-vex]
 #       ...
 
 name: verify-gates
@@ -40,7 +58,7 @@ on:
         required: true
         type: string
       signer-workflow:
-        description: 'Signing workflow identity (owner/.github/.github/workflows/reusable-attest-scan.yml)'
+        description: 'The single signer for ALL predicate-types in this call (e.g. reusable-attest-scan.yml for seam-signed gates, reusable-vex.yml for OpenVEX). One signer per invocation.'
         required: true
         type: string
       predicate-types:

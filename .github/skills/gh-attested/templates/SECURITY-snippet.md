@@ -9,17 +9,22 @@ via GitHub keyless signing. Verify them from any workstation with the `gh` CLI.
 `--signer-workflow` is required: signing runs in a central reusable workflow, so
 the certificate identity (SLSA L3) is the signer, not this repo.
 
+Each predicate is pinned to the workflow that actually signed it: the seam
+(`reusable-attest-scan.yml`) signs the SARIF gates; OpenVEX self-signs in
+`reusable-vex.yml`; k6 self-signs in `reusable-k6.yml`.
+
 ```bash
 SUBJECT=oci://ghcr.io/__org__/app@sha256:<digest>   # or your release artifact ref
 OWNER=__org__
-SIGNER=__org__/.github/.github/workflows/reusable-attest-scan.yml
+SEAM=__org__/.github/.github/workflows/reusable-attest-scan.yml
 
-# Example: verify the SAST gate attestation
-gh attestation verify "$SUBJECT" --owner "$OWNER" --signer-workflow "$SIGNER" \
+# Seam-signed gate (SAST shown; other SARIF gates: swap the predicate-type)
+gh attestation verify "$SUBJECT" --owner "$OWNER" --signer-workflow "$SEAM" \
   --predicate-type https://__org__.github.io/attestations/sast/v1
 
-# Vulnerability disposition (OpenVEX — standard predicate)
-gh attestation verify "$SUBJECT" --owner "$OWNER" --signer-workflow "$SIGNER" \
+# Vulnerability disposition (OpenVEX — self-signed by reusable-vex.yml)
+gh attestation verify "$SUBJECT" --owner "$OWNER" \
+  --signer-workflow __org__/.github/.github/workflows/reusable-vex.yml \
   --predicate-type https://openvex.dev/ns/v0.2.0
 ```
 

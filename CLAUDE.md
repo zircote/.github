@@ -185,9 +185,11 @@ Caller rules (same SHA-pinning + fail-closed discipline as above):
 - SARIF-emitting gates land in the code-scanning hub; make them merge gates via
   required status checks (`templates/ruleset.json`). Context names are
   `<caller job id> / <called job name>` (e.g. `sast / analyze`).
-- Deploy jobs `needs:` the verify job. Verification: `gh attestation verify`
-  with `--owner` **and** `--signer-workflow
-  zircote/.github/.github/workflows/reusable-attest-scan.yml`. Commands live in
+- Deploy jobs `needs:` the verify job(s). Verification: `gh attestation verify`
+  with `--owner` **and** `--signer-workflow` pinned to the workflow that signed
+  that predicate — the seam (`reusable-attest-scan.yml`) for the SARIF gates,
+  `reusable-vex.yml` for OpenVEX, `reusable-k6.yml` for k6. `reusable-verify-gates.yml`
+  takes one signer per call, so call it once per signer group. Commands live in
   `SECURITY.md` ("Verifying Quality-Gate Attestations").
 - Repo configuration (rulesets, settings, native scanners, environments) is
   applied idempotently with a diff-preview + confirm; **secrets/variables are
