@@ -23,6 +23,7 @@ documentation for four kinds of need:
 ## How-to guides
 
 - [Onboard a repo to attested delivery](how-to/onboard-a-repo-to-attested-delivery.md)
+- [Onboard a repo to attested quality gates](how-to/onboard-a-repo-to-attested-quality-gates.md)
 - [Enforce action SHA pinning](how-to/enforce-action-sha-pinning.md)
 - [Generate an SBOM and vulnerability scan](how-to/generate-sbom-and-vuln-scan.md)
 - [Emit DORA deployment metrics](how-to/emit-dora-deployment-metrics.md)
@@ -38,6 +39,9 @@ executable, fully self-contained onboarding protocol for any org or repo.
 
 - [Reusable workflows](reference/workflows.md) — every centralized
   attested-delivery workflow: inputs, outputs, secrets, permissions.
+- [Attestation predicate definitions](reference/attestation-predicates/README.md)
+  — the custom predicate types the quality gates sign: URI, body format, verdict
+  rule, JSON Schema.
 - Language CI, release, security, and docs workflows are summarized in
   [CLAUDE.md](../CLAUDE.md) and the [repo README](../README.md#reusable-workflows).
 

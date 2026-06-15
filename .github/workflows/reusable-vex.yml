@@ -1,0 +1,90 @@
+# Reusable workflow: OpenVEX vulnerability disposition.
+#
+# A clean scan is rarely zero findings. An OpenVEX document (maintained in the
+# repo) records per-vulnerability status (not_affected / affected / fixed /
+# under_investigation) so the deploy gate can enforce "no UNDISPOSITIONED
+# high/critical vulnerabilities" rather than "zero findings". This workflow
+# normalizes the document with `vexctl merge` and signs it as an OpenVEX
+# attestation bound to the artifact digest.
+#
+# vexctl is installed via `go install` pinned to a module version (immutable via
+# the Go checksum database) — there is no official vexctl GitHub Action.
+#
+# Usage:
+#   jobs:
+#     vex:
+#       needs: [build]
+#       permissions:
+#         id-token: write
+#         attestations: write
+#         contents: read
+#       uses: zircote/.github/.github/workflows/reusable-vex.yml@<sha>
+#       with:
+#         subject-name: ghcr.io/zircote/app
+#         subject-digest: ${{ needs.build.outputs.digest }}
+#         vex-path: .vex/openvex.json
+
+name: vex
+
+on:
+  workflow_call:
+    inputs:
+      subject-name:
+        description: 'Subject the OpenVEX statement is bound to'
+        required: true
+        type: string
+      subject-digest:
+        description: 'Subject digest (sha256:...)'
+        required: true
+        type: string
+      vex-path:
+        description: 'Path to the OpenVEX document in the repository'
+        required: false
+        type: string
+        default: '.vex/openvex.json'
+      vexctl-version:
+        description: 'vexctl module version to install'
+        required: false
+        type: string
+        default: 'v0.4.1'
+
+permissions:
+  contents: read
+
+jobs:
+  attest-vex:
+    name: attest-vex
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      attestations: write
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Set up Go
+        uses: actions/setup-go@4a3601121dd01d1626a1e23e37211e3254c1c06c # v6.4.0
+        with:
+          go-version: 'stable'
+
+      - name: Install vexctl
+        env:
+          VEXCTL_VERSION: ${{ inputs.vexctl-version }}
+        run: go install "github.com/openvex/vexctl@${VEXCTL_VERSION}"
+
+      - name: Normalize OpenVEX document
+        env:
+          VEX_PATH: ${{ inputs.vex-path }}
+        run: |
+          test -f "${VEX_PATH}" || { echo "::error::OpenVEX document not found at ${VEX_PATH}"; exit 1; }
+          vexctl merge "${VEX_PATH}" > openvex.normalized.json
+          jq -e . openvex.normalized.json > /dev/null
+
+      - name: Attest OpenVEX document
+        uses: actions/attest@59d89421af93a897026c735860bf21b6eb4f7b26 # v4.1.0
+        with:
+          subject-name: ${{ inputs.subject-name }}
+          subject-digest: ${{ inputs.subject-digest }}
+          predicate-type: https://openvex.dev/ns/v0.2.0
+          predicate-path: openvex.normalized.json

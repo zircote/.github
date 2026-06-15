@@ -74,3 +74,32 @@ cosign verify-attestation "ghcr.io/zircote/<repo>@${DIGEST}" \
 gh release download <tag> --repo zircote/<repo>
 gh attestation verify <binary> --repo zircote/<repo>
 ```
+
+## Verifying Quality-Gate Attestations
+
+Repositories wired to the attested **quality gates** (the `gh-attested` skill)
+additionally record a signed, digest-bound attestation for each CI gate — SAST,
+SCA, container/IaC/license scan, supply-chain posture, and vulnerability
+disposition. Each predicate is pinned to **the workflow that actually signed
+it** (SLSA L3 cert identity): the seam (`reusable-attest-scan.yml`) signs the
+SARIF gates, while OpenVEX self-signs in `reusable-vex.yml` — so
+`--signer-workflow` differs per predicate.
+
+```sh
+SUBJECT=oci://ghcr.io/zircote/<repo>@${DIGEST}   # or a release-artifact ref
+SEAM=zircote/.github/.github/workflows/reusable-attest-scan.yml
+
+# Seam-signed gate (SAST shown; other SARIF gates: swap the predicate-type)
+gh attestation verify "$SUBJECT" --owner zircote --signer-workflow "$SEAM" \
+  --predicate-type https://zircote.github.io/attestations/sast/v1
+
+# Vulnerability disposition (OpenVEX — self-signed by reusable-vex.yml)
+gh attestation verify "$SUBJECT" --owner zircote \
+  --signer-workflow zircote/.github/.github/workflows/reusable-vex.yml \
+  --predicate-type https://openvex.dev/ns/v0.2.0
+```
+
+A successful verification proves the attestation is authentic and bound to the
+artifact — inspect the predicate body (`--format json | jq …`) to read the
+gate's recorded verdict. The full per-predicate command set is in the
+`gh-attested` skill's `references/verification.md`.

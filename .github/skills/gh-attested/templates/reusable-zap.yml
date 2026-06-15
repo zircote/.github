@@ -1,0 +1,61 @@
+# Reusable workflow: OWASP ZAP DAST full scan (conditional, opt-in).
+#
+# Runs the ZAP Full Scan (spider + active scan) against a running target and
+# fails the job on alerts when fail-action is true. The HTML/JSON/Markdown
+# report is attached as a build artifact by the action.
+#
+# The caller must stand up the target (a deployed preview, a service started in
+# a prior job, etc.) and pass its URL. SARIF emission is a ZAP *engine* report
+# (Automation Framework), not a native action input — emit it via cmd-options
+# and upload as a follow-on step if code-scanning ingestion is wanted (see the
+# gh-attested skill references/gate-catalog.md).
+#
+# `allow_issue_writing: false` keeps this workflow to contents: read — it does
+# not open GitHub issues.
+#
+# Usage:
+#   jobs:
+#     dast:
+#       permissions:
+#         contents: read
+#       uses: __org__/.github/.github/workflows/reusable-zap.yml@<sha>
+#       with:
+#         target: https://staging.example.com
+
+name: zap
+
+on:
+  workflow_call:
+    inputs:
+      target:
+        description: 'URL of the running target to scan'
+        required: true
+        type: string
+      fail-action:
+        description: 'Fail the job when ZAP reports alerts'
+        required: false
+        type: boolean
+        default: true
+      cmd-options:
+        description: 'Additional ZAP command-line options'
+        required: false
+        type: string
+        default: '-a'
+
+permissions:
+  contents: read
+
+jobs:
+  dast:
+    name: dast
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: ZAP full scan
+        uses: zaproxy/action-full-scan@3c58388149901b9a03b7718852c5ba889646c27c # v0.13.0
+        with:
+          target: ${{ inputs.target }}
+          fail_action: ${{ inputs.fail-action }}
+          cmd_options: ${{ inputs.cmd-options }}
+          allow_issue_writing: false

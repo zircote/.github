@@ -275,8 +275,30 @@ on them):
 | Grype (`anchore/scan-action`) | v7.4.0 |
 | `actions/attest-build-provenance` | v4.1.0 |
 
+## Attested quality-gate workflows
+
+A sibling suite (constituted by the [`gh-attested`
+skill](../../.github/skills/gh-attested/SKILL.md)) brings a public OSS repo to
+complete CI quality-gate coverage and signs each gate's verdict as a custom-
+predicate attestation. Full per-workflow inputs live in the skill's
+`references/gate-catalog.md`; the CLAUDE.md "Attested Quality Gates" section is
+the index.
+
+| Workflow | Gate |
+| --- | --- |
+| `reusable-attest-scan.yml` | the seam — signs any evidence file by digest |
+| `reusable-sast-codeql.yml` | SAST (CodeQL) |
+| `reusable-sca-osv.yml` | SCA (OSV-Scanner + dependency review) |
+| `reusable-trivy.yml` | container vuln + IaC misconfig + license |
+| `reusable-scorecard.yml` | supply-chain posture (OpenSSF Scorecard) |
+| `reusable-vex.yml` | vulnerability disposition (OpenVEX) |
+| `reusable-k6.yml` | load / performance (opt-in) |
+| `reusable-zap.yml` | DAST (OWASP ZAP, opt-in) |
+| `reusable-verify-gates.yml` | fail-closed verify before deploy |
+
 ## See also
 
 - [Onboard a repo to attested delivery](../how-to/onboard-a-repo-to-attested-delivery.md)
+- [Onboard a repo to attested quality gates](../how-to/onboard-a-repo-to-attested-quality-gates.md)
 - [Why attested delivery](../explanation/attested-delivery.md)
 - [Rollout status](../attested-delivery/rollout-status.md)

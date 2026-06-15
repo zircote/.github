@@ -1,0 +1,77 @@
+# Reusable workflow: SAST via CodeQL code scanning.
+#
+# CodeQL builds a database (AST + data-flow + control-flow graphs) and runs
+# security queries, emitting SARIF 2.1.0 into the GitHub code-scanning hub. On
+# a pull request the "Code scanning results" check fails on any error/critical/
+# high finding — wire it as a required status check to make it a merge gate.
+# Free for public repositories by default (GitHub Advanced Security).
+#
+# Compiled languages (c-cpp, csharp, go, java-kotlin, swift) generally need a
+# build: pass `build-mode: autobuild` or `build-mode: manual` and call once per
+# language. Interpreted languages (javascript-typescript, python, ruby,
+# actions) work with `build-mode: none`.
+#
+# Usage:
+#   jobs:
+#     sast:
+#       permissions:
+#         security-events: write
+#         contents: read
+#         actions: read
+#       uses: __org__/.github/.github/workflows/reusable-sast-codeql.yml@<sha>
+#       with:
+#         languages: 'javascript-typescript,python'
+
+name: sast-codeql
+
+on:
+  workflow_call:
+    inputs:
+      languages:
+        description: 'Comma-separated CodeQL languages (e.g. javascript-typescript,python)'
+        required: true
+        type: string
+      build-mode:
+        description: 'CodeQL build mode: none | autobuild | manual'
+        required: false
+        type: string
+        default: 'none'
+      config-file:
+        description: 'Optional path to a codeql-config.yml'
+        required: false
+        type: string
+        default: ''
+      queries:
+        description: 'Optional query suite (e.g. security-extended)'
+        required: false
+        type: string
+        default: ''
+
+permissions:
+  contents: read
+
+jobs:
+  analyze:
+    name: analyze
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write   # upload SARIF to code scanning
+      contents: read
+      actions: read
+      packages: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@38697555549f1db7851b81482ff19f1fa5c4fedc # v4.34.1
+        with:
+          languages: ${{ inputs.languages }}
+          build-mode: ${{ inputs.build-mode }}
+          config-file: ${{ inputs.config-file }}
+          queries: ${{ inputs.queries }}
+
+      - name: Perform CodeQL analysis
+        uses: github/codeql-action/analyze@38697555549f1db7851b81482ff19f1fa5c4fedc # v4.34.1
+        with:
+          category: '/language:${{ inputs.languages }}'

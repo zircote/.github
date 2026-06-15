@@ -1,0 +1,107 @@
+# Reusable workflow: Trivy — container image, IaC misconfiguration, and license.
+#
+# Complements sbom-and-scan.yml (SBOM + Grype). Trivy adds:
+#   - image vulnerability scan (when image-ref is set), fail-closed on severity;
+#   - IaC misconfiguration scan of the repo (Docker/K8s/Terraform/CloudFormation);
+#   - license scan (Forbidden->CRITICAL, Restricted->HIGH).
+# All findings normalize on SARIF and land in the code-scanning hub, so the
+# code-scanning required check is the merge gate for the repo scan; the image
+# scan additionally fails the job on findings at/above `severity`.
+#
+# SECURITY: aquasecurity/trivy-action is pinned to a full commit SHA. In
+# March 2026 (CVE-2026-33634) an attacker force-pushed 76 of 77 trivy-action
+# tags to credential-stealing malware; tag references are unsafe. Never replace
+# this SHA with a tag.
+#
+# Usage:
+#   jobs:
+#     trivy:
+#       permissions:
+#         contents: read
+#         security-events: write
+#         actions: read
+#       uses: zircote/.github/.github/workflows/reusable-trivy.yml@<sha>
+#       with:
+#         image-ref: ghcr.io/zircote/app@sha256:...   # omit to scan repo only
+
+name: trivy
+
+on:
+  workflow_call:
+    inputs:
+      image-ref:
+        description: 'Image to scan by digest (empty = skip image scan)'
+        required: false
+        type: string
+        default: ''
+      severity:
+        description: 'Severities to report/fail on'
+        required: false
+        type: string
+        default: 'HIGH,CRITICAL'
+      scan-iac:
+        description: 'Scan repo for IaC misconfiguration + license issues'
+        required: false
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+
+jobs:
+  iac-license:
+    name: iac-license
+    if: ${{ inputs.scan-iac }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+      actions: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Trivy IaC + license scan (filesystem)
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          scan-type: fs
+          scan-ref: .
+          scanners: misconfig,license
+          format: sarif
+          output: trivy-iac-license.sarif
+          severity: ${{ inputs.severity }}
+          exit-code: '0'   # report to code scanning; the code-scanning check is the gate
+
+      - name: Upload IaC + license SARIF
+        if: always()
+        uses: github/codeql-action/upload-sarif@38697555549f1db7851b81482ff19f1fa5c4fedc # v4.34.1
+        with:
+          sarif_file: trivy-iac-license.sarif
+          category: trivy-iac-license
+
+  image:
+    name: image
+    if: ${{ inputs.image-ref != '' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+      actions: read
+      packages: read
+    steps:
+      - name: Trivy image vulnerability scan
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          scan-type: image
+          image-ref: ${{ inputs.image-ref }}
+          format: sarif
+          output: trivy-image.sarif
+          severity: ${{ inputs.severity }}
+          exit-code: '1'   # fail-closed on image vulnerabilities
+
+      - name: Upload image SARIF
+        if: always()
+        uses: github/codeql-action/upload-sarif@38697555549f1db7851b81482ff19f1fa5c4fedc # v4.34.1
+        with:
+          sarif_file: trivy-image.sarif
+          category: trivy-image
