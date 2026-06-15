@@ -53,7 +53,11 @@ function generateTopReposMarkdown(repos) {
   const rows = repos.map(repo => {
     const name = repo.name;
     const url = repo.url;
-    const desc = truncate(repo.description || 'No description', 55).replace(/\|/g, '\\|');
+    // Escape backslashes before pipes so a literal "\|" in a description can't
+    // defeat the table-cell pipe escaping (CodeQL js/incomplete-sanitization).
+    const desc = truncate(repo.description || 'No description', 55)
+      .replace(/\\/g, '\\\\')
+      .replace(/\|/g, '\\|');
     const lang = repo.language || 'Mixed';
     const emoji = getActivityEmoji(repo.score);
 
