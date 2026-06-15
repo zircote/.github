@@ -17,7 +17,8 @@ substituted for the owner.
    into the org's central `.github` repo's `.github/workflows/`, substitute the
    token, commit to the default branch, record the SHA.
    ```sh
-   sed -i '' 's/__org__/MyOrg/g' .github/workflows/reusable-*.yml
+   # cross-platform in-place edit (GNU and BSD/macOS `sed -i` differ; perl is portable)
+   perl -pi -e 's/__org__/MyOrg/g' .github/workflows/reusable-*.yml
    ```
    Public central repos are callable by anyone; private/internal ones need
    `gh api -X PUT repos/<owner>/.github/actions/permissions/access -f access_level=organization`.

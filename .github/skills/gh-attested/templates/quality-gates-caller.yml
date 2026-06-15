@@ -14,7 +14,8 @@ name: quality-gates
 
 on:
   push:
-    branches: [main]
+    branches: [main]   # CHANGE to YOUR repo's default branch (main / master / trunk);
+                       # confirm via: gh api repos/<owner>/<repo> --jq .default_branch
   pull_request:
 
 permissions:

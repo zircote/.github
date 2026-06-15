@@ -11,7 +11,6 @@
 #   jobs:
 #     verify:
 #       permissions:
-#         id-token: write
 #         contents: read
 #         attestations: read
 #         packages: read
@@ -45,10 +44,9 @@ on:
         required: true
         type: string
       predicate-types:
-        description: 'Newline- or whitespace-separated predicate type URIs to require'
-        required: false
+        description: 'Newline- or whitespace-separated predicate type URIs to require (at least one)'
+        required: true
         type: string
-        default: ''
 
 permissions:
   contents: read
@@ -58,7 +56,6 @@ jobs:
     name: verify
     runs-on: ubuntu-latest
     permissions:
-      id-token: write
       contents: read
       attestations: read
       packages: read
@@ -72,18 +69,19 @@ jobs:
           PREDICATE_TYPES: ${{ inputs.predicate-types }}
         run: |
           set -euo pipefail
+          # Fail closed: refuse to "verify" with no required predicate. An empty
+          # list would otherwise let a deploy proceed against no specific gate.
           if [ -z "${PREDICATE_TYPES//[[:space:]]/}" ]; then
-            echo "Verifying ${SUBJECT} (default provenance predicate)"
-            gh attestation verify "${SUBJECT}" --owner "${OWNER}" --signer-workflow "${SIGNER}"
-          else
-            failed=0
-            for pt in ${PREDICATE_TYPES}; do
-              echo "Verifying ${SUBJECT} against predicate ${pt}"
-              if ! gh attestation verify "${SUBJECT}" --owner "${OWNER}" \
-                    --signer-workflow "${SIGNER}" --predicate-type "${pt}"; then
-                echo "::error::verification failed for predicate ${pt}"
-                failed=1
-              fi
-            done
-            exit "${failed}"
+            echo "::error::predicate-types is required and must name at least one predicate URI (fail closed)"
+            exit 1
           fi
+          failed=0
+          for pt in ${PREDICATE_TYPES}; do
+            echo "Verifying ${SUBJECT} against predicate ${pt}"
+            if ! gh attestation verify "${SUBJECT}" --owner "${OWNER}" \
+                  --signer-workflow "${SIGNER}" --predicate-type "${pt}"; then
+              echo "::error::verification failed for predicate ${pt}"
+              failed=1
+            fi
+          done
+          exit "${failed}"
