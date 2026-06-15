@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://zircote.github.io/attestations/sast/v1",
+  "title": "zircote SAST gate predicate (CodeQL, SARIF 2.1.0)",
+  "description": "Predicate body is the unmodified SARIF 2.1.0 log produced by CodeQL code scanning and signed by reusable-attest-scan.yml. Verdict rule: the gate FAILS if any result has level \"error\" or a security-severity of high/critical; otherwise it PASSES. Verifiers MUST read runs[].results to determine the verdict — a valid signature proves the gate ran and was recorded, not that it passed.",
+  "type": "object",
+  "required": ["version", "runs"],
+  "properties": {
+    "version": { "const": "2.1.0" },
+    "$schema": { "type": "string" },
+    "runs": {
+      "type": "array",
+      "items": { "type": "object" }
+    }
+  }
+}

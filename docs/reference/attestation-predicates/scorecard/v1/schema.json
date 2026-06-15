@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://zircote.github.io/attestations/scorecard/v1",
+  "title": "zircote supply-chain posture gate predicate (OpenSSF Scorecard, SARIF 2.1.0)",
+  "description": "Predicate body is the unmodified SARIF 2.1.0 log produced by OpenSSF Scorecard and signed by reusable-attest-scan.yml. Posture is advisory by default: the gate records each check's score (0-10). Verifiers read runs[].results to enforce a minimum aggregate or per-check score; signature validity is not a pass.",
+  "type": "object",
+  "required": ["version", "runs"],
+  "properties": {
+    "version": { "const": "2.1.0" },
+    "$schema": { "type": "string" },
+    "runs": {
+      "type": "array",
+      "items": { "type": "object" }
+    }
+  }
+}

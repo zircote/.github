@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://zircote.github.io/attestations/k6-load/v1",
+  "title": "zircote load/performance gate predicate (Grafana k6 summary export)",
+  "description": "Predicate body is the JSON document produced by k6 --summary-export, signed by reusable-k6.yml. There is no standard performance predicate type; this is a custom type. Verdict rule: the gate FAILS if any threshold failed (k6 exits 99, ThresholdsHaveFailed); otherwise it PASSES. Verifiers read metrics[*].thresholds[*].ok — a false entry is a fail.",
+  "type": "object",
+  "required": ["metrics"],
+  "properties": {
+    "metrics": {
+      "type": "object",
+      "description": "Per-metric values; each metric may carry a thresholds object whose entries report ok=true|false.",
+      "additionalProperties": { "type": "object" }
+    },
+    "root_group": { "type": "object" }
+  }
+}

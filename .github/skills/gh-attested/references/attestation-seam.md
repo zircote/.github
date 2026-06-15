@@ -63,7 +63,12 @@ share a filesystem across caller jobs).
 | SBOM | SPDX / CycloneDX via `attest-sbom` (attested-delivery) |
 
 The custom `zircote.github.io/...` URIs need not resolve to a live document —
-they are stable type identifiers a verifier pins with `--predicate-type`.
+they are stable type identifiers a verifier pins with `--predicate-type`. Each
+custom type is **defined** (body format, verdict rule, JSON Schema) in the
+repo at
+[`docs/reference/attestation-predicates/`](../../../../docs/reference/attestation-predicates/README.md);
+that tree is the source of truth and what gets published if the namespace is
+ever served.
 
 ## What the subject is
 

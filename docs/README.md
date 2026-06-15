@@ -39,6 +39,9 @@ executable, fully self-contained onboarding protocol for any org or repo.
 
 - [Reusable workflows](reference/workflows.md) — every centralized
   attested-delivery workflow: inputs, outputs, secrets, permissions.
+- [Attestation predicate definitions](reference/attestation-predicates/README.md)
+  — the custom predicate types the quality gates sign: URI, body format, verdict
+  rule, JSON Schema.
 - Language CI, release, security, and docs workflows are summarized in
   [CLAUDE.md](../CLAUDE.md) and the [repo README](../README.md#reusable-workflows).
 

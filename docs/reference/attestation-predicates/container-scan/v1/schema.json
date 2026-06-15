@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://zircote.github.io/attestations/container-scan/v1",
+  "title": "zircote container-vulnerability gate predicate (Trivy image, SARIF 2.1.0)",
+  "description": "Predicate body is the unmodified SARIF 2.1.0 log produced by a Trivy image scan and signed by reusable-attest-scan.yml. Verdict rule: the gate FAILS if any result reports a vulnerability at or above the configured severity (default HIGH,CRITICAL); otherwise it PASSES. Verifiers MUST read runs[].results.",
+  "type": "object",
+  "required": ["version", "runs"],
+  "properties": {
+    "version": { "const": "2.1.0" },
+    "$schema": { "type": "string" },
+    "runs": {
+      "type": "array",
+      "items": { "type": "object" }
+    }
+  }
+}

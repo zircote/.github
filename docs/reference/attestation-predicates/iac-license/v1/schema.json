@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://zircote.github.io/attestations/iac-license/v1",
+  "title": "zircote IaC + license gate predicate (Trivy filesystem, SARIF 2.1.0)",
+  "description": "Predicate body is the unmodified SARIF 2.1.0 log produced by a Trivy filesystem scan with the misconfig and license scanners, signed by reusable-attest-scan.yml. Verdict rule: the gate FAILS on any misconfiguration or license finding at or above the configured severity (Forbidden->CRITICAL, Restricted->HIGH); otherwise it PASSES. Verifiers MUST read runs[].results.",
+  "type": "object",
+  "required": ["version", "runs"],
+  "properties": {
+    "version": { "const": "2.1.0" },
+    "$schema": { "type": "string" },
+    "runs": {
+      "type": "array",
+      "items": { "type": "object" }
+    }
+  }
+}
