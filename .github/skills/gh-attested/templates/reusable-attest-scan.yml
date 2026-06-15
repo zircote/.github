@@ -1,0 +1,84 @@
+# Reusable workflow: the attestation "seam".
+#
+# Turns any quality-gate's evidence file (a scanner's SARIF/JSON, a load-test
+# summary, an OpenVEX document, ...) into a signed, digest-bound in-toto
+# attestation via GitHub keyless signing (`actions/attest`, custom predicate).
+# A clean result in the Security tab is *evidence*; this attestation is the
+# enforceable, verifiable *claim* — bound to a subject by digest and signed by
+# this central workflow's OIDC identity (Sigstore Public Good for public repos).
+#
+# Verification (see SECURITY.md / gh-attested skill references/verification.md):
+#   gh attestation verify <subject> --owner <owner> \
+#     --predicate-type <predicate-type> \
+#     --signer-workflow <owner>/.github/.github/workflows/reusable-attest-scan.yml
+#
+# Security note: only workflow_call inputs (controlled by the caller) and the
+# downloaded evidence artifact are used. No untrusted input reaches a shell.
+#
+# Usage:
+#   jobs:
+#     attest-sast:
+#       needs: [sast]
+#       permissions:
+#         id-token: write
+#         attestations: write
+#         contents: read
+#       uses: __org__/.github/.github/workflows/reusable-attest-scan.yml@<sha>
+#       with:
+#         subject-name: my-app
+#         subject-digest: ${{ needs.build.outputs.digest }}   # sha256:...
+#         predicate-type: https://__org__.github.io/attestations/sast/v1
+#         predicate-artifact: codeql-sarif
+#         predicate-filename: results.sarif
+
+name: attest-scan
+
+on:
+  workflow_call:
+    inputs:
+      subject-name:
+        description: 'Logical subject name (image repo, package name, or artifact label)'
+        required: true
+        type: string
+      subject-digest:
+        description: 'Subject digest the predicate is bound to (sha256:...)'
+        required: true
+        type: string
+      predicate-type:
+        description: 'URI identifying the predicate type (e.g. https://openvex.dev/ns/v0.2.0)'
+        required: true
+        type: string
+      predicate-artifact:
+        description: 'Name of the uploaded artifact containing the evidence file'
+        required: true
+        type: string
+      predicate-filename:
+        description: 'Evidence filename within the artifact (e.g. results.sarif)'
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  attest:
+    name: attest
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write        # keyless Sigstore signing
+      attestations: write    # persist the GitHub artifact attestation
+      contents: read
+    steps:
+      - name: Download evidence artifact
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: ${{ inputs.predicate-artifact }}
+          path: predicate
+
+      - name: Attest evidence as a signed custom predicate
+        uses: actions/attest@59d89421af93a897026c735860bf21b6eb4f7b26 # v4.1.0
+        with:
+          subject-name: ${{ inputs.subject-name }}
+          subject-digest: ${{ inputs.subject-digest }}
+          predicate-type: ${{ inputs.predicate-type }}
+          predicate-path: predicate/${{ inputs.predicate-filename }}

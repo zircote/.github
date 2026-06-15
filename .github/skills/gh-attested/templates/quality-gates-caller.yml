@@ -1,0 +1,79 @@
+# Thin caller — wire a repo's merge-time quality gates to the central reusables.
+#
+# Copy to the TARGET repo's .github/workflows/quality-gates.yml, replace
+# __org__ with the owner, and pin every @<sha> to the full 40-char commit SHA of
+# the central repo (Dependabot's github-actions ecosystem keeps them fresh).
+#
+# This is the universal merge-time core (SAST + SCA + posture + IaC/license +
+# pin-check). For the DEPLOY-TIME attestation seam (sign each gate's verdict and
+# fail-closed verify before shipping), see references/attestation-seam.md and
+# references/enforcement.md — the seam consumes an evidence artifact, so the gate
+# job must upload its SARIF (or call the scan inline) before reusable-attest-scan.
+
+name: quality-gates
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  sast:
+    permissions:
+      security-events: write
+      contents: read
+      actions: read
+    uses: __org__/.github/.github/workflows/reusable-sast-codeql.yml@<sha>
+    with:
+      languages: 'javascript-typescript'   # edit per repo; compiled langs need build-mode
+
+  sca:
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+      pull-requests: write
+    uses: __org__/.github/.github/workflows/reusable-sca-osv.yml@<sha>
+    with:
+      fail-on-severity: high
+
+  posture:
+    if: github.event_name == 'push'
+    permissions:
+      security-events: write
+      id-token: write
+      contents: read
+      actions: read
+    uses: __org__/.github/.github/workflows/reusable-scorecard.yml@<sha>
+
+  trivy:
+    permissions:
+      contents: read
+      security-events: write
+      actions: read
+    uses: __org__/.github/.github/workflows/reusable-trivy.yml@<sha>
+    with:
+      scan-iac: true
+      # image-ref: ghcr.io/__org__/app@sha256:<digest>   # add to scan a built image
+
+  pin-check:
+    permissions:
+      contents: read
+    uses: __org__/.github/.github/workflows/pin-check.yml@<sha>
+
+  # ---------------------------------------------------------------------------
+  # Opt-in gates (need a running target) — uncomment when applicable:
+  #
+  # load:
+  #   permissions: { id-token: write, attestations: write, contents: read }
+  #   uses: __org__/.github/.github/workflows/reusable-k6.yml@<sha>
+  #   with: { script-path: tests/load.js }
+  #
+  # dast:
+  #   permissions: { contents: read }
+  #   uses: __org__/.github/.github/workflows/reusable-zap.yml@<sha>
+  #   with: { target: https://staging.example.com }
+  # ---------------------------------------------------------------------------

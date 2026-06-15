@@ -1,0 +1,73 @@
+# Reusable workflow: SCA via OSV-Scanner + GitHub dependency review.
+#
+# Two complementary free layers (Dependabot alerts are the third, configured at
+# the repo level and outside this workflow):
+#   - OSV-Scanner (Google, Apache-2.0): an independent second opinion against
+#     the OSV database across lockfiles and ecosystems; uploads SARIF to the
+#     code-scanning hub.
+#   - dependency-review-action: the PR merge gate — fails the check when a PR
+#     introduces a vulnerable dependency or a disallowed license. Public-repo
+#     free.
+#
+# Usage:
+#   jobs:
+#     sca:
+#       permissions:
+#         actions: read
+#         contents: read
+#         security-events: write
+#         pull-requests: write
+#       uses: zircote/.github/.github/workflows/reusable-sca-osv.yml@<sha>
+#       with:
+#         fail-on-severity: high
+
+name: sca-osv
+
+on:
+  workflow_call:
+    inputs:
+      fail-on-severity:
+        description: 'dependency-review threshold: low | moderate | high | critical'
+        required: false
+        type: string
+        default: 'high'
+      scan-args:
+        description: 'OSV-Scanner arguments'
+        required: false
+        type: string
+        default: |-
+          --recursive
+          ./
+
+permissions:
+  contents: read
+
+jobs:
+  # OSV-Scanner ships an official reusable workflow that scans, generates SARIF,
+  # and uploads it to code scanning. Pinned to the repo's release SHA.
+  osv-scan:
+    name: osv-scanner
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+    uses: google/osv-scanner-action/.github/workflows/osv-scanner-reusable.yml@9a498708959aeaef5ef730655706c5a1df1edbc2 # v2.3.8
+    with:
+      scan-args: ${{ inputs.scan-args }}
+
+  dependency-review:
+    name: dependency-review
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Dependency review
+        uses: actions/dependency-review-action@a1d282b36b6f3519aa1f3fc636f609c47dddb294 # v5.0.0
+        with:
+          fail-on-severity: ${{ inputs.fail-on-severity }}
+          comment-summary-in-pr: on-failure

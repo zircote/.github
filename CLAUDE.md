@@ -154,6 +154,52 @@ Caller rules:
   `--signer-workflow zircote/.github/.github/workflows/sign-and-attest.yml`
   (`--repo` alone fails under SLSA L3 — the SAN is the central signer).
 
+## Attested Quality Gates (CI gate suite)
+
+Centralized reusable workflows that bring a **public** OSS repo to complete
+quality-gate coverage with GitHub-native + free-for-OSS tooling, turning each
+gate's verdict into a signed, digest-bound attestation. Constituted and applied
+by the **`gh-attested`** skill (assess → plan → implement). Composes with —
+does not duplicate — `attested-delivery` (build provenance, SBOM signing,
+fail-closed verify), `reusable-security.yml` (gitleaks + language audits), and
+`sbom-and-scan.yml` (CycloneDX/SPDX + Grype).
+
+| Workflow | Gate | Key inputs |
+|----------|------|------------|
+| `reusable-attest-scan.yml` | **The seam** — signs any evidence file as a custom-predicate attestation bound to a digest | `subject-name`, `subject-digest`, `predicate-type`, `predicate-artifact`, `predicate-filename` |
+| `reusable-sast-codeql.yml` | SAST (CodeQL → code scanning) | `languages`, `build-mode` |
+| `reusable-sca-osv.yml` | SCA (OSV-Scanner + dependency review PR gate) | `fail-on-severity`, `scan-args` |
+| `reusable-trivy.yml` | Container vuln + IaC misconfig + license | `image-ref`, `severity`, `scan-iac` |
+| `reusable-scorecard.yml` | Supply-chain posture (OpenSSF Scorecard) | `publish-results` |
+| `reusable-vex.yml` | Vulnerability disposition (OpenVEX via `vexctl`) | `subject-name`, `subject-digest`, `vex-path` |
+| `reusable-k6.yml` | Load / performance (opt-in; needs a target) | `script-path`, `attest` |
+| `reusable-zap.yml` | DAST (OWASP ZAP; opt-in; needs a target) | `target`, `fail-action` |
+| `reusable-verify-gates.yml` | Fail-closed `gh attestation verify` before deploy | `subject-ref`, `owner`, `signer-workflow`, `predicate-types` |
+
+Caller rules (same SHA-pinning + fail-closed discipline as above):
+
+- Pin every `uses:` to this repo's full 40-char commit SHA; **pin third-party
+  actions by SHA, never tag** (Trivy CVE-2026-33634 — tags force-pushed to
+  malware). `aquasecurity/trivy-action` is pinned to a maintainer-signed
+  post-incident commit.
+- SARIF-emitting gates land in the code-scanning hub; make them merge gates via
+  required status checks (`templates/ruleset.json`). Context names are
+  `<caller job id> / <called job name>` (e.g. `sast / analyze`).
+- Deploy jobs `needs:` the verify job. Verification: `gh attestation verify`
+  with `--owner` **and** `--signer-workflow
+  zircote/.github/.github/workflows/reusable-attest-scan.yml`. Commands live in
+  `SECURITY.md` ("Verifying Quality-Gate Attestations").
+- Repo configuration (rulesets, settings, native scanners, environments) is
+  applied idempotently with a diff-preview + confirm; **secrets/variables are
+  guided, never written or logged** — see the skill's `references/repo-config.md`.
+
+The skill is self-contained at `.github/skills/gh-attested/` (SKILL.md +
+`references/` + `__org__`-parameterized `templates/`). Honest boundaries:
+private repos need GHAS licenses for CodeQL/secret-scanning/dependency-review;
+GitHub has no k8s admission control (external — Kyverno/policy-controller);
+there is no standard performance predicate; a signed attestation proves a gate
+*ran and recorded a verdict*, not that it *passed*.
+
 ## Available Composite Actions
 
 | Action | Purpose |

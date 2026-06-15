@@ -1,0 +1,89 @@
+# Reusable workflow: fail-closed verification of gate attestations.
+#
+# Runs `gh attestation verify` against a subject for each required predicate
+# type. Any verification failure exits non-zero, so placing this job in a
+# deploy job's `needs:` halts an unverified or improperly-signed artifact
+# before it ships. Under SLSA L3 the signer identity is the central signing
+# workflow (the Fulcio SAN), so --signer-workflow is mandatory; --owner alone
+# is insufficient.
+#
+# Usage:
+#   jobs:
+#     verify:
+#       permissions:
+#         id-token: write
+#         contents: read
+#         attestations: read
+#         packages: read
+#       uses: zircote/.github/.github/workflows/reusable-verify-gates.yml@<sha>
+#       with:
+#         subject-ref: oci://ghcr.io/zircote/app@sha256:...
+#         owner: zircote
+#         signer-workflow: zircote/.github/.github/workflows/reusable-attest-scan.yml
+#         predicate-types: |-
+#           https://zircote.github.io/attestations/sast/v1
+#           https://openvex.dev/ns/v0.2.0
+#     deploy:
+#       needs: [verify]
+#       ...
+
+name: verify-gates
+
+on:
+  workflow_call:
+    inputs:
+      subject-ref:
+        description: 'Subject to verify (oci://...@sha256 or a file path)'
+        required: true
+        type: string
+      owner:
+        description: 'Repository owner that produced the attestations'
+        required: true
+        type: string
+      signer-workflow:
+        description: 'Signing workflow identity (owner/.github/.github/workflows/reusable-attest-scan.yml)'
+        required: true
+        type: string
+      predicate-types:
+        description: 'Newline- or whitespace-separated predicate type URIs to require'
+        required: false
+        type: string
+        default: ''
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    name: verify
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+      attestations: read
+      packages: read
+    steps:
+      - name: Verify gate attestations (fail-closed)
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SUBJECT: ${{ inputs.subject-ref }}
+          OWNER: ${{ inputs.owner }}
+          SIGNER: ${{ inputs.signer-workflow }}
+          PREDICATE_TYPES: ${{ inputs.predicate-types }}
+        run: |
+          set -euo pipefail
+          if [ -z "${PREDICATE_TYPES//[[:space:]]/}" ]; then
+            echo "Verifying ${SUBJECT} (default provenance predicate)"
+            gh attestation verify "${SUBJECT}" --owner "${OWNER}" --signer-workflow "${SIGNER}"
+          else
+            failed=0
+            for pt in ${PREDICATE_TYPES}; do
+              echo "Verifying ${SUBJECT} against predicate ${pt}"
+              if ! gh attestation verify "${SUBJECT}" --owner "${OWNER}" \
+                    --signer-workflow "${SIGNER}" --predicate-type "${pt}"; then
+                echo "::error::verification failed for predicate ${pt}"
+                failed=1
+              fi
+            done
+            exit "${failed}"
+          fi

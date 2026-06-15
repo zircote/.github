@@ -1,0 +1,11 @@
+# CODEOWNERS — required by the ruleset's "require code owner review" rule.
+# Replace __org__ and the team/handles with the target's owners.
+# Docs: https://docs.github.com/articles/about-code-owners
+
+# Default owner for everything
+*                       @__org__/maintainers
+
+# CI / supply-chain config needs owner review (these gate every other change)
+/.github/workflows/     @__org__/maintainers
+/.github/dependabot.yml @__org__/maintainers
+/.vex/                  @__org__/maintainers

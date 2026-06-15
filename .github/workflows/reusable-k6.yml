@@ -1,0 +1,81 @@
+# Reusable workflow: Grafana k6 load / performance gate (conditional, opt-in).
+#
+# The gate is k6's thresholds — pass/fail criteria on test metrics. On a
+# threshold breach k6 exits 99 (ThresholdsHaveFailed), failing the job. The
+# JSON summary is optionally signed as a custom performance attestation (there
+# is no standard performance predicate type).
+#
+# The caller is responsible for starting/targeting the system under test; the
+# k6 script encodes the target URL and thresholds.
+#
+# Usage:
+#   jobs:
+#     load:
+#       permissions:
+#         id-token: write
+#         attestations: write
+#         contents: read
+#       uses: zircote/.github/.github/workflows/reusable-k6.yml@<sha>
+#       with:
+#         script-path: tests/load.js
+#         attest: true
+#         subject-name: my-app
+#         subject-digest: ${{ needs.build.outputs.digest }}
+
+name: k6
+
+on:
+  workflow_call:
+    inputs:
+      script-path:
+        description: 'Path to the k6 test script'
+        required: true
+        type: string
+      attest:
+        description: 'Sign the k6 summary as a custom performance attestation'
+        required: false
+        type: boolean
+        default: false
+      subject-name:
+        description: 'Subject name for the attestation (required when attest=true)'
+        required: false
+        type: string
+        default: ''
+      subject-digest:
+        description: 'Subject digest for the attestation (required when attest=true)'
+        required: false
+        type: string
+        default: ''
+
+permissions:
+  contents: read
+
+jobs:
+  load:
+    name: load
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      attestations: write
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Set up k6
+        uses: grafana/setup-k6-action@db07bd9765aac508ef18982e52ab937fe633a065 # v1.2.1
+
+      - name: Run k6 load test
+        uses: grafana/run-k6-action@de51a7390bdf0ac85a3bef493691bd71d4c7c158 # v1.4.0
+        with:
+          path: ${{ inputs.script-path }}
+          flags: --summary-export=k6-summary.json
+
+      - name: Attest performance summary
+        if: ${{ inputs.attest && inputs.subject-digest != '' }}
+        uses: actions/attest@59d89421af93a897026c735860bf21b6eb4f7b26 # v4.1.0
+        with:
+          subject-name: ${{ inputs.subject-name }}
+          subject-digest: ${{ inputs.subject-digest }}
+          predicate-type: https://zircote.github.io/attestations/k6-load/v1
+          predicate-path: k6-summary.json

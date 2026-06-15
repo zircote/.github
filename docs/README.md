@@ -23,6 +23,7 @@ documentation for four kinds of need:
 ## How-to guides
 
 - [Onboard a repo to attested delivery](how-to/onboard-a-repo-to-attested-delivery.md)
+- [Onboard a repo to attested quality gates](how-to/onboard-a-repo-to-attested-quality-gates.md)
 - [Enforce action SHA pinning](how-to/enforce-action-sha-pinning.md)
 - [Generate an SBOM and vulnerability scan](how-to/generate-sbom-and-vuln-scan.md)
 - [Emit DORA deployment metrics](how-to/emit-dora-deployment-metrics.md)
