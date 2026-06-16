@@ -29,6 +29,13 @@ on:
         required: false
         type: boolean
         default: true
+    outputs:
+      sarif-artifact:
+        description: 'Artifact name holding the SARIF evidence (attestation seam)'
+        value: scorecard-sarif
+      sarif-filename:
+        description: 'SARIF filename within the artifact'
+        value: scorecard.sarif
 
 permissions:
   contents: read
@@ -60,3 +67,13 @@ jobs:
         with:
           sarif_file: scorecard.sarif
           category: scorecard
+
+      # Expose the SARIF as a downloadable artifact so the attestation seam
+      # (reusable-attest-scan.yml) can sign it bound to a release subject.
+      - name: Upload Scorecard SARIF artifact
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: scorecard-sarif
+          path: scorecard.sarif
+          if-no-files-found: error

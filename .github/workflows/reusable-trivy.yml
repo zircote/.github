@@ -44,6 +44,19 @@ on:
         required: false
         type: boolean
         default: true
+    outputs:
+      sarif-artifact:
+        description: 'Artifact name holding the IaC+license SARIF (attestation seam)'
+        value: iac-license-sarif
+      sarif-filename:
+        description: 'IaC+license SARIF filename within the artifact'
+        value: trivy-iac-license.sarif
+      image-sarif-artifact:
+        description: 'Artifact name holding the image-scan SARIF (when image-ref set)'
+        value: container-scan-sarif
+      image-sarif-filename:
+        description: 'Image-scan SARIF filename within the artifact'
+        value: trivy-image.sarif
 
 permissions:
   contents: read
@@ -79,6 +92,15 @@ jobs:
           sarif_file: trivy-iac-license.sarif
           category: trivy-iac-license
 
+      # Expose the SARIF as a downloadable artifact for the attestation seam.
+      - name: Upload IaC + license SARIF artifact
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: iac-license-sarif
+          path: trivy-iac-license.sarif
+          if-no-files-found: error
+
   image:
     name: image
     if: ${{ inputs.image-ref != '' }}
@@ -105,3 +127,12 @@ jobs:
         with:
           sarif_file: trivy-image.sarif
           category: trivy-image
+
+      # Expose the SARIF as a downloadable artifact for the attestation seam.
+      - name: Upload image SARIF artifact
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: container-scan-sarif
+          path: trivy-image.sarif
+          if-no-files-found: error

@@ -38,6 +38,15 @@ on:
         default: |-
           --recursive
           ./
+    outputs:
+      # The OSV reusable (pinned by SHA above) uploads its SARIF under this
+      # fixed artifact name; the attestation seam downloads it by this name.
+      sarif-artifact:
+        description: 'Artifact name holding the OSV SARIF (attestation seam)'
+        value: 'OSV Scanner SARIF file'
+      sarif-filename:
+        description: 'SARIF filename within the artifact'
+        value: results.sarif
 
 permissions:
   contents: read
