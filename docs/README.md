@@ -19,6 +19,8 @@ documentation for four kinds of need:
 - [Your first attested release](tutorials/first-attested-release.md) — build,
   sign, attest, and verify a container image end to end using the centralized
   workflows.
+- [Wire your first attested quality gate](tutorials/first-attested-quality-gate.md)
+  — run a CodeQL SAST gate and verify its signed, digest-bound verdict.
 
 ## How-to guides
 
@@ -39,6 +41,9 @@ executable, fully self-contained onboarding protocol for any org or repo.
 
 - [Reusable workflows](reference/workflows.md) — every centralized
   attested-delivery workflow: inputs, outputs, secrets, permissions.
+- [Quality-gate workflows](reference/quality-gate-workflows.md) — the SAST, SCA,
+  Trivy, Scorecard, VEX, k6, ZAP, seam, and verify-gates workflows: role, key
+  inputs, evidence, predicate type, signer.
 - [Attestation predicate definitions](reference/attestation-predicates/README.md)
   — the custom predicate types the quality gates sign: URI, body format, verdict
   rule, JSON Schema.
@@ -50,6 +55,9 @@ executable, fully self-contained onboarding protocol for any org or repo.
 - [Why attested delivery](explanation/attested-delivery.md) — the promotion
   invariant, the signing-isolation boundary, admission-time enforcement, and
   the change-record gate.
+- [Why attested quality gates](explanation/attested-quality-gates.md) — the
+  verdict-as-attestation model, signer pinning, custom predicate types, and the
+  "signed ≠ passed" caveat.
 
 ## Project plans
 
@@ -74,3 +82,5 @@ the Diátaxis quadrants:
 | `dora-emit.yml` | — | Yes | Yes | Yes |
 | `pin-check.yml` | — | Yes | Yes | — |
 | Admission enforcement (Kyverno / pre-deploy gate) | — | Yes | — | Yes |
+| Attested quality gates (SAST/SCA/Trivy/Scorecard/VEX/k6/ZAP) | Yes (SAST) | Yes | Yes | Yes |
+| Attestation seam (`reusable-attest-scan.yml`) | Yes | Yes | Yes | Yes |
