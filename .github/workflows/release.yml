@@ -16,8 +16,10 @@ name: release
 on:
   push:
     tags:
-      - 'v[0-9]+.[0-9]+.[0-9]+'      # stable, e.g. v1.2.0
-      - 'v[0-9]+.[0-9]+.[0-9]+-*'    # prerelease, e.g. v1.2.0-rc.1
+      # GitHub Actions tag filters are glob, not regex. These coarse globs match
+      # any vX.Y.Z[-pre]; the job's first step validates strict semver.
+      - 'v*.*.*'        # stable, e.g. v1.2.0
+      - 'v*.*.*-*'      # prerelease, e.g. v1.2.0-rc.1
   workflow_dispatch:
     inputs:
       tag:
@@ -101,13 +103,21 @@ jobs:
         run: |
           PRE_FLAG=""
           [ "$PRERELEASE" = "true" ] && PRE_FLAG="--prerelease"
-          gh release create "$TAG" \
-            --repo "$REPO" \
-            --title "$TAG" \
-            --generate-notes \
-            --verify-tag \
-            $PRE_FLAG \
-            "$ARTIFACT" "$ARTIFACT.sha256"
+          # Idempotent: a re-dispatch against an existing tag refreshes the
+          # release assets instead of failing on an already-published release.
+          if gh release view "$TAG" --repo "$REPO" >/dev/null 2>&1; then
+            echo "Release $TAG already exists; refreshing assets."
+            gh release upload "$TAG" "$ARTIFACT" "$ARTIFACT.sha256" \
+              --repo "$REPO" --clobber
+          else
+            gh release create "$TAG" \
+              --repo "$REPO" \
+              --title "$TAG" \
+              --generate-notes \
+              --verify-tag \
+              $PRE_FLAG \
+              "$ARTIFACT" "$ARTIFACT.sha256"
+          fi
 
       - name: Verify the attestation (fail-closed dogfood)
         env:

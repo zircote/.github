@@ -77,7 +77,7 @@ Speaker notes go here.
 | `<!-- metric: value="95%" label="Success Rate" -->` | Metric callout |
 | `<!-- cta: text="Get Started" url="https://…" -->` | Call-to-action button |
 | `::: columns / :::: column … :::: / :::` | Two-column layout |
-| ` ```lang … ``` ` | Syntax-highlighted code block |
+| Triple-backtick code fence with a language | Syntax-highlighted code block |
 
 ## Reusable workflow
 

@@ -30,7 +30,10 @@ The `release` workflow then:
 5. Re-verifies the attestation fail-closed before finishing.
 
 To re-run against an existing tag, dispatch the workflow manually
-(**Actions → release → Run workflow**) and supply the tag.
+(**Actions → release → Run workflow**) and supply the tag. A re-dispatch is
+idempotent: if a Release already exists for the tag it refreshes the attached
+assets (bundle + `.sha256`) rather than failing; the auto-generated notes from
+the original run are kept.
 
 Version bump convention (Conventional Commits): `fix:` → patch, `feat:` → minor,
 `feat!:` / `BREAKING CHANGE:` → major.
