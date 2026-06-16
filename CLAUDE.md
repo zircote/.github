@@ -297,6 +297,17 @@ Cross-repo MCP access uses a GitHub App. Required App permissions must match the
 - Keep commits atomic and focused
 - Reference issues in commit messages when applicable
 
+## Release Process
+
+This repo is released by its own **attested** workflow (`.github/workflows/release.yml`,
+tag-driven). Push a semver tag (`git tag v1.2.0 && git push origin v1.2.0`) to
+build a deterministic `git archive` source bundle, attest SLSA build provenance
+over it (signed by `release.yml`), publish a GitHub Release with auto-notes, and
+fail-closed self-verify. Conventional-commit bump: `fix:`→patch, `feat:`→minor,
+`feat!:`/`BREAKING CHANGE:`→major. Full how-to + the consumer verify command:
+`RELEASING.md`. (`reusable-release.yml` is the separate `workflow_call` reusable
+for consumer **app** repos and does not attest.)
+
 ## Language Standards (for Templates)
 
 | Language | Version | Package Manager | Linter/Formatter | Type Checker |

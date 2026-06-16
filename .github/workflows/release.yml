@@ -1,0 +1,130 @@
+# Attested source release for zircote/.github.
+#
+# This repo preaches attested delivery, so its own releases are attested: a
+# deterministic source bundle, a SLSA build-provenance attestation signed by
+# THIS workflow's OIDC identity, and a fail-closed self-verify. Consumers keep
+# pinning reusable workflows/actions by 40-char SHA; tags + Releases give them a
+# human-readable changelog and a verifiable artifact per release.
+#
+# Cut a release:
+#   git tag v1.2.0 && git push origin v1.2.0
+# or run this workflow manually (workflow_dispatch) against an existing tag.
+# Verify a release artifact: see RELEASING.md.
+
+name: release
+
+on:
+  push:
+    tags:
+      - 'v[0-9]+.[0-9]+.[0-9]+'      # stable, e.g. v1.2.0
+      - 'v[0-9]+.[0-9]+.[0-9]+-*'    # prerelease, e.g. v1.2.0-rc.1
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Existing semver tag to (re)release, e.g. v1.2.0'
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-${{ github.ref_name }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    name: Attested source release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write       # create the GitHub Release, read the tag
+      id-token: write       # OIDC for keyless Sigstore signing
+      attestations: write   # write the build-provenance attestation
+    steps:
+      - name: Resolve and validate tag
+        id: tag
+        env:
+          EVENT: ${{ github.event_name }}
+          REF_NAME: ${{ github.ref_name }}
+          DISPATCH_TAG: ${{ inputs.tag }}
+        run: |
+          if [ "$EVENT" = "workflow_dispatch" ]; then
+            TAG="$DISPATCH_TAG"
+          else
+            TAG="$REF_NAME"
+          fi
+          # Fail closed on anything that is not vMAJOR.MINOR.PATCH[-prerelease].
+          if ! printf '%s' "$TAG" | grep -qE '^v[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?$'; then
+            echo "::error::Tag '$TAG' is not semver (expected vX.Y.Z or vX.Y.Z-pre)"
+            exit 1
+          fi
+          PRERELEASE=false
+          case "$TAG" in *-*) PRERELEASE=true ;; esac
+          {
+            echo "tag=$TAG"
+            echo "version=${TAG#v}"
+            echo "prerelease=$PRERELEASE"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Checkout at tag
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        with:
+          ref: ${{ steps.tag.outputs.tag }}
+          fetch-depth: 0
+          fetch-tags: true
+
+      - name: Build deterministic source bundle
+        id: bundle
+        env:
+          TAG: ${{ steps.tag.outputs.tag }}
+          VERSION: ${{ steps.tag.outputs.version }}
+        run: |
+          ARTIFACT="zircote-github-${VERSION}.tar.gz"
+          # git archive is reproducible: same tree -> identical bytes/digest.
+          git archive --format=tar.gz --prefix="zircote-github-${VERSION}/" \
+            -o "$ARTIFACT" "$TAG"
+          sha256sum "$ARTIFACT" | tee "$ARTIFACT.sha256"
+          echo "artifact=$ARTIFACT" >> "$GITHUB_OUTPUT"
+
+      - name: Attest build provenance
+        uses: actions/attest-build-provenance@a2bbfa25375fe432b6a289bc6b6cd05ecd0c4c32 # v4.1.0
+        with:
+          subject-path: ${{ steps.bundle.outputs.artifact }}
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          TAG: ${{ steps.tag.outputs.tag }}
+          ARTIFACT: ${{ steps.bundle.outputs.artifact }}
+          PRERELEASE: ${{ steps.tag.outputs.prerelease }}
+        run: |
+          PRE_FLAG=""
+          [ "$PRERELEASE" = "true" ] && PRE_FLAG="--prerelease"
+          gh release create "$TAG" \
+            --repo "$REPO" \
+            --title "$TAG" \
+            --generate-notes \
+            --verify-tag \
+            $PRE_FLAG \
+            "$ARTIFACT" "$ARTIFACT.sha256"
+
+      - name: Verify the attestation (fail-closed dogfood)
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          ARTIFACT: ${{ steps.bundle.outputs.artifact }}
+        run: |
+          SIGNER="${REPO}/.github/workflows/release.yml"
+          # Tolerate brief attestation-index propagation, but fail closed.
+          for attempt in 1 2 3 4 5; do
+            if gh attestation verify "$ARTIFACT" \
+                 --repo "$REPO" --signer-workflow "$SIGNER"; then
+              echo "Attestation verified on attempt $attempt."
+              exit 0
+            fi
+            echo "Not yet verifiable (attempt $attempt); retrying in 10s..."
+            sleep 10
+          done
+          echo "::error::Attestation did not verify — refusing to leave an unverified release."
+          exit 1
