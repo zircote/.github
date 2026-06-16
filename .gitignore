@@ -5,3 +5,6 @@
 
 # subcog tool-generated audit logs (anywhere in the tree)
 **/.subcog/
+
+# Local-only Claude config (kept on disk, never committed)
+.claude/**/*.local.*
