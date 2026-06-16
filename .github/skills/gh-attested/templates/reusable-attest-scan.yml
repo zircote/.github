@@ -18,7 +18,7 @@
 # Usage:
 #   jobs:
 #     attest-sast:
-#       needs: [sast]
+#       needs: [build, sast]   # build emits the subject digest; sast the SARIF
 #       permissions:
 #         id-token: write
 #         attestations: write
@@ -28,8 +28,8 @@
 #         subject-name: my-app
 #         subject-digest: ${{ needs.build.outputs.digest }}   # sha256:...
 #         predicate-type: https://__org__.github.io/attestations/sast/v1
-#         predicate-artifact: codeql-sarif
-#         predicate-filename: results.sarif
+#         predicate-artifact: ${{ needs.sast.outputs.sarif-artifact }}
+#         predicate-filename: ${{ needs.sast.outputs.sarif-filename }}
 
 name: attest-scan
 

@@ -22,7 +22,7 @@ Three actions cover the common predicates; one covers everything else:
 ## The central seam workflow
 
 `reusable-attest-scan.yml` wraps `actions/attest`. It downloads an evidence
-artifact (uploaded by the gate job) and signs the named file as a custom
+artifact (uploaded by the gate reusable) and signs the named file as a custom
 predicate bound to `subject-digest`. Because it is a *central reusable
 workflow*, the Fulcio SAN is the central signer — SLSA L3 isolation — and
 verifiers pin `--signer-workflow`.
@@ -39,13 +39,27 @@ attest-sast:
     subject-name: ghcr.io/zircote/app
     subject-digest: ${{ needs.build.outputs.digest }}
     predicate-type: https://zircote.github.io/attestations/sast/v1
-    predicate-artifact: codeql-sarif      # uploaded by the sast job
-    predicate-filename: results.sarif
+    predicate-artifact: ${{ needs.sast.outputs.sarif-artifact }}
+    predicate-filename: ${{ needs.sast.outputs.sarif-filename }}
 ```
 
-The gate job must `actions/upload-artifact` its evidence file under
-`predicate-artifact` so the seam job can download it (reusable workflows do not
-share a filesystem across caller jobs).
+Each SARIF gate reusable uploads its evidence as a downloadable artifact and
+exposes two `workflow_call` outputs — `sarif-artifact` (the artifact name) and
+`sarif-filename` (the file within it) — so the seam consumes them directly with
+no caller-side upload step. (`reusable-attest-scan.yml` downloads that artifact;
+reusable workflows do not share a filesystem across caller jobs.)
+
+| Gate reusable | `sarif-artifact` | `sarif-filename` |
+|---|---|---|
+| `reusable-sast-codeql.yml` | `sast-sarif` | `results.sarif` |
+| `reusable-sca-osv.yml` | `OSV Scanner SARIF file` | `results.sarif` |
+| `reusable-scorecard.yml` | `scorecard-sarif` | `scorecard.sarif` |
+| `reusable-trivy.yml` (iac/license) | `iac-license-sarif` | `trivy-iac-license.sarif` |
+| `reusable-trivy.yml` (image) | `container-scan-sarif` ¹ | `trivy-image.sarif` ¹ |
+
+¹ The Trivy image scan exposes its SARIF via the `image-sarif-artifact` /
+`image-sarif-filename` outputs (the `sarif-artifact` / `sarif-filename` outputs
+carry the always-present IaC+license scan).
 
 ## Predicate-type URIs
 

@@ -46,6 +46,13 @@ on:
         required: false
         type: string
         default: ''
+    outputs:
+      sarif-artifact:
+        description: 'Artifact name holding the SARIF evidence (attestation seam)'
+        value: sast-sarif
+      sarif-filename:
+        description: 'SARIF filename within the artifact'
+        value: results.sarif
 
 permissions:
   contents: read
@@ -75,3 +82,32 @@ jobs:
         uses: github/codeql-action/analyze@38697555549f1db7851b81482ff19f1fa5c4fedc # v4.34.1
         with:
           category: '/language:${{ inputs.languages }}'
+          # Write SARIF to a directory in addition to the code-scanning upload,
+          # so the attestation seam can sign it bound to a release subject.
+          output: codeql-sarif
+
+      # CodeQL writes one SARIF per language; merge their runs into a single
+      # results.sarif and expose it as a downloadable artifact for the seam.
+      - name: Merge SARIF for attestation
+        shell: bash
+        run: |
+          set -euo pipefail
+          shopt -s nullglob
+          files=(codeql-sarif/*.sarif)
+          if [ "${#files[@]}" -eq 0 ]; then
+            echo "::error::CodeQL produced no SARIF"; exit 1
+          fi
+          jq -s '{
+            "$schema": .[0]."$schema",
+            "version": .[0].version,
+            "runs": (map(.runs) | add)
+          }' "${files[@]}" > results.sarif
+          jq -e . results.sarif > /dev/null
+
+      - name: Upload SAST SARIF artifact
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: sast-sarif
+          path: results.sarif
+          if-no-files-found: error
