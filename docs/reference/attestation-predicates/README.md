@@ -1,6 +1,6 @@
 ---
 diataxis_type: reference
-diataxis_goal: define the custom attestation predicate types the quality gates sign
+diataxis_describes: the custom attestation predicate types the quality gates sign
 ---
 
 # Attestation Predicate Definitions
@@ -63,3 +63,12 @@ gh attestation verify "$SUBJECT" --owner zircote \
 A predicate type's URI ends in a major version (`/v1`). A breaking change to the
 body contract or verdict rule bumps to `/v2` (a new directory); `/v1` stays
 immutable so existing attestations keep verifying.
+
+## Related
+
+- [How to onboard a repo to attested quality gates](../../how-to/onboard-a-repo-to-attested-quality-gates.md)
+  — the guide that wires the gates which sign these predicates.
+- [Quality-gate workflows reference](../quality-gate-workflows.md) — the
+  workflows that emit each predicate, with key inputs.
+- [Why attested quality gates](../../explanation/attested-quality-gates.md) —
+  the verdict-as-attestation model behind these types.

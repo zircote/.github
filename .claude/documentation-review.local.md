@@ -20,6 +20,18 @@ ignore:
   - "~/**"
   - "node_modules/**"
   - "*.local.md"
+  - "docs/presentations/drafts/**"   # generator inputs (sample decks), not documentation
+  - "docs/presentations/output/**"   # generated artifacts, not documentation
+
+diataxis:
+  enabled: true
+  strictness: standard               # explicit: flag mode-mixing + missing quadrant metadata as issues
+  require_frontmatter: true
+  quadrant_directories:
+    tutorials: docs/tutorials/
+    how-to: docs/how-to/
+    reference: docs/reference/
+    explanation: docs/explanation/
 
 standards:
   require_description: true
@@ -62,7 +74,9 @@ This repository contains organization-wide GitHub configuration for zircote:
 - **Root docs**: CONTRIBUTING.md, SECURITY.md, README.md - Community health files
 - **Agents**: `agents/*.md` - Autonomous agent definitions
 - **Skills**: `.github/skills/**/SKILL.md` - Copilot skill documentation
-- **Presentations**: `docs/presentations/` - Slide generation and drafts
+- **Presentations**: `docs/presentations/` - Subsystem index; the generator how-to
+  and reference live in `docs/how-to/` and `docs/reference/` (Diátaxis split).
+  `drafts/` and `output/` are generator input/output, excluded from review.
 - **Profile**: `profile/README.md` - Organization profile
 
 ## Review Focus Areas
@@ -74,4 +88,6 @@ This repository contains organization-wide GitHub configuration for zircote:
 
 ## Known Issues
 
-- Link to `../.github/skills/presentation-generation/SKILL.md` in README.md line 204 is broken
+- None currently tracked. (The previously noted broken
+  `presentation-generation/SKILL.md` link is resolved — the skill exists and the
+  root README references it via the skills table.)
