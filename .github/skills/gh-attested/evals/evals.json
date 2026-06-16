@@ -1,0 +1,130 @@
+{
+  "skill_name": "gh-attested",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "I want to wire attested quality gates for my repo. It is a HYPOTHETICAL public repo called `examplecorp/widget` (owner/org `examplecorp`), language TypeScript/JavaScript, default branch `main`, no container image and no running app. Do NOT call the GitHub API or git — treat this as a paper exercise. Generate the Phase 2 thin-caller workflow that fans out the universal merge-time gates: SAST, SCA, supply-chain posture, Trivy IaC+license, and pin-check. Because you cannot resolve the central repo's real commit SHA offline, pin every central reusable `uses:` to the placeholder 40-hex SHA `1111111111111111111111111111111111111111`. Write the finished workflow to `quality-gates.yml` in your outputs directory.",
+      "expected_output": "A .github/workflows-style caller named quality-gates.yml that calls examplecorp/.github/.github/workflows/{reusable-sast-codeql,reusable-sca-osv,reusable-scorecard,reusable-trivy,pin-check}.yml, each pinned to a 40-char SHA, with least-privilege per-job permissions and the __org__ placeholder replaced by examplecorp.",
+      "files": [],
+      "deterministic_checks": [
+        {"type": "file_exists", "file": "quality-gates.yml", "description": "caller workflow was written"},
+        {"type": "file_contains", "file": "quality-gates.yml", "literal": "reusable-sast-codeql.yml", "description": "SAST gate wired"},
+        {"type": "file_contains", "file": "quality-gates.yml", "literal": "reusable-sca-osv.yml", "description": "SCA gate wired"},
+        {"type": "file_contains", "file": "quality-gates.yml", "literal": "reusable-scorecard.yml", "description": "posture (Scorecard) gate wired"},
+        {"type": "file_contains", "file": "quality-gates.yml", "literal": "reusable-trivy.yml", "description": "Trivy IaC+license gate wired"},
+        {"type": "file_contains", "file": "quality-gates.yml", "literal": "pin-check.yml", "description": "pin-check gate wired"},
+        {"type": "file_contains", "file": "quality-gates.yml", "literal": "examplecorp/.github/.github/workflows", "description": "central-repo path uses the real org, not a placeholder"},
+        {"type": "file_not_contains", "file": "quality-gates.yml", "literal": "__org__", "description": "the __org__ placeholder was fully replaced"},
+        {"type": "file_contains", "file": "quality-gates.yml", "literal": "permissions:", "description": "permissions are declared (least privilege)"},
+        {"type": "regex_match", "file": "quality-gates.yml", "pattern": "@[0-9a-f]{40}", "description": "central reusables are pinned to a 40-char SHA"}
+      ],
+      "expectations": [
+        "Every `uses:` of a central reusable is pinned to the 40-char SHA placeholder, and none is pinned to a moving tag (no `@v1`, `@main`, `@master`).",
+        "Each gate job declares least-privilege permissions appropriate to its work (e.g. `security-events: write` on the SAST/Trivy jobs that upload SARIF), rather than granting broad write at the workflow level."
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Audit the action-pinning posture of an existing workflow against the gh-attested hard rules. This is a HYPOTHETICAL repo `examplecorp/widget`; do NOT call the GitHub API. Use only the file content provided below. List every unsafely pinned `uses:` and state the correct remediation. Write a markdown report to `pin-audit.md` in your outputs directory.",
+      "expected_output": "A pin-audit.md report that flags all three tag-pinned actions (actions/checkout, aquasecurity/trivy-action, github/codeql-action) as unsafe, prescribes full 40-char commit-SHA pinning, and cites the trivy-action supply-chain compromise as the cautionary precedent.",
+      "files": [
+        {
+          "path": ".github/workflows/ci.yml",
+          "content": "name: ci\non: [push]\njobs:\n  build:\n    runs-on: ubuntu-latest\n    steps:\n      - uses: actions/checkout@v4\n      - uses: aquasecurity/trivy-action@0.20.0\n      - uses: github/codeql-action/analyze@v3\n"
+        }
+      ],
+      "deterministic_checks": [
+        {"type": "file_exists", "file": "pin-audit.md", "description": "audit report was written"},
+        {"type": "file_contains", "file": "pin-audit.md", "literal": "actions/checkout", "description": "flags the checkout tag pin"},
+        {"type": "file_contains", "file": "pin-audit.md", "literal": "aquasecurity/trivy-action", "description": "flags the trivy-action tag pin"},
+        {"type": "file_contains", "file": "pin-audit.md", "literal": "github/codeql-action", "description": "flags the codeql-action tag pin"},
+        {"type": "regex_match", "file": "pin-audit.md", "pattern": "(?i)40[ -]char|full[ -].{0,8}sha|commit sha", "description": "prescribes full 40-char commit-SHA pinning"}
+      ],
+      "expectations": [
+        "The report flags all three `uses:` as unsafely tag-pinned (not pinned to a commit SHA) and recommends replacing each tag with a full 40-character commit SHA.",
+        "It cites the aquasecurity/trivy-action force-push/malware compromise (CVE-2026-33634) as the standing reason tags are unsafe."
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "A downstream consumer wants to independently verify the SAST gate attestation on a published image. The subject is `oci://ghcr.io/examplecorp/app@sha256:abc123` and the owner is `examplecorp`. This is HYPOTHETICAL — do NOT actually run gh or call any API. Produce the exact `gh attestation verify` command they should run, correct under this org's SLSA L3 attested-delivery model. Write the command (a short shell snippet) to `verify.sh` in your outputs directory.",
+      "expected_output": "A verify.sh containing a `gh attestation verify` invocation pinned with --owner examplecorp AND --signer-workflow pointing at the central seam workflow reusable-attest-scan.yml, the SAST predicate-type URI, and NO cosign-only flags.",
+      "files": [],
+      "deterministic_checks": [
+        {"type": "file_exists", "file": "verify.sh", "description": "verification command was written"},
+        {"type": "file_contains", "file": "verify.sh", "literal": "gh attestation verify", "description": "uses gh attestation verify"},
+        {"type": "file_contains", "file": "verify.sh", "literal": "--signer-workflow", "description": "pins the signer workflow (mandatory under SLSA L3)"},
+        {"type": "file_contains", "file": "verify.sh", "literal": "reusable-attest-scan.yml", "description": "signer is the central seam workflow"},
+        {"type": "file_contains", "file": "verify.sh", "literal": "--owner", "description": "scopes to the owner"},
+        {"type": "file_contains", "file": "verify.sh", "literal": "https://zircote.github.io/attestations/sast/v1", "description": "uses the SAST predicate-type URI"},
+        {"type": "file_not_contains", "file": "verify.sh", "literal": "--cert-identity-regexp", "description": "does NOT use the cosign-only flag gh rejects"},
+        {"type": "file_not_contains", "file": "verify.sh", "literal": "--cert-oidc-issuer", "description": "does NOT use the cosign-only flag gh rejects"}
+      ],
+      "expectations": [
+        "The command pins `--signer-workflow` to the central seam workflow (`reusable-attest-scan.yml`), correctly reflecting that under SLSA L3 the Fulcio SAN is the central signer rather than the source repository — `--owner` alone would be insufficient."
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "On my HYPOTHETICAL repo `examplecorp/widget` I want to enable org-tier gitleaks, which needs a `GITLEAKS_LICENSE` secret. Tell me how to set it up. Do NOT call the GitHub API. Write your setup instructions to `secret-setup.md` in your outputs directory.",
+      "expected_output": "A secret-setup.md that instructs the user to run `gh secret set GITLEAKS_LICENSE` themselves, never printing or fabricating the value, consistent with the skill's never-read/write/log-a-secret contract.",
+      "files": [],
+      "deterministic_checks": [
+        {"type": "file_exists", "file": "secret-setup.md", "description": "setup instructions were written"},
+        {"type": "file_contains", "file": "secret-setup.md", "literal": "gh secret set GITLEAKS_LICENSE", "description": "emits the correct user-run command by name"}
+      ],
+      "expectations": [
+        "The instructions tell the user to run the `gh secret set` command themselves so the value is piped from their own input; the skill emits only the secret NAME and the command and never fabricates, inlines a real value (e.g. via `--body \"<value>\"`), requests the value in chat, or prints it. Referencing `--body` solely as a pattern to AVOID is correct behavior, not a violation.",
+        "The guidance reflects the skill's never-read/write/commit/log-a-secret contract — most gates need no secret at all and GITLEAKS_LICENSE is set by the user out-of-band."
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "I already gathered the state of my HYPOTHETICAL repo `examplecorp/widget` (see the attached files). Do NOT call the GitHub API — use ONLY the provided state. Produce the Phase 0 coverage matrix across all 12 quality gates (present? attested? merge gate? deploy gate?) and a list of in-scope gaps. Write it as a markdown table to `coverage-matrix.md` in your outputs directory.",
+      "expected_output": "A coverage-matrix.md markdown table with one row per each of the 12 gates, correctly marking SAST present (a codeql.yml exists) and SCA/posture/Trivy/VEX/SBOM as gaps, with k6 and DAST out-of-scope (no running app/container).",
+      "files": [
+        {
+          "path": "repo-shape.json",
+          "content": "{\n  \"visibility\": \"public\",\n  \"default_branch\": \"main\",\n  \"languages\": {\"TypeScript\": 90210, \"JavaScript\": 1200},\n  \"has_dockerfile\": false,\n  \"has_running_app\": false,\n  \"dependabot_yml\": false\n}\n"
+        },
+        {
+          "path": "workflows.txt",
+          "content": "test.yml\ncodeql.yml\n"
+        }
+      ],
+      "deterministic_checks": [
+        {"type": "file_exists", "file": "coverage-matrix.md", "description": "coverage matrix was written"},
+        {"type": "file_contains", "file": "coverage-matrix.md", "literal": "SAST", "description": "SAST row present"},
+        {"type": "file_contains", "file": "coverage-matrix.md", "literal": "SCA", "description": "SCA row present"},
+        {"type": "regex_match", "file": "coverage-matrix.md", "pattern": "(?i)scorecard|posture", "description": "supply-chain posture row present"},
+        {"type": "regex_match", "file": "coverage-matrix.md", "pattern": "(?i)vex|disposition", "description": "vuln disposition (VEX) row present"},
+        {"type": "regex_match", "file": "coverage-matrix.md", "pattern": "(?i)dast|zap", "description": "DAST row present"},
+        {"type": "file_contains", "file": "coverage-matrix.md", "literal": "SBOM", "description": "SBOM row present"},
+        {"type": "regex_match", "file": "coverage-matrix.md", "pattern": "(?i)provenance", "description": "build provenance row present"},
+        {"type": "shell_command", "command": "python3 -c \"import sys; rows=[l for l in open('coverage-matrix.md') if l.lstrip().startswith('|')]; sys.exit(0 if len(rows)>=13 else 1)\"", "description": "matrix is a table with at least 12 gate rows (plus header/separator)"}
+      ],
+      "expectations": [
+        "The matrix marks SAST (CodeQL) as present because a `codeql.yml` workflow exists, and marks SCA, supply-chain posture, Trivy (IaC/license), VEX and SBOM as gaps not yet covered.",
+        "k6 (load) and DAST (ZAP) are marked out-of-scope / documented-not-wired because the repo has no running app and no container image."
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "Wire ALL gates — including load testing (k6) and DAST (ZAP) — for my HYPOTHETICAL repo `examplecorp/pylib` (owner `examplecorp`). It is a pure Python library: no running service, no container image, no load script, no target URL. Do NOT call the GitHub API. Pin central reusables to the placeholder 40-hex SHA `1111111111111111111111111111111111111111`. Write the caller to `quality-gates.yml` and a short note to `scope-notes.md` explaining what you wired versus what you deliberately did not, in your outputs directory.",
+      "expected_output": "A quality-gates.yml that actively wires the gates that apply to a library (SAST, SCA, posture, pin-check) but leaves k6 and ZAP unwired (commented/omitted), plus a scope-notes.md explaining that k6/ZAP are opt-in and out-of-scope without a running target.",
+      "files": [],
+      "deterministic_checks": [
+        {"type": "file_exists", "file": "quality-gates.yml", "description": "caller workflow was written"},
+        {"type": "file_exists", "file": "scope-notes.md", "description": "scope rationale was written"},
+        {"type": "file_contains", "file": "quality-gates.yml", "literal": "reusable-sast-codeql.yml", "description": "SAST still wired for a library"},
+        {"type": "regex_match", "file": "scope-notes.md", "pattern": "(?i)opt[ -]in|out of scope|not wired|documented[ -]not[ -]wired|no running", "description": "scope note explains k6/ZAP exclusion"},
+        {"type": "shell_command", "command": "python3 -c \"import sys; bad=[l for l in open('quality-gates.yml') if 'reusable-k6.yml' in l and not l.lstrip().startswith('#')]; sys.exit(1 if bad else 0)\"", "description": "k6 is NOT actively wired (any reusable-k6 line is commented)"},
+        {"type": "shell_command", "command": "python3 -c \"import sys; bad=[l for l in open('quality-gates.yml') if 'reusable-zap.yml' in l and not l.lstrip().startswith('#')]; sys.exit(1 if bad else 0)\"", "description": "ZAP is NOT actively wired (any reusable-zap line is commented)"}
+      ],
+      "expectations": [
+        "The skill declines to actively wire k6 and ZAP for a target with no running app/container, marking them documented-not-wired rather than fabricating a load script or target URL.",
+        "The library-applicable gates (SAST, SCA, posture, pin-check) ARE wired in the caller."
+      ]
+    }
+  ]
+}
