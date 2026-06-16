@@ -1,6 +1,7 @@
 ---
 name: gh-attested
 description: Assess, plan, and implement complete attested quality-gate coverage for a public open-source repo using GitHub-native + free-for-OSS tooling — SAST, SCA, secrets, container/IaC/license, SBOM, VEX, provenance, posture, peer review, load, DAST — each gate's verdict turned into a signed, digest-bound attestation. USE THIS SKILL when user says "assess quality gates", "attested quality gates", "attest CI gates", "add CodeQL/OSV-Scanner/Trivy/Scorecard", "SAST/SCA/DAST attestation", "free-for-OSS security gates", or "wire attested quality gates".
+argument-hint: '[owner/repo] [assess|plan|implement|enforce|verify] [--dry-run] [--include=k6,zap] [--help]'
 allowed-tools:
   - Bash
   - Read
@@ -35,6 +36,29 @@ This skill **composes with**, and does not duplicate:
 - "add CodeQL SAST / OSV-Scanner / Trivy / OpenSSF Scorecard / OpenVEX"
 - "set up free-for-OSS security gates and enforce them"
 - "verify the gate attestations for a release"
+
+## Using this skill
+
+Invoke by describing intent ("assess quality gates for zircote/widget"). The
+skill recognizes these scoping tokens — typed as flags **or** plain English:
+
+- **target** `<owner/repo>` — repo to operate on. Default: the current repo
+  (`gh repo view --json nameWithOwner -q .nameWithOwner`). Never guessed.
+- **phase** — stop after one phase instead of running the whole pipeline:
+  `assess` (read-only coverage matrix), `plan` (read-only wiring list),
+  `implement` (opens a PR), `enforce` (apply repo config behind a
+  preview + confirm), `verify` (re-verify existing attestations). Omit to run
+  Phase 0→4, pausing at each gate.
+- **`--dry-run`** — render every artifact and command as a preview; write
+  nothing, open no PR, apply no config.
+- **`--include=k6,zap`** — opt in to gates that need a running target
+  (otherwise k6/ZAP stay documented-not-wired).
+
+Prerequisites: `gh` authenticated; target repo **public** for the free tier
+(private ⇒ `references/limitations.md`); Phase 3 (enforce) needs repo admin.
+
+**Help**: when the user asks how to use this skill, or passes `--help` / `-h` /
+`help`, read `references/help.md` and present it, then stop.
 
 ## Architecture invariant
 
@@ -76,7 +100,9 @@ Two honest caveats, always in force:
 
 ## Phase protocol
 
-Each phase ends with a verify gate. Do not proceed past a failing gate.
+Each phase ends with a verify gate. Do not proceed past a failing gate. Scope
+to the phase requested under **Using this skill**; with no phase given, run
+0→4, stopping at each gate. Honor `--dry-run` (preview only) throughout.
 
 ### Phase 0 — Assess (read-only)
 
@@ -176,6 +202,7 @@ Gate: config applied idempotently (re-run = no-op); transcript shows only secret
 
 ## References
 
+- `references/help.md` — end-user help / usage (present on `--help`; honest invocation framing)
 - `references/gate-catalog.md` — the 12 gates: tool, reusable, pinned action, evidence, predicate-type URI, merge vs deploy, free-for-OSS
 - `references/assessment.md` — coverage-assessment `gh` queries + the matrix template
 - `references/attestation-seam.md` — `actions/attest` custom-predicate mechanics; per-gate predicate URIs; compose-with-attested-delivery
