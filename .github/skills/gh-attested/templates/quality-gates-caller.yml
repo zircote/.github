@@ -7,8 +7,15 @@
 # This is the universal merge-time core (SAST + SCA + posture + IaC/license +
 # pin-check). For the DEPLOY-TIME attestation seam (sign each gate's verdict and
 # fail-closed verify before shipping), see references/attestation-seam.md and
-# references/enforcement.md — the seam consumes an evidence artifact, so the gate
-# job must upload its SARIF (or call the scan inline) before reusable-attest-scan.
+# references/enforcement.md — each gate reusable uploads its SARIF and exposes
+# sarif-artifact / sarif-filename outputs for reusable-attest-scan to consume.
+#
+# PERMISSIONS: a reusable's declared permissions must be a SUBSET of what the
+# caller grants, or the call fails at startup (whole-workflow, no job checks).
+# The sast and trivy reusables declare `packages: read` (CodeQL package
+# resolution; Trivy image pull), so their callers below must grant it too —
+# trivy's image job is conditional, but its declared permission is still
+# validated at startup regardless of `if:`.
 
 name: quality-gates
 
@@ -27,6 +34,7 @@ jobs:
       security-events: write
       contents: read
       actions: read
+      packages: read         # reusable's analyze job declares it (subset rule)
     uses: __org__/.github/.github/workflows/reusable-sast-codeql.yml@<sha>
     with:
       languages: 'javascript-typescript'   # edit per repo; compiled langs need build-mode
@@ -55,6 +63,7 @@ jobs:
       contents: read
       security-events: write
       actions: read
+      packages: read         # reusable's image job declares it (subset rule)
     uses: __org__/.github/.github/workflows/reusable-trivy.yml@<sha>
     with:
       scan-iac: true
