@@ -44,6 +44,15 @@ on:
         required: false
         type: boolean
         default: true
+      ignore-unfixed:
+        description: >-
+          Only report/fail on vulnerabilities that have a fix available.
+          Standard posture for base-image gating: distroless/Debian images
+          carry unfixed glibc/openssl CVEs with no upstream patch, which
+          would otherwise fail the image gate forever with nothing actionable.
+        required: false
+        type: boolean
+        default: false
     outputs:
       sarif-artifact:
         description: 'Artifact name holding the IaC+license SARIF (attestation seam)'
@@ -119,6 +128,7 @@ jobs:
           format: sarif
           output: trivy-image.sarif
           severity: ${{ inputs.severity }}
+          ignore-unfixed: ${{ inputs.ignore-unfixed }}
           exit-code: '1'   # fail-closed on image vulnerabilities
 
       - name: Upload image SARIF
