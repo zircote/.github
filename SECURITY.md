@@ -2,9 +2,23 @@
 
 ## Supported Versions
 
+The current **consumer-recommended release is `v0.2.0`**
+(commit `67d8539d888070b1d00b9a59462c60dfad2f4fae`). When consuming this repo's
+reusable workflows or composite actions, pin every `uses:` to that **full 40-char
+commit SHA**, never the tag — per the repo's SHA-pinning rule; Dependabot's
+`github-actions` ecosystem keeps the pin current.
+
+```yaml
+uses: zircote/.github/.github/workflows/<workflow>.yml@67d8539d888070b1d00b9a59462c60dfad2f4fae # v0.2.0
+```
+
 | Version | Supported |
 |---------|-----------|
-| Latest  | Yes       |
+| `v0.2.0` (recommended) | Yes |
+| `< v0.2.0` | Best-effort |
+
+The `v0.2.0` source release is itself signed and attested — verify it before
+relying on it (see [Verifying this repo's own release](#verifying-this-repos-own-source-release)).
 
 ## Reporting a Vulnerability
 
@@ -74,6 +88,35 @@ cosign verify-attestation "ghcr.io/zircote/<repo>@${DIGEST}" \
 gh release download <tag> --repo zircote/<repo>
 gh attestation verify <binary> --repo zircote/<repo>
 ```
+
+### Verifying this repo's own source release
+
+The recommended `v0.2.0` release of **this** repository is a source bundle signed
+by its own `release.yml`. It carries three predicates bound to the bundle digest:
+SLSA provenance, a CycloneDX SBOM (the package's declared dependencies), and a
+Grype vulnerability report. Verify from any workstation — pin `--signer-workflow`
+to `release.yml` (not `sign-and-attest.yml`):
+
+```sh
+TAG=v0.2.0
+SIGNER=zircote/.github/.github/workflows/release.yml
+gh release download "$TAG" --repo zircote/.github
+
+# the bundle matches its published digest
+shasum -a 256 -c "zircote-github-${TAG#v}.tar.gz.sha256"   # -> OK
+
+# verify all three predicates (omit --predicate-type to verify them together)
+for pt in https://slsa.dev/provenance/v1 \
+          https://cyclonedx.org/bom \
+          https://in-toto.io/attestation/vulns/v0.1; do
+  gh attestation verify "zircote-github-${TAG#v}.tar.gz" \
+    --repo zircote/.github --signer-workflow "$SIGNER" --predicate-type "$pt"
+done
+```
+
+A successful verify proves authenticity and digest binding — **not** that the
+vuln scan was clean. Read the verdict from the predicate body
+(`--format json | jq`) or the attached `grype.json` / `sbom.cdx.json`.
 
 ## Verifying Quality-Gate Attestations
 
