@@ -1,0 +1,29 @@
+# Git hooks for zircote/.github, managed by lefthook (https://lefthook.dev).
+#
+# Purpose: catch locally what the GitHub Actions CI gates reject on push —
+# malformed workflows (actionlint) and unpinned action references (pin-check) —
+# so a push doesn't round-trip through a red CI run.
+#
+# One-time setup after clone:   lefthook install
+# Bypass in an emergency:       git commit --no-verify  /  git push --no-verify
+
+pre-commit:
+  parallel: true
+  commands:
+    # Lint only the workflow files being committed (fast, <1s each).
+    actionlint:
+      glob: ".github/workflows/*.yml"
+      run: actionlint {staged_files}
+      fail_text: "actionlint found workflow errors — fix them before committing."
+
+    # Prevent committing unresolved merge-conflict markers.
+    merge-conflicts:
+      run: scripts/check-merge-markers.sh {staged_files}
+      fail_text: "Unresolved merge-conflict markers in staged files."
+
+pre-push:
+  commands:
+    # Mirror of the required CI pin-check gate; scans .github/workflows + actions.
+    pin-check:
+      run: scripts/check-pins.sh
+      fail_text: "Unpinned GitHub Actions references — the CI pin-check gate will reject this push."
