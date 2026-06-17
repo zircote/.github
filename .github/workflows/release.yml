@@ -75,6 +75,24 @@ jobs:
           fetch-depth: 0
           fetch-tags: true
 
+      # Source-germane evidence generated from the pristine checkout (before the
+      # bundle tarball exists, so Syft does not catalog the archive itself);
+      # attested to the bundle digest further down.
+      - name: Generate source SBOM (CycloneDX)
+        uses: anchore/sbom-action@e22c389904149dbc22b58101806040fa8d37a610 # v0.24.0
+        with:
+          path: .
+          format: cyclonedx-json
+          output-file: sbom.cdx.json
+
+      - name: Scan source for vulnerabilities (Grype)
+        id: grype
+        uses: anchore/scan-action@e1165082ffb1fe366ebaf02d8526e7c4989ea9d2 # v7.4.0
+        with:
+          path: .
+          output-format: json
+          fail-build: false   # evidence to attest, not a gate (read the verdict)
+
       - name: Build deterministic source bundle
         id: bundle
         env:
@@ -93,6 +111,23 @@ jobs:
         with:
           subject-path: ${{ steps.bundle.outputs.artifact }}
 
+      # The source-germane gates: the SBOM + vuln evidence generated above from
+      # the pristine checkout, each attested to the SAME bundle digest. These
+      # describe the package (its deps and vulnerabilities), not a container.
+      - name: Attest the SBOM to the bundle
+        uses: actions/attest@59d89421af93a897026c735860bf21b6eb4f7b26 # v4.1.0
+        with:
+          subject-path: ${{ steps.bundle.outputs.artifact }}
+          predicate-type: https://cyclonedx.org/bom
+          predicate-path: sbom.cdx.json
+
+      - name: Attest the vulnerability report to the bundle
+        uses: actions/attest@59d89421af93a897026c735860bf21b6eb4f7b26 # v4.1.0
+        with:
+          subject-path: ${{ steps.bundle.outputs.artifact }}
+          predicate-type: https://in-toto.io/attestation/vulns/v0.1
+          predicate-path: ${{ steps.grype.outputs.json }}
+
       - name: Create GitHub Release
         env:
           GH_TOKEN: ${{ github.token }}
@@ -100,15 +135,18 @@ jobs:
           TAG: ${{ steps.tag.outputs.tag }}
           ARTIFACT: ${{ steps.bundle.outputs.artifact }}
           PRERELEASE: ${{ steps.tag.outputs.prerelease }}
+          GRYPE_JSON: ${{ steps.grype.outputs.json }}
         run: |
           PRE_FLAG=""
           [ "$PRERELEASE" = "true" ] && PRE_FLAG="--prerelease"
+          # Carry the evidence files alongside the bundle (stable names).
+          cp "$GRYPE_JSON" grype.json
+          ASSETS=("$ARTIFACT" "$ARTIFACT.sha256" sbom.cdx.json grype.json)
           # Idempotent: a re-dispatch against an existing tag refreshes the
           # release assets instead of failing on an already-published release.
           if gh release view "$TAG" --repo "$REPO" >/dev/null 2>&1; then
             echo "Release $TAG already exists; refreshing assets."
-            gh release upload "$TAG" "$ARTIFACT" "$ARTIFACT.sha256" \
-              --repo "$REPO" --clobber
+            gh release upload "$TAG" "${ASSETS[@]}" --repo "$REPO" --clobber
           else
             gh release create "$TAG" \
               --repo "$REPO" \
@@ -116,25 +154,35 @@ jobs:
               --generate-notes \
               --verify-tag \
               $PRE_FLAG \
-              "$ARTIFACT" "$ARTIFACT.sha256"
+              "${ASSETS[@]}"
           fi
 
-      - name: Verify the attestation (fail-closed dogfood)
+      - name: Verify the attestations (fail-closed dogfood)
         env:
           GH_TOKEN: ${{ github.token }}
           REPO: ${{ github.repository }}
           ARTIFACT: ${{ steps.bundle.outputs.artifact }}
         run: |
           SIGNER="${REPO}/.github/workflows/release.yml"
-          # Tolerate brief attestation-index propagation, but fail closed.
-          for attempt in 1 2 3 4 5; do
-            if gh attestation verify "$ARTIFACT" \
-                 --repo "$REPO" --signer-workflow "$SIGNER"; then
-              echo "Attestation verified on attempt $attempt."
-              exit 0
+          # Verifies every attestation this workflow signed for the bundle —
+          # provenance, SBOM, and vuln. Tolerates brief attestation-index
+          # propagation, but fails closed.
+          for pt in https://slsa.dev/provenance/v1 \
+                    https://cyclonedx.org/bom \
+                    https://in-toto.io/attestation/vulns/v0.1; do
+            ok=""
+            for attempt in 1 2 3 4 5; do
+              if gh attestation verify "$ARTIFACT" --repo "$REPO" \
+                   --signer-workflow "$SIGNER" --predicate-type "$pt"; then
+                echo "Verified $pt (attempt $attempt)."
+                ok=1; break
+              fi
+              echo "$pt not yet verifiable (attempt $attempt); retrying in 10s..."
+              sleep 10
+            done
+            if [ -z "$ok" ]; then
+              echo "::error::Attestation $pt did not verify — refusing to leave an unverified release."
+              exit 1
             fi
-            echo "Not yet verifiable (attempt $attempt); retrying in 10s..."
-            sleep 10
           done
-          echo "::error::Attestation did not verify — refusing to leave an unverified release."
-          exit 1
+          echo "All attestations verified (provenance, SBOM, vuln)."

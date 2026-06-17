@@ -24,10 +24,15 @@ The `release` workflow then:
 
 1. Validates the tag is semver (fails closed otherwise).
 2. Builds `zircote-github-<version>.tar.gz` with `git archive` (reproducible).
-3. Attests SLSA build provenance over the bundle (`actions/attest-build-provenance`).
-4. Creates the GitHub Release with auto-generated notes and attaches the bundle
-   plus its `.sha256`.
-5. Re-verifies the attestation fail-closed before finishing.
+3. Attests three predicates to the bundle digest:
+   - **SLSA build provenance** (`https://slsa.dev/provenance/v1`) — how it was built;
+   - **CycloneDX SBOM** (`https://cyclonedx.org/bom`) — the package's declared
+     dependencies (Syft over the source);
+   - **Vulnerability report** (`https://in-toto.io/attestation/vulns/v0.1`) — a
+     Grype scan of the source (evidence, not a gate — read the verdict).
+4. Creates the GitHub Release with auto-generated notes and attaches the bundle,
+   its `.sha256`, `sbom.cdx.json`, and `grype.json`.
+5. Re-verifies all three attestations fail-closed before finishing.
 
 To re-run against an existing tag, dispatch the workflow manually
 (**Actions → release → Run workflow**) and supply the tag. A re-dispatch is
@@ -44,12 +49,26 @@ Download the `.tar.gz` from the release, then — independently from a
 workstation:
 
 ```bash
-gh attestation verify zircote-github-<version>.tar.gz \
-  --repo zircote/.github \
-  --signer-workflow zircote/.github/.github/workflows/release.yml
+BUNDLE=zircote-github-<version>.tar.gz
+SIGNER=zircote/.github/.github/workflows/release.yml
+
+# Provenance — how it was built (omit --predicate-type to verify all three)
+gh attestation verify "$BUNDLE" --repo zircote/.github --signer-workflow "$SIGNER" \
+  --predicate-type https://slsa.dev/provenance/v1
+
+# SBOM — the package's declared dependencies
+gh attestation verify "$BUNDLE" --repo zircote/.github --signer-workflow "$SIGNER" \
+  --predicate-type https://cyclonedx.org/bom
+
+# Vulnerability report — read the verdict, don't just trust the signature
+gh attestation verify "$BUNDLE" --repo zircote/.github --signer-workflow "$SIGNER" \
+  --predicate-type https://in-toto.io/attestation/vulns/v0.1
 ```
 
 `--signer-workflow` is required: under SLSA L3 the Fulcio SAN is the signing
-workflow. Inspect the provenance predicate with `--format json | jq` to confirm
-the source commit and build inputs. A successful verify proves the bundle is
-authentic and unmodified since it was built from the tag.
+workflow, not the source repo. A successful verify proves the bundle is
+authentic and bound to that predicate — **not** that the vuln scan was clean;
+inspect the predicate body (`--format json | jq`) to read the verdict. These
+predicates describe the **package** (its provenance, dependencies, and
+vulnerabilities), which is why they apply to a source release, not only to a
+container image.
