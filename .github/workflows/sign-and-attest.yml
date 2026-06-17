@@ -101,6 +101,13 @@ jobs:
           image: ${{ env.IMAGE_REF }}
           format: cyclonedx-json
           output-file: sbom.cdx.json
+          # The SBOM is consumed locally by the next `cosign attest` step and
+          # persisted as an OCI referrer — it must NOT be pushed as a GitHub
+          # release asset. sbom-action defaults both uploads to true and, on a
+          # tag, tries to attach to the release, which fails under this job's
+          # least-privilege `contents: read`.
+          upload-release-assets: false
+          upload-artifact: false
       - name: Attest SBOM (cosign)
         if: ${{ inputs.sbom }}
         run: |
