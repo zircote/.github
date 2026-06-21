@@ -69,7 +69,7 @@ This organization's [.github repo](https://github.com/zircote/.github) centraliz
 ## Active Projects
 
 <!-- LAST_UPDATED_START -->
- __Last updated: 2026-06-14__
+ __Last updated: 2026-06-21__
 <!-- LAST_UPDATED_END -->
 
 ### Most Active Repositories
@@ -79,14 +79,14 @@ Ranked by recent contributions, community engagement, and development activity.
 <!-- ACTIVE_REPOS_START -->
 | Repository | Description | Tech | Activity |
 |------------|-------------|------|----------|
-| [rlm-rs](https://github.com/zircote/rlm-rs) | Rust CLI implementing the Recursive Language Model (RLM) pat... | Rust | ✨ Active |
-| [rust-template](https://github.com/zircote/rust-template) | Template for rust projects | MDX | ✨ Active |
-| [adrscope](https://github.com/zircote/adrscope) | Rust CLI and GitHub Action for Architecture Decision Records... | Rust | 📈 Growing |
+| [rust-template](https://github.com/zircote/rust-template) | Template for rust projects | MDX | 📈 Growing |
 | [nsip](https://github.com/zircote/nsip) | Sheep genetic evaluation CLI & MCP server -- search animals,... | Rust | 📈 Growing |
-| [homebrew-tap](https://github.com/zircote/homebrew-tap) | Homebrew tap for various projects | Ruby | 📈 Growing |
 | [.github](https://github.com/zircote/.github) | Organization shared workflows, policies, and community healt... | Shell | 📈 Growing |
-| [git-adr](https://github.com/zircote/git-adr) | 🏛️ Architecture Decision Records in git notes - no files, no... | Rust | 📈 Growing |
-| [maker-rs](https://github.com/zircote/maker-rs) | Zero-error LLM execution via SPRT voting. Rust library and M... | Rust | 📈 Growing |
+| [MIF](https://github.com/zircote/MIF) | Open standard for portable AI memory interchange — JSON-LD +... | MDX | 📈 Growing |
+| [rlm-rs](https://github.com/zircote/rlm-rs) | Rust CLI implementing the Recursive Language Model (RLM) pat... | Rust | 📈 Growing |
+| [homebrew-tap](https://github.com/zircote/homebrew-tap) | Homebrew tap for various projects | Ruby | 📈 Growing |
+| [human-voice](https://github.com/zircote/human-voice) | Detect and eliminate AI writing patterns in your content. Th... | Python | 📈 Growing |
+| [claude-team-orchestration](https://github.com/zircote/claude-team-orchestration) | Multi-agent orchestration plugin for Claude Code. Coordinate... | MDX | 📈 Growing |
 <!-- ACTIVE_REPOS_END -->
 
 ### Recently Created
@@ -94,7 +94,6 @@ Ranked by recent contributions, community engagement, and development activity.
 <!-- NEW_REPOS_START -->
 - **[copilot-review](https://github.com/zircote/copilot-review)** (JavaScript) - A Claude Code plugin that uses GitHub Copilot as the backend for code reviews an...
 - **[fastmcp-lro](https://github.com/zircote/fastmcp-lro)** (Python) - Large Result Offloading for MCP servers. Writes oversized tool responses to JSON...
-- **[autoresearch](https://github.com/zircote/autoresearch)** (Python) - Autonomous skill improvement loop for Claude Code plugins — inspired by Karpathy...
 <!-- NEW_REPOS_END -->
 
 ---
