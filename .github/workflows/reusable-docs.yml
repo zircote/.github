@@ -168,7 +168,7 @@ jobs:
       # Python setup for MkDocs/Sphinx
       - name: Install uv
         if: inputs.framework == 'mkdocs' || inputs.framework == 'sphinx'
-        uses: astral-sh/setup-uv@cec208311dfd045dd5311c1add060b2062131d57 # v6.0.1
+        uses: astral-sh/setup-uv@fac544c07dec837d0ccb6301d7b5580bf5edae39 # v6.0.1
 
       - name: Setup Python
         if: inputs.framework == 'mkdocs' || inputs.framework == 'sphinx'
