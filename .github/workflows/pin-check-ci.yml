@@ -23,13 +23,13 @@ jobs:
   pin-check:
     permissions:
       contents: read
-    uses: zircote/.github/.github/workflows/pin-check.yml@68927d3c0db9484f33e78f7f76d2d1917df9b439
+    uses: zircote/.github/.github/workflows/pin-check.yml@e3010b176bbb1d0fba075a1d8421d59690b9a23a
     with:
       scan-dir: .github/workflows
 
   pin-check-actions:
     permissions:
       contents: read
-    uses: zircote/.github/.github/workflows/pin-check.yml@68927d3c0db9484f33e78f7f76d2d1917df9b439
+    uses: zircote/.github/.github/workflows/pin-check.yml@e3010b176bbb1d0fba075a1d8421d59690b9a23a
     with:
       scan-dir: actions
