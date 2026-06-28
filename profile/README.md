@@ -69,7 +69,7 @@ This organization's [.github repo](https://github.com/zircote/.github) centraliz
 ## Active Projects
 
 <!-- LAST_UPDATED_START -->
- __Last updated: 2026-06-21__
+ __Last updated: 2026-06-28__
 <!-- LAST_UPDATED_END -->
 
 ### Most Active Repositories
@@ -79,21 +79,21 @@ Ranked by recent contributions, community engagement, and development activity.
 <!-- ACTIVE_REPOS_START -->
 | Repository | Description | Tech | Activity |
 |------------|-------------|------|----------|
-| [rust-template](https://github.com/zircote/rust-template) | Template for rust projects | MDX | 📈 Growing |
-| [nsip](https://github.com/zircote/nsip) | Sheep genetic evaluation CLI & MCP server -- search animals,... | Rust | 📈 Growing |
-| [.github](https://github.com/zircote/.github) | Organization shared workflows, policies, and community healt... | Shell | 📈 Growing |
-| [MIF](https://github.com/zircote/MIF) | Open standard for portable AI memory interchange — JSON-LD +... | MDX | 📈 Growing |
 | [rlm-rs](https://github.com/zircote/rlm-rs) | Rust CLI implementing the Recursive Language Model (RLM) pat... | Rust | 📈 Growing |
-| [homebrew-tap](https://github.com/zircote/homebrew-tap) | Homebrew tap for various projects | Ruby | 📈 Growing |
-| [human-voice](https://github.com/zircote/human-voice) | Detect and eliminate AI writing patterns in your content. Th... | Python | 📈 Growing |
-| [claude-team-orchestration](https://github.com/zircote/claude-team-orchestration) | Multi-agent orchestration plugin for Claude Code. Coordinate... | MDX | 📈 Growing |
+| [lsp-marketplace](https://github.com/zircote/lsp-marketplace) | Curated marketplace of 28 LSP-enabled Claude Code plugins wi... | Shell | 📈 Growing |
+| [subcog](https://github.com/zircote/subcog) | Persistent memory system for AI coding assistants. Captures ... | Rust | 📈 Growing |
+| [sigint](https://github.com/zircote/sigint) | Market intelligence toolkit for Claude Code. Iterative resea... | jq | 📈 Growing |
+| [claude-team-orchestration](https://github.com/zircote/claude-team-orchestration) | Multi-agent orchestration plugin for Claude Code. Coordinate... | MDX | 💤 Stable |
+| [cdc-error-handling](https://github.com/zircote/cdc-error-handling) |  | Unknown | 💤 Stable |
+| [adrscope](https://github.com/zircote/adrscope) | Rust CLI and GitHub Action for Architecture Decision Records... | Rust | 💤 Stable |
+| [lsp-tools](https://github.com/zircote/lsp-tools) | LSP-first code intelligence for Claude Code with strong enfo... | Shell | 💤 Stable |
 <!-- ACTIVE_REPOS_END -->
 
 ### Recently Created
 
 <!-- NEW_REPOS_START -->
+- **[cdc-error-handling](https://github.com/zircote/cdc-error-handling)** (Unknown) - No description
 - **[copilot-review](https://github.com/zircote/copilot-review)** (JavaScript) - A Claude Code plugin that uses GitHub Copilot as the backend for code reviews an...
-- **[fastmcp-lro](https://github.com/zircote/fastmcp-lro)** (Python) - Large Result Offloading for MCP servers. Writes oversized tool responses to JSON...
 <!-- NEW_REPOS_END -->
 
 ---
