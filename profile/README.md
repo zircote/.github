@@ -69,7 +69,7 @@ This organization's [.github repo](https://github.com/zircote/.github) centraliz
 ## Active Projects
 
 <!-- LAST_UPDATED_START -->
- __Last updated: 2026-06-28__
+ __Last updated: 2026-07-05__
 <!-- LAST_UPDATED_END -->
 
 ### Most Active Repositories
@@ -80,19 +80,19 @@ Ranked by recent contributions, community engagement, and development activity.
 | Repository | Description | Tech | Activity |
 |------------|-------------|------|----------|
 | [rlm-rs](https://github.com/zircote/rlm-rs) | Rust CLI implementing the Recursive Language Model (RLM) pat... | Rust | 📈 Growing |
+| [git-adr](https://github.com/zircote/git-adr) | 🏛️ Architecture Decision Records in git notes - no files, no... | Rust | 📈 Growing |
 | [lsp-marketplace](https://github.com/zircote/lsp-marketplace) | Curated marketplace of 28 LSP-enabled Claude Code plugins wi... | Shell | 📈 Growing |
 | [subcog](https://github.com/zircote/subcog) | Persistent memory system for AI coding assistants. Captures ... | Rust | 📈 Growing |
-| [sigint](https://github.com/zircote/sigint) | Market intelligence toolkit for Claude Code. Iterative resea... | jq | 📈 Growing |
+| [cdc-error-plugin](https://github.com/zircote/cdc-error-plugin) |  | Unknown | 💤 Stable |
+| [svelte-lsp](https://github.com/zircote/svelte-lsp) | Claude Code plugin for Svelte development with svelte-langua... | Svelte | 💤 Stable |
+| [oolong-pairs](https://github.com/zircote/oolong-pairs) | Benchmark harness for A/B testing Claude Code plugins agains... | Python | 💤 Stable |
 | [claude-team-orchestration](https://github.com/zircote/claude-team-orchestration) | Multi-agent orchestration plugin for Claude Code. Coordinate... | MDX | 💤 Stable |
-| [cdc-error-handling](https://github.com/zircote/cdc-error-handling) |  | Unknown | 💤 Stable |
-| [adrscope](https://github.com/zircote/adrscope) | Rust CLI and GitHub Action for Architecture Decision Records... | Rust | 💤 Stable |
-| [lsp-tools](https://github.com/zircote/lsp-tools) | LSP-first code intelligence for Claude Code with strong enfo... | Shell | 💤 Stable |
 <!-- ACTIVE_REPOS_END -->
 
 ### Recently Created
 
 <!-- NEW_REPOS_START -->
-- **[cdc-error-handling](https://github.com/zircote/cdc-error-handling)** (Unknown) - No description
+- **[cdc-error-plugin](https://github.com/zircote/cdc-error-plugin)** (Unknown) - No description
 - **[copilot-review](https://github.com/zircote/copilot-review)** (JavaScript) - A Claude Code plugin that uses GitHub Copilot as the backend for code reviews an...
 <!-- NEW_REPOS_END -->
 
