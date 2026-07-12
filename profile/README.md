@@ -69,7 +69,7 @@ This organization's [.github repo](https://github.com/zircote/.github) centraliz
 ## Active Projects
 
 <!-- LAST_UPDATED_START -->
- __Last updated: 2026-07-05__
+ __Last updated: 2026-07-12__
 <!-- LAST_UPDATED_END -->
 
 ### Most Active Repositories
@@ -80,20 +80,19 @@ Ranked by recent contributions, community engagement, and development activity.
 | Repository | Description | Tech | Activity |
 |------------|-------------|------|----------|
 | [rlm-rs](https://github.com/zircote/rlm-rs) | Rust CLI implementing the Recursive Language Model (RLM) pat... | Rust | 📈 Growing |
-| [git-adr](https://github.com/zircote/git-adr) | 🏛️ Architecture Decision Records in git notes - no files, no... | Rust | 📈 Growing |
-| [lsp-marketplace](https://github.com/zircote/lsp-marketplace) | Curated marketplace of 28 LSP-enabled Claude Code plugins wi... | Shell | 📈 Growing |
 | [subcog](https://github.com/zircote/subcog) | Persistent memory system for AI coding assistants. Captures ... | Rust | 📈 Growing |
-| [cdc-error-plugin](https://github.com/zircote/cdc-error-plugin) |  | Unknown | 💤 Stable |
-| [svelte-lsp](https://github.com/zircote/svelte-lsp) | Claude Code plugin for Svelte development with svelte-langua... | Svelte | 💤 Stable |
-| [oolong-pairs](https://github.com/zircote/oolong-pairs) | Benchmark harness for A/B testing Claude Code plugins agains... | Python | 💤 Stable |
-| [claude-team-orchestration](https://github.com/zircote/claude-team-orchestration) | Multi-agent orchestration plugin for Claude Code. Coordinate... | MDX | 💤 Stable |
+| [python-lsp](https://github.com/zircote/python-lsp) | Claude Code plugin for Python development with pylsp/pyright... | Python | 💤 Stable |
+| [csharp-lsp](https://github.com/zircote/csharp-lsp) | Claude Code plugin for C# development with OmniSharp LSP and... | C# | 💤 Stable |
+| [maker-rs](https://github.com/zircote/maker-rs) | Zero-error LLM execution via SPRT voting. Rust library and M... | Rust | 💤 Stable |
+| [rust-lsp](https://github.com/zircote/rust-lsp) | Claude Code plugin for Rust development with rust-analyzer, ... | Rust | 💤 Stable |
+| [mcp-bundle](https://github.com/zircote/mcp-bundle) | Claude Code plugin and GitHub Actions workflow for packaging... | Shell | 💤 Stable |
+| [yaml-lsp](https://github.com/zircote/yaml-lsp) | Claude Code plugin for YAML development with yaml-language-s... | Unknown | 💤 Stable |
 <!-- ACTIVE_REPOS_END -->
 
 ### Recently Created
 
 <!-- NEW_REPOS_START -->
-- **[cdc-error-plugin](https://github.com/zircote/cdc-error-plugin)** (Unknown) - No description
-- **[copilot-review](https://github.com/zircote/copilot-review)** (JavaScript) - A Claude Code plugin that uses GitHub Copilot as the backend for code reviews an...
+_No new repositories in the last 90 days._
 <!-- NEW_REPOS_END -->
 
 ---
