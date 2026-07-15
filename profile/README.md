@@ -17,12 +17,24 @@
 
 ### Focus Areas
 
+- **Supply-Chain Security** (current focus) — Signed, SLSA-attested, fail-closed-verified release pipelines (cosign, SBOM, provenance) as reusable org workflows; see [Attested Delivery](https://github.com/zircote/.github)
+- **Open Standards for AI Tooling** (current focus) — Authoring the [MIF](https://mif-spec.dev) specification to make AI memory portable and interoperable
 - **AI Memory Systems** — Building structured, persistent memory for AI agents: [subcog](https://github.com/zircote/subcog) and [mnemonic](https://github.com/zircote/mnemonic)
-- **Open Standards for AI Tooling** — Authoring the [MIF](https://mif-spec.dev) specification to make AI memory portable and interoperable
 - **Agentic Workflows** — GitHub Agentic Workflows (`gh-aw`) for autonomous, event-driven repository operations at scale
-- **Supply-Chain Security** — Signed, SLSA-attested, fail-closed-verified release pipelines (cosign, SBOM, provenance) as reusable org workflows
 - **AI-Assisted Development** — Claude Code plugins, agents, and multi-agent orchestration
 - **DevOps & Platform Engineering** — Infrastructure automation, CI/CD, AWS architecture
+
+---
+
+## A Note on This Work
+
+This repository, and the projects it links to, exist first for personal interest and need. I test ideas here before I know whether they matter to anyone else, and I frequently implement proposals directly from published research: [rlm-rs](https://github.com/zircote/rlm-rs) follows the Recursive Language Model pattern from [arXiv:2512.24601](https://arxiv.org/abs/2512.24601), and [maker-rs](https://github.com/zircote/maker-rs) implements the MAKER approach to zero-error LLM execution through SPRT voting. Reading a paper and building the thing it describes is how I verify whether an idea holds up outside its own abstract.
+
+Two areas occupy most of my attention at the moment: attested delivery (signed, SLSA-attested, fail-closed-verified release pipelines) and the Memory Interchange Format (MIF, an open specification for portable AI memory). Both stem from the same concern. Software supply-chain attacks are not a new threat, but the scale and coordination behind them have shifted from opportunistic to industrialized, and I hold this work to a professional standard because I take that shift seriously, not because anyone is asking me to.
+
+I am fascinated by AI-assisted development and unsettled by it in roughly equal measure. I build agentic workflows, memory systems, and Claude Code tooling because I believe the underlying capability is real, and I lose sleep over that same capability because I do not believe its risks are well understood, by me or by anyone else. I also carry an unresolved tension about open source itself: I remain committed to it, while recognizing that open source is under more sustained attack today than at any point I have worked in it.
+
+None of this is a pitch. If a problem I have solved for myself turns out to be a problem you have too, I am glad the solution is here. But the work, and the writing that accompanies it on [my blog](https://zircote.github.io/), is produced for my own benefit first and shared freely as a byproduct, not the goal. Because AI tooling is involved in how I build this, trust none of it blindly. I make every effort to keep it safe, secure, and worth something to whoever ends up using it, myself included.
 
 ---
 
@@ -33,6 +45,16 @@
 The AI memory ecosystem is fragmented — Mem0, Zep, Letta, and others all use proprietary schemas with no interoperability. MIF defines a common data model with dual representations: human-readable **Markdown** (Obsidian-compatible) and machine-processable **JSON-LD**, with lossless conversion between them. Three conformance levels scale from a 4-field core to full bi-temporal provenance, decay, and embeddings, with migration guides from the major memory systems.
 
 **Status:** v0.1.0-draft &bull; [Specification](https://mif-spec.dev/specification/overview/) &bull; [GitHub](https://github.com/zircote/MIF)
+
+---
+
+## Reference Architectures
+
+### [Attested Delivery](https://attested-delivery.github.io/) — Signed, SLSA-Attested Release Pipelines
+
+Software supply-chain attacks exploit an unverified assumption: that a release artifact is what its build pipeline claims it is. Attested Delivery answers that assumption with GitHub-native tooling: keyless cosign signatures, SLSA Build L3 provenance, CycloneDX SBOMs, and fail-closed verification gates, distributed as language-agnostic pipeline templates (Rust, Go, OpenTofu/Terraform IaC) rather than a hosted service. The digest is the release; anything unattested does not ship.
+
+**Status:** active development &bull; [Documentation](https://attested-delivery.github.io/docs/) &bull; [GitHub](https://github.com/attested-delivery)
 
 ---
 
