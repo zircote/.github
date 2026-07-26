@@ -91,7 +91,7 @@ This organization's [.github repo](https://github.com/zircote/.github) centraliz
 ## Active Projects
 
 <!-- LAST_UPDATED_START -->
- __Last updated: 2026-07-19__
+ __Last updated: 2026-07-26__
 <!-- LAST_UPDATED_END -->
 
 ### Most Active Repositories
@@ -103,17 +103,18 @@ Ranked by recent contributions, community engagement, and development activity.
 |------------|-------------|------|----------|
 | [rlm-rs](https://github.com/zircote/rlm-rs) | Rust CLI implementing the Recursive Language Model (RLM) pat... | Rust | 📈 Growing |
 | [subcog](https://github.com/zircote/subcog) | Persistent memory system for AI coding assistants. Captures ... | Rust | 📈 Growing |
-| [oolong-pairs](https://github.com/zircote/oolong-pairs) | Benchmark harness for A/B testing Claude Code plugins agains... | Python | 💤 Stable |
-| [improver](https://github.com/zircote/improver) | Elicitation & enrichment engine for prompts, goals, and loop... | Unknown | 💤 Stable |
-| [rust-template](https://github.com/zircote/rust-template) | Template for rust projects | MDX | 💤 Stable |
-| [homebrew-tap](https://github.com/zircote/homebrew-tap) | Homebrew tap for various projects | Ruby | 💤 Stable |
-| [human-voice](https://github.com/zircote/human-voice) | Detect and eliminate AI writing patterns in your content. Th... | Python | 💤 Stable |
+| [lsp-marketplace](https://github.com/zircote/lsp-marketplace) | Curated marketplace of 28 LSP-enabled Claude Code plugins wi... | Shell | 📈 Growing |
+| [markdown-lsp](https://github.com/zircote/markdown-lsp) | Claude Code plugin for Markdown development with marksman LS... | Unknown | 💤 Stable |
 | [maker-rs](https://github.com/zircote/maker-rs) | Zero-error LLM execution via SPRT voting. Rust library and M... | Rust | 💤 Stable |
+| [git-adr](https://github.com/zircote/git-adr) | 🏛️ Architecture Decision Records in git notes - no files, no... | Rust | 💤 Stable |
+| [human-voice](https://github.com/zircote/human-voice) | Detect and eliminate AI writing patterns in your content. Th... | Python | 💤 Stable |
+| [rust-template](https://github.com/zircote/rust-template) | Template for rust projects | MDX | 💤 Stable |
 <!-- ACTIVE_REPOS_END -->
 
 ### Recently Created
 
 <!-- NEW_REPOS_START -->
+- **[workflows-plugin](https://github.com/zircote/workflows-plugin)** (JavaScript) - Claude Code plugin: consistent orchestration patterns for the Workflow tool (dyn...
 - **[improver](https://github.com/zircote/improver)** (Unknown) - Elicitation & enrichment engine for prompts, goals, and loops — turns a thin dra...
 <!-- NEW_REPOS_END -->
 
