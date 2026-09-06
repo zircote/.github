@@ -91,7 +91,7 @@ This organization's [.github repo](https://github.com/zircote/.github) centraliz
 ## Active Projects
 
 <!-- LAST_UPDATED_START -->
- __Last updated: 2026-07-26__
+ __Last updated: 2026-09-06__
 <!-- LAST_UPDATED_END -->
 
 ### Most Active Repositories
@@ -102,13 +102,13 @@ Ranked by recent contributions, community engagement, and development activity.
 | Repository | Description | Tech | Activity |
 |------------|-------------|------|----------|
 | [rlm-rs](https://github.com/zircote/rlm-rs) | Rust CLI implementing the Recursive Language Model (RLM) pat... | Rust | 📈 Growing |
-| [subcog](https://github.com/zircote/subcog) | Persistent memory system for AI coding assistants. Captures ... | Rust | 📈 Growing |
-| [lsp-marketplace](https://github.com/zircote/lsp-marketplace) | Curated marketplace of 28 LSP-enabled Claude Code plugins wi... | Shell | 📈 Growing |
-| [markdown-lsp](https://github.com/zircote/markdown-lsp) | Claude Code plugin for Markdown development with marksman LS... | Unknown | 💤 Stable |
 | [maker-rs](https://github.com/zircote/maker-rs) | Zero-error LLM execution via SPRT voting. Rust library and M... | Rust | 💤 Stable |
-| [git-adr](https://github.com/zircote/git-adr) | 🏛️ Architecture Decision Records in git notes - no files, no... | Rust | 💤 Stable |
+| [workflows-plugin](https://github.com/zircote/workflows-plugin) | Claude Code plugin: consistent orchestration patterns for th... | JavaScript | 💤 Stable |
+| [scala-lsp](https://github.com/zircote/scala-lsp) | Claude Code plugin for Scala development with Metals LSP and... | Scala | 💤 Stable |
 | [human-voice](https://github.com/zircote/human-voice) | Detect and eliminate AI writing patterns in your content. Th... | Python | 💤 Stable |
+| [subcog](https://github.com/zircote/subcog) | Persistent memory system for AI coding assistants. Captures ... | Rust | 💤 Stable |
 | [rust-template](https://github.com/zircote/rust-template) | Template for rust projects | MDX | 💤 Stable |
+| [git-adr](https://github.com/zircote/git-adr) | 🏛️ Architecture Decision Records in git notes - no files, no... | Rust | 💤 Stable |
 <!-- ACTIVE_REPOS_END -->
 
 ### Recently Created
