@@ -91,7 +91,7 @@ This organization's [.github repo](https://github.com/zircote/.github) centraliz
 ## Active Projects
 
 <!-- LAST_UPDATED_START -->
- __Last updated: 2026-07-26__
+ __Last updated: 2026-11-01__
 <!-- LAST_UPDATED_END -->
 
 ### Most Active Repositories
@@ -101,21 +101,20 @@ Ranked by recent contributions, community engagement, and development activity.
 <!-- ACTIVE_REPOS_START -->
 | Repository | Description | Tech | Activity |
 |------------|-------------|------|----------|
-| [rlm-rs](https://github.com/zircote/rlm-rs) | Rust CLI implementing the Recursive Language Model (RLM) pat... | Rust | 📈 Growing |
-| [subcog](https://github.com/zircote/subcog) | Persistent memory system for AI coding assistants. Captures ... | Rust | 📈 Growing |
-| [lsp-marketplace](https://github.com/zircote/lsp-marketplace) | Curated marketplace of 28 LSP-enabled Claude Code plugins wi... | Shell | 📈 Growing |
-| [markdown-lsp](https://github.com/zircote/markdown-lsp) | Claude Code plugin for Markdown development with marksman LS... | Unknown | 💤 Stable |
+| [Hal](https://github.com/zircote/Hal) | A PHP implementation of HAL http://stateless.co/hal_specific... | PHP | 📈 Growing |
+| [human-voice](https://github.com/zircote/human-voice) | Detect and eliminate AI writing patterns in your content. Th... | Python | 📈 Growing |
 | [maker-rs](https://github.com/zircote/maker-rs) | Zero-error LLM execution via SPRT voting. Rust library and M... | Rust | 💤 Stable |
-| [git-adr](https://github.com/zircote/git-adr) | 🏛️ Architecture Decision Records in git notes - no files, no... | Rust | 💤 Stable |
-| [human-voice](https://github.com/zircote/human-voice) | Detect and eliminate AI writing patterns in your content. Th... | Python | 💤 Stable |
-| [rust-template](https://github.com/zircote/rust-template) | Template for rust projects | MDX | 💤 Stable |
+| [php-lsp](https://github.com/zircote/php-lsp) | Claude Code plugin for PHP development with intelephense LSP... | PHP | 💤 Stable |
+| [typescript-lsp](https://github.com/zircote/typescript-lsp) | Claude Code plugin for TypeScript/JavaScript with vtsls LSP,... | TypeScript | 💤 Stable |
+| [csharp-lsp](https://github.com/zircote/csharp-lsp) | Claude Code plugin for C# development with OmniSharp LSP and... | C# | 💤 Stable |
+| [python-lsp](https://github.com/zircote/python-lsp) | Claude Code plugin for Python development with pylsp/pyright... | Python | 💤 Stable |
+| [workflows-plugin](https://github.com/zircote/workflows-plugin) | Claude Code plugin: consistent orchestration patterns for th... | JavaScript | 💤 Stable |
 <!-- ACTIVE_REPOS_END -->
 
 ### Recently Created
 
 <!-- NEW_REPOS_START -->
-- **[workflows-plugin](https://github.com/zircote/workflows-plugin)** (JavaScript) - Claude Code plugin: consistent orchestration patterns for the Workflow tool (dyn...
-- **[improver](https://github.com/zircote/improver)** (Unknown) - Elicitation & enrichment engine for prompts, goals, and loops — turns a thin dra...
+_No new repositories in the last 90 days._
 <!-- NEW_REPOS_END -->
 
 ---
